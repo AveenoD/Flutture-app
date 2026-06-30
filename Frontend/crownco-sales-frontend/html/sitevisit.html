@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Detail - Crownco</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0084FF;
+            --bg-gray: #F8F9FC;
+            --border-color: #E3E6F0;
+            --text-main: #2D3748;
+            --text-muted: #718096;
+            --success-green: #1CC88A;
+            --hot-red: #FF4D4D;
+            --very-hot-bg: #FFF1F1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-gray);
+            min-height: 100vh;
+            margin: 0;
+            overflow-y: auto; /* Allow full-page vertical scrolling */
+        }
+
+        /* Main Wrapper (without sidebar & topbar) */
+        .main-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Scrollable Content */
+        .content-container { padding: 30px; flex-grow: 1; }
+
+        /* Header Navigation */
+        .header-nav { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+        .back-circle { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border-color); background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        /* Progress Stepper */
+        .stepper { display: flex; justify-content: space-around; align-items: center; position: relative; max-width: 800px; margin: 0 auto 40px; }
+        .step { text-align: center; z-index: 2; color: var(--text-muted); font-size: 0.85rem; }
+        .step-icon { width: 36px; height: 36px; background: #fff; border: 2px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 1.1rem; color: var(--primary-blue); transition: 0.3s; }
+        .step.active .step-icon { background: var(--primary-blue); color: #fff; border-color: var(--primary-blue); }
+        .step.active { color: var(--text-main); font-weight: 600; }
+        .step-line { position: absolute; top: 18px; left: 10%; right: 10%; height: 2px; background: var(--border-color); z-index: 1; }
+
+        /* Tab Switcher */
+        .tab-row { display: flex; gap: 40px; border-bottom: 1px solid var(--border-color); margin-bottom: 30px; justify-content: flex-start; }
+        .tab { padding: 10px 20px; color: var(--text-muted); cursor: pointer; font-weight: 500; position: relative; }
+        .tab.active { color: var(--primary-blue); }
+        .tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--primary-blue); }
+
+        /* Grid Content */
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+
+        .panel { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .panel-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; color: var(--text-main); }
+
+        /* Profile Card */
+        .profile-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .user-meta { display: flex; gap: 15px; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        .hot-pill { background: var(--very-hot-bg); color: var(--hot-red); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        
+        .contact-list { list-style: none; font-size: 0.9rem; color: var(--text-muted); line-height: 2; }
+        .assign-tag { background: #F1F5F9; color: var(--primary-blue); padding: 5px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: inline-block; margin-top: 15px; }
+
+        /* Buttons */
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .btn { padding: 12px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; }
+        .btn-call { background: var(--primary-blue); color: #fff; }
+        .btn-chat { background: var(--primary-blue); color: #fff; }
+        .btn-approve { background: var(--primary-blue); color: #fff; width: 100%; margin-top: 15px; }
+        .btn-reject { background: #fff; border: 1px solid #718096; color: #718096; width: 100%; margin-top: 15px; }
+
+        /* Remark Card */
+        .remark-card-container {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .remark-card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+        .remark-panel { padding: 0; overflow: hidden; }
+        .remark-section { padding: 20px 24px 16px; border-bottom: 1px dashed var(--border-color); }
+        .remark-list { list-style: none; margin: 0; padding: 0; }
+        .remark-item { position: relative; padding-left: 18px; margin-bottom: 8px; color: var(--text-main); font-size: 0.85rem; }
+        .remark-item::before { content: ''; position: absolute; left: 0; top: 7px; width: 8px; height: 8px; background: var(--primary-blue); border-radius: 50%; }
+
+        .followup-card-container {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .followup-row { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0;
+            border-bottom: none;
+            font-size: 0.8rem; 
+            color: var(--text-muted);
+        }
+        .followup-text { max-width: 80%; }
+        .followup-add-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: #F8FAFC;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .remark-input-row { padding: 12px 24px 20px; }
+
+        /* Property Visit List */
+        .visit-list { position: relative; padding-left: 50px; padding-top: 10px; }
+        .visit-item { 
+            position: relative; 
+            padding: 16px; 
+            margin-bottom: 16px; 
+            background: #fff; 
+            border-radius: 8px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            min-height: 70px;
+        }
+        .visit-line { 
+            position: absolute; 
+            left: 20px; 
+            top: 20px; 
+            bottom: 20px; 
+            width: 2px; 
+            background: var(--border-color); 
+            z-index: 0;
+        }
+        .visit-circle { 
+            position: absolute; 
+            left: -40px; 
+            width: 24px; 
+            height: 24px; 
+            border-radius: 50%; 
+            background: #fff; 
+            border: 2px solid var(--border-color); 
+            z-index: 2; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .visit-item.completed .visit-circle { 
+            border-color: var(--success-green); 
+            background: var(--success-green); 
+            color: white; 
+        }
+        .visit-item.pending .visit-circle { 
+            border-color: var(--primary-blue); 
+            background: var(--primary-blue);
+        }
+        .visit-item.pending .visit-circle::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+        .visit-item.add-revisit .visit-circle {
+            background: #E3E6F0;
+            border-color: #E3E6F0;
+            color: #2D3748;
+            font-size: 1rem;
+        }
+        .visit-content {
+            flex: 1;
+        }
+        .visit-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        .visit-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .visit-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .person-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #F1F5F9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .status-tag { 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+        }
+        .tag-completed { 
+            background: #E6FFFA; 
+            color: #38B2AC; 
+        }
+        .tag-pending { 
+            background: #FFF5E6; 
+            color: #F6AD55; 
+        }
+
+        /* Textarea Wrapper */
+        .remark-input-row { 
+            padding: 12px 24px 20px; 
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .input-wrapper { 
+            flex: 1;
+            background: #F8F9FC; 
+            border: 1px solid var(--border-color); 
+            border-radius: 999px; 
+            padding: 10px 20px; 
+            display: flex; 
+            align-items: center; 
+        }
+        .input-emoji { 
+            margin-right: 10px; 
+        }
+        .input-wrapper input { 
+            flex-grow: 1; 
+            border: none; 
+            background: transparent; 
+            outline: none; 
+            padding: 5px; 
+            font-size: 0.9rem; 
+        }
+        .icon-actions { 
+            display: flex; 
+            gap: 15px; 
+            color: var(--text-muted); 
+            font-size: 1.1rem; 
+        }
+        .mic-fab {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 132, 255, 0.35);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .sidebar-space { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <div class="content-container">
+            <div class="header-nav">
+                <div class="back-circle">←</div>
+                <h1 style="font-size: 1.4rem; font-weight: 700;">Lead Detail</h1>
+            </div>
+
+            <div class="stepper">
+                <div class="step-line"></div>
+                <div class="step active">
+                    <div class="step-icon">📄</div>
+                    <p>Summary</p>
+                </div>
+                <div class="step active">
+                    <div class="step-icon">🏢</div>
+                    <p>Property Visit</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">💬</div>
+                    <p>Negotiation</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">🏠</div>
+                    <p>Booking</p>
+                </div>
+            </div>
+
+            <div class="tab-row">
+                <div class="tab active">Overveiw</div>
+                <div class="tab">Follow Ups</div>
+            </div>
+
+            <div class="main-grid">
+                
+                <div class="left-col">
+                    <h2 class="panel-title">Lead Profile</h2>
+                    <div class="panel">
+                        <div class="profile-header">
+                            <div class="user-meta">
+                                <img src="https://i.pravatar.cc/150?u=shaikh" alt="User" class="avatar">
+                                <div>
+                                    <h3 style="font-size: 1.05rem;">Shaikh Maaz</h3>
+                                    <p style="font-size: 0.85rem; color: var(--text-muted);">Crown Heights</p>
+                                </div>
+                            </div>
+                            <span class="hot-pill">Very Hot</span>
+                        </div>
+                        <ul class="contact-list">
+                            <li>📞 (808) 555-0111</li>
+                            <li>📍 Pembroke Pines</li>
+                        </ul>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">Badge - <span style="color: var(--primary-blue); font-weight: 700;">₹40L - ₹50L</span></p>
+                        
+                        <div class="btn-group">
+                            <button class="btn btn-call">📞 Call Now</button>
+                            <button class="btn btn-chat">💬 Chat Now</button>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="assign-tag">Assigned By Anuj</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 15px;">2 Hour ago</span>
+                        </div>
+                    </div>
+
+                    <div class="remark-card-container">
+                        <h3 class="remark-card-title">Remarks</h3>
+                        <ul class="remark-list">
+                            <li class="remark-item">Client is interested in 2BHK, corner-facing unit.</li>
+                            <li class="remark-item">Shared pricing PDF via WhatsApp.</li>
+                            <li class="remark-item">Next follow-up scheduled for Thursday, 11 AM.</li>
+                            <li class="remark-item">Next follow-up scheduled for Thursday, 11 AM.</li>
+                        </ul>
+                    </div>
+
+                    <div class="followup-card-container">
+                        <div class="followup-row">
+                            <span class="followup-text">Send a follow-up reminder 1 day before the scheduled call on Thursday, 11 AM.</span>
+                            <button class="followup-add-btn">+</button>
+                        </div>
+                    </div>
+
+                   
+                        <div class="remark-input-row">
+                            <div class="input-wrapper">
+                                <span class="input-emoji">😊</span>
+                                <input type="text" placeholder="Add a new remark...">
+                                <div class="icon-actions">
+                                    <span>🔗</span> <span>📷</span>
+                                </div>
+                            </div>
+                            <button class="mic-fab">🎙️</button>
+                        </div>
+                
+
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+                        <button class="btn btn-reject">✕ Rejected</button>
+                        <button class="btn btn-approve">Approved ≫</button>
+                    </div>
+                </div>
+
+                <div class="right-col">
+                    <h2 class="panel-title">Property Visit List</h2>
+                    <div class="panel" style="padding: 0; background: transparent; border: none; box-shadow: none;">
+                        <div class="visit-list">
+                            <div class="visit-line"></div>
+                            
+                            <div class="visit-item completed">
+                                <div class="visit-circle">✓</div>
+                                <div class="visit-content">
+                                    <div class="visit-title">First Visit</div>
+                                    <div class="visit-date">24/08/2025</div>
+                                </div>
+                                <div class="visit-actions">
+                                    <span class="status-tag tag-completed">● Completed</span>
+                                    <div class="person-icon">👤</div>
+                                </div>
+                            </div>
+
+                            <div class="visit-item pending">
+                                <div class="visit-circle"></div>
+                                <div class="visit-content">
+                                    <div class="visit-title">Revisit</div>
+                                    <div class="visit-date">24/08/2025</div>
+                                </div>
+                                <div class="visit-actions">
+                                    <span class="status-tag tag-pending">● Pending</span>
+                                    <div class="person-icon">👤</div>
+                                </div>
+                            </div>
+
+                            <div class="visit-item add-revisit" style="cursor: pointer;">
+                                <div class="visit-circle">+</div>
+                                <div class="visit-content">
+                                    <div class="visit-title">Add Revisit</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="panel-title">Recent Calls</h2>
+                    <div class="panel">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="display: flex; gap: 10px;">
+                                <span style="color: var(--text-muted);">🕒</span>
+                                <div>
+                                    <h4 style="font-size: 0.85rem;">Today, 2:30 PM</h4>
+                                    <p style="font-size: 0.85rem; margin-top: 10px;">Intrested in 2BHK units, looking for corner apartment</p>
+                                    <p style="color: var(--success-green); font-size: 0.8rem; margin-top: 10px;">✓ Answered</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="color: var(--primary-blue);">▶</span> <span style="font-size: 0.8rem; color: var(--text-muted);">5:45</span>
+                                <div style="margin-top: 40px; color: var(--text-muted);">⏩</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="panel-title">Recent Chats</h2>
+                    <div class="panel">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="display: flex; gap: 10px;">
+                                <span style="color: var(--text-muted);">🕒</span>
+                                <div>
+                                    <h4 style="font-size: 0.85rem;">Today, 2:30 PM</h4>
+                                    <p style="font-size: 0.85rem; margin-top: 10px;">Client is looking for a 2BHK corner unit, preferably on the 7th floor.</p>
+                                    <p style="color: #F6AD55; font-size: 0.8rem; margin-top: 10px;">! Awaiting Responce</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="color: var(--primary-blue);">💬</span> <span style="font-size: 0.8rem; color: var(--text-muted);">5 Message</span>
+                                <div style="margin-top: 40px; color: var(--text-muted);">⏩</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple Interaction: Switch tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelector('.tab.active').classList.remove('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Functionality: Placeholder for Approve action
+        document.querySelector('.btn-approve').addEventListener('click', function() {
+            alert('Lead Approved Successfully');
+        });
+    </script>
+</body>
+</html>

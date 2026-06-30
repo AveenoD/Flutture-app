@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crownco-core-api-config
+  namespace: crownco-production
+data:
+  PORT: "3000"
+  POSTGRES_HOST: crownco-postgres-primary
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: crownco-db
+  POSTGRES_USER: crownco-db-user
+  REDIS_HOST: crownco-redis
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  WA_VERIFY_TOKEN: crownco_wa_verify
+  WA_GRAPH_API_VERSION: v21.0
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crownco-ui-config
+  namespace: crownco-production
+data:
+  NODE_ENV: production
+  PORT: "3000"
+  NEXT_PUBLIC_ENVIRONMENT: production
+  # Point UIs to the production API ingress host/path
+  NEXT_PUBLIC_API_URL: https://api.crownco.ai/core

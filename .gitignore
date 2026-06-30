@@ -1,0 +1,60 @@
+# macOS
+.DS_Store
+
+# Database dumps (large files, should not be in git)
+dump.sql
+*.dump
+
+# Node / Next.js common
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+.next/
+.next-static/
+.next-cache/
+.vercel/
+.out/
+.dist/
+.build/
+coverage/
+.turbo/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+logs/
+*.log
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Misc
+*.local
+*.tmp
+*.bak
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+.jest*/
+coverage/
+
+# Backend build artifacts
+Backend/**/dist/
+Backend/**/build/
+Backend/**/venv/
+Backend/**/.venv/
+Backend/**/__pycache__/
+

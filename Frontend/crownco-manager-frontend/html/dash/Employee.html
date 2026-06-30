@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-blue: #007bff;
+            --bg-light: #f8f9fa;
+            --border-color: #e9ecef;
+            --text-dark: #333;
+            --text-muted: #6c757d;
+            --success-green: #28a745;
+            --danger-red: #dc3545;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            display: flex;
+            height: 100vh;
+            overflow: hidden; /* Fix body, allow inner scroll */
+        }
+
+        /* --- Layout Constraints --- */
+        .sidebar-placeholder {
+            width: 240px;
+            background: #fff;
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar-placeholder {
+            height: 70px;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        /* --- Scrollable Content --- */
+        .scrollable-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .section-header {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        /* --- Metrics Cards Grid --- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .metric-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .metric-icon {
+            font-size: 1.2rem;
+            padding: 8px;
+            border-radius: 6px;
+            background: #f1f5f9;
+        }
+
+        .trend-badge {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .trend-up { color: var(--success-green); }
+        .trend-down { color: var(--danger-red); }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Tabs --- */
+        .tabs {
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 10px 4px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--primary-blue);
+            border-bottom: 2px solid var(--primary-blue);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* --- Table Container --- */
+        .table-section {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .table-toolbar {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .search-container {
+            position: relative;
+            flex-grow: 1;
+            max-width: 400px;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 8px 80px 8px 35px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .search-container .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-container .filter-icons {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f1f5f9;
+            border-radius: 4px;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .filter-f {
+            font-weight: 600;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-add { background: var(--primary-blue); color: white; border: none; }
+        .btn-delete { color: var(--danger-red); border-color: #fecaca; }
+
+        /* --- Data Table --- */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #f8fafc;
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th .sort-icon {
+            margin-left: 6px;
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        th:hover .sort-icon {
+            opacity: 1;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            vertical-align: middle;
+        }
+
+        .emp-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .emp-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .emp-name { font-weight: 600; display: block; }
+        .emp-sub { font-size: 0.75rem; color: var(--text-muted); }
+
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-break { background: #dbeafe; color: #1e40af; }
+
+        .performance-pill {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .performance-high { background: #dcfce7; color: #166534; }
+        .performance-medium { background: #fed7aa; color: #9a3412; }
+        .performance-low { background: #fee2e2; color: #991b1b; }
+
+        .btn-view { color: var(--primary-blue); border-color: var(--primary-blue); }
+        
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-edit {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-edit:hover {
+            color: var(--primary-blue);
+        }
+
+        /* --- Pagination --- */
+        .pagination-footer {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar-placeholder { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-placeholder"></div>
+
+    <div class="main-container">
+        <div class="topbar-placeholder"></div>
+
+        <div class="scrollable-content">
+            <h2 class="section-header">Metrics Breakdown</h2>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-top">
+                        <i class="fa-solid fa-users metric-icon" style="color: #3b82f6;"></i>
+                        <span class="trend-badge trend-up">+6.5%</span>
+                    </div>
+                    <div class="metric-value">145</div>
+                    <div class="metric-label">Total Employees</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-top">
+                        <i class="fa-solid fa-folder-tree metric-icon" style="color: #a855f7;"></i>
+                        <span class="trend-badge trend-up">+1.3%</span>
+                    </div>
+                    <div class="metric-value">12</div>
+                    <div class="metric-label">Total Teams</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-top">
+                        <i class="fa-solid fa-user-slash metric-icon" style="color: #6366f1;"></i>
+                        <span class="trend-badge trend-down">-2.1%</span>
+                    </div>
+                    <div class="metric-value">8</div>
+                    <div class="metric-label">Employees without a Team</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-top">
+                        <i class="fa-solid fa-chart-line metric-icon" style="color: #10b981;"></i>
+                        <span class="trend-badge trend-up">+0.4s</span>
+                    </div>
+                    <div class="metric-value">12.1</div>
+                    <div class="metric-label">Avg. Team Size</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-top">
+                        <i class="fa-solid fa-list-check metric-icon" style="color: #ef4444;"></i>
+                        <span class="trend-badge trend-up">+4.6%</span>
+                    </div>
+                    <div class="metric-value">24</div>
+                    <div class="metric-label">Active Projects Assigned</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-top">
+                        <i class="fa-solid fa-clock metric-icon" style="color: #f59e0b;"></i>
+                        <span class="trend-badge trend-up">+2.2%</span>
+                    </div>
+                    <div class="metric-value">05</div>
+                    <div class="metric-label">Pending Onboarding</div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="employees">Employees</div>
+                <div class="tab" data-tab="teams">Teams</div>
+            </div>
+
+            <!-- Employees Tab Content -->
+            <div class="tab-content active" id="employees-content">
+            <div class="table-section">
+                <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0; padding: 20px 16px 16px 16px; border-bottom: 1px solid var(--border-color);">All Employees List</h3>
+                <div class="table-toolbar">
+                    <div style="display: flex; align-items: center; gap: 12px; flex-grow: 1; max-width: 500px;">
+                        <button class="btn" style="background: white; border: 1px solid var(--border-color);">
+                            <i class="fa-solid fa-table-columns"></i> Column
+                        </button>
+                        <div class="search-container">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" placeholder="Search">
+                            <div class="filter-icons">
+                                <div class="filter-icon">
+                                    <i class="fa-solid fa-sliders" style="font-size: 0.7rem;"></i>
+                                </div>
+                                <div class="filter-icon filter-f">F</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="btn"><i class="fa-solid fa-download"></i> Export</button>
+                        <button class="btn btn-delete"><i class="fa-solid fa-trash"></i> Delete</button>
+                        <button class="btn btn-add"><i class="fa-solid fa-plus"></i> Add Employee</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox"></th>
+                                <th>Name & Phone <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                                <th>Joined & Email <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                                <th>Job function <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                                <th>Team Assigned <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                                <th>Performance <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                                <th>Status <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                                <th>Action <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="emp-info">
+                                        <img src="https://i.pravatar.cc/150?u=1" class="emp-avatar">
+                                        <div>
+                                            <span class="emp-name">Zishan Shaikh</span>
+                                            <span class="emp-sub">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="emp-name">12 Jun 2024</span>
+                                    <span class="emp-sub">Zishan@gmail.com</span>
+                                </td>
+                                <td>Sale Executive</td>
+                                <td>North Zone Sales</td>
+                                <td><span class="performance-pill performance-high">High</span></td>
+                                <td><span class="status-pill status-active">Active</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-view">View Detail</button>
+                                        <button class="btn-edit"><i class="fa-solid fa-pencil"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="emp-info">
+                                        <img src="https://i.pravatar.cc/150?u=2" class="emp-avatar">
+                                        <div>
+                                            <span class="emp-name">Mustakim Sayyed</span>
+                                            <span class="emp-sub">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="emp-name">30 Jul 2023</span>
+                                    <span class="emp-sub">Mustakim@gmail.com</span>
+                                </td>
+                                <td>Sale Executive</td>
+                                <td>South Zone Sales</td>
+                                <td><span class="performance-pill performance-medium">Medium</span></td>
+                                <td><span class="status-pill status-active">Active</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-view">View Detail</button>
+                                        <button class="btn-edit"><i class="fa-solid fa-pencil"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="emp-info">
+                                        <img src="https://i.pravatar.cc/150?u=3" class="emp-avatar">
+                                        <div>
+                                            <span class="emp-name">Maaz Khan</span>
+                                            <span class="emp-sub">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="emp-name">7 Aug 2024</span>
+                                    <span class="emp-sub">Maaz@gmail.com</span>
+                                </td>
+                                <td>Sale Executive</td>
+                                <td>Team A</td>
+                                <td><span class="performance-pill performance-low">Low</span></td>
+                                <td><span class="status-pill status-break">Break</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-view">View Detail</button>
+                                        <button class="btn-edit"><i class="fa-solid fa-pencil"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="emp-info">
+                                        <img src="https://i.pravatar.cc/150?u=4" class="emp-avatar">
+                                        <div>
+                                            <span class="emp-name">Raju Rastogi</span>
+                                            <span class="emp-sub">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="emp-name">12 Jun 2025</span>
+                                    <span class="emp-sub">Raju@gmail.com</span>
+                                </td>
+                                <td>Sale Executive</td>
+                                <td>No Team</td>
+                                <td><span class="performance-pill performance-medium">Medium</span></td>
+                                <td><span class="status-pill status-active">Active</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-view">View Detail</button>
+                                        <button class="btn-edit"><i class="fa-solid fa-pencil"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-footer">
+                    <div>Rows Per Page: 
+                        <select style="border: 1px solid #ddd; padding: 2px;">
+                            <option>10</option>
+                        </select>
+                    </div>
+                    <div>1 - 4 of 4 <i class="fa-solid fa-chevron-left" style="margin-left: 10px; cursor: pointer;"></i> <i class="fa-solid fa-chevron-right" style="margin-left: 5px; cursor: pointer;"></i></div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Teams Tab Content -->
+            <div class="tab-content" id="teams-content">
+            <div class="table-section">
+                <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0; padding: 20px 16px 16px 16px; border-bottom: 1px solid var(--border-color);">All Teams List</h3>
+                <div class="table-toolbar">
+                    <div style="display: flex; align-items: center; gap: 12px; flex-grow: 1; max-width: 500px;">
+                        <button class="btn" style="background: white; border: 1px solid var(--border-color);">
+                            <i class="fa-solid fa-table-columns"></i> Column
+                        </button>
+                        <div class="search-container">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" placeholder="Search">
+                            <div class="filter-icons">
+                                <div class="filter-icon">
+                                    <i class="fa-solid fa-sliders" style="font-size: 0.7rem;"></i>
+                                </div>
+                                <div class="filter-icon filter-f">F</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="btn"><i class="fa-solid fa-download"></i> Export</button>
+                        <button class="btn btn-delete"><i class="fa-solid fa-trash"></i> Delete</button>
+                        <button class="btn btn-add"><i class="fa-solid fa-plus"></i> Create Team</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox"></th>
+                                <th>Team Name <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                                <th>Team Lead <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                                <th>Members <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                                <th>Projects Assigned <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                                <th>Tags <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                                <th>Action <i class="fa-solid fa-arrows-up-down sort-icon"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="emp-info">
+                                        <img src="https://i.pravatar.cc/150?u=1" class="emp-avatar">
+                                        <div>
+                                            <span class="emp-name">North Zone</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="emp-name">Zishan Shaikh</span>
+                                </td>
+                                <td>8 Members</td>
+                                <td>3 Projects</td>
+                                <td>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <span class="status-pill" style="background: #e9d5ff; color: #6b21a8;">Luxury Projects</span>
+                                        <span class="status-pill" style="background: #dcfce7; color: #166534;">High Performer</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-view">View All Member</button>
+                                        <button class="btn-edit"><i class="fa-solid fa-pencil"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="emp-info">
+                                        <img src="https://i.pravatar.cc/150?u=2" class="emp-avatar">
+                                        <div>
+                                            <span class="emp-name">South Zone</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="emp-name">Maaz Khan</span>
+                                </td>
+                                <td>4 Members</td>
+                                <td>3 Projects</td>
+                                <td>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <span class="status-pill" style="background: #e9d5ff; color: #6b21a8;">Luxury Projects</span>
+                                        <span class="status-pill" style="background: #dcfce7; color: #166534;">High Performer</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-view">View All Member</button>
+                                        <button class="btn-edit"><i class="fa-solid fa-pencil"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="emp-info">
+                                        <img src="https://i.pravatar.cc/150?u=3" class="emp-avatar">
+                                        <div>
+                                            <span class="emp-name">Budget 50-80L</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="emp-name">Mustakim Sayyed</span>
+                                </td>
+                                <td>12 Members</td>
+                                <td>3 Projects</td>
+                                <td>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <span class="status-pill" style="background: #e9d5ff; color: #6b21a8;">Luxury Projects</span>
+                                        <span class="status-pill" style="background: #dcfce7; color: #166534;">High Performer</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-view">View All Member</button>
+                                        <button class="btn-edit"><i class="fa-solid fa-pencil"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="emp-info">
+                                        <img src="https://i.pravatar.cc/150?u=4" class="emp-avatar">
+                                        <div>
+                                            <span class="emp-name">Premium Leads Thane</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="emp-name">Tauquid Khatik</span>
+                                </td>
+                                <td>14 Members</td>
+                                <td>3 Projects</td>
+                                <td>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <span class="status-pill" style="background: #e9d5ff; color: #6b21a8;">Luxury Projects</span>
+                                        <span class="status-pill" style="background: #dcfce7; color: #166534;">High Performer</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-view">View All Member</button>
+                                        <button class="btn-edit"><i class="fa-solid fa-pencil"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="emp-info">
+                                        <img src="https://i.pravatar.cc/150?u=5" class="emp-avatar">
+                                        <div>
+                                            <span class="emp-name">Walk In Customer</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="emp-name">Virat Kohli</span>
+                                </td>
+                                <td>2 Members</td>
+                                <td>3 Projects</td>
+                                <td>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <span class="status-pill" style="background: #e9d5ff; color: #6b21a8;">Luxury Projects</span>
+                                        <span class="status-pill" style="background: #dcfce7; color: #166534;">High Performer</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-view">View All Member</button>
+                                        <button class="btn-edit"><i class="fa-solid fa-pencil"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="emp-info">
+                                        <img src="https://i.pravatar.cc/150?u=6" class="emp-avatar">
+                                        <div>
+                                            <span class="emp-name">Housing Leads Thane</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="emp-name">Sarah Johnson</span>
+                                </td>
+                                <td>6 Members</td>
+                                <td>3 Projects</td>
+                                <td>
+                                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                        <span class="status-pill" style="background: #e9d5ff; color: #6b21a8;">Luxury Projects</span>
+                                        <span class="status-pill" style="background: #dcfce7; color: #166534;">High Performer</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-view">View All Member</button>
+                                        <button class="btn-edit"><i class="fa-solid fa-pencil"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-footer">
+                    <div>Rows Per Page: 
+                        <select style="border: 1px solid #ddd; padding: 2px;">
+                            <option>10</option>
+                        </select>
+                    </div>
+                    <div>1 - 6 of 6 <i class="fa-solid fa-chevron-left" style="margin-left: 10px; cursor: pointer;"></i> <i class="fa-solid fa-chevron-right" style="margin-left: 5px; cursor: pointer;"></i></div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+                
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Hide all tab contents
+                tabContents.forEach(content => content.classList.remove('active'));
+                // Show the corresponding content
+                const targetContent = document.getElementById(targetTab + '-content');
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maaz Palace - Real Estate Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #f4f7fa;
+            --card-bg: #ffffff;
+            --primary-blue: #3b82f6;
+            --primary-green: #10b981;
+            --accent-orange: #f59e0b;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --negative-red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden; /* Prevent body scroll */
+        }
+
+        /* --- Layout Structure --- */
+        .sidebar-placeholder {
+            width: 240px;
+            background: #fff;
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar-placeholder {
+            height: 60px;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        /* --- Scrollable Content Area --- */
+        .content-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            scroll-behavior: smooth;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        /* --- Metrics Grid --- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .metric-icon {
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+        }
+
+        .trend {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .trend.up { color: var(--primary-green); }
+        .trend.down { color: var(--negative-red); }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Property & Graph Section --- */
+        .middle-section {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+            align-items: start;
+        }
+
+        .property-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .property-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            background-color: #ddd;
+        }
+
+        .property-info {
+            padding: 16px;
+        }
+
+        .property-info h3 {
+            color: var(--primary-blue);
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .property-details p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-badge {
+            margin-top: 15px;
+            background: #f0fdf4;
+            border: 1px solid #bcf0da;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+        }
+
+        /* --- Chart Simulation --- */
+        .chart-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            width: 100%;
+        }
+
+        .chart-container .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            padding-left: 40px;
+            padding-bottom: 30px;
+            width: 100%;
+        }
+
+        .y-axis {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 30px;
+            width: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            height: 250px;
+        }
+
+        .y-axis-label {
+            text-align: right;
+            padding-right: 8px;
+        }
+
+        .chart-visual {
+            height: 250px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-evenly;
+            padding-top: 0;
+            padding-bottom: 0;
+            padding-left: 10px;
+            padding-right: 10px;
+            border-bottom: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
+            position: relative;
+            min-height: 250px;
+        }
+
+        .chart-visual::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(to bottom, 
+                    #e2e8f0 0px, 
+                    #e2e8f0 1px, 
+                    transparent 1px, 
+                    transparent 50px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .chart-visual::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: var(--border-color);
+            z-index: 1;
+        }
+
+        .bar-group {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            max-width: 120px;
+            align-self: flex-end;
+        }
+
+        .bar { 
+            width: 20px; 
+            border-radius: 2px 2px 0 0; 
+            position: relative;
+            min-height: 2px;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        .bar.actual { background: #cbd5e1; }
+        .bar.forecast { background: #3b82f6; }
+        .bar.target { background: #10b981; }
+
+        .x-axis {
+            display: flex;
+            justify-content: space-evenly;
+            padding-top: 10px;
+            padding-left: 10px;
+            padding-right: 10px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .x-axis-label {
+            flex: 1;
+            text-align: center;
+            max-width: 120px;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            font-size: 0.8rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-square {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .legend-square.actual { background: #cbd5e1; }
+        .legend-square.forecast { background: #3b82f6; }
+        .legend-square.target { background: #10b981; }
+
+        .insight-banner {
+            margin-top: 15px;
+            background: #eff6ff;
+            color: var(--primary-blue);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            position: relative;
+        }
+
+        .insight-timestamp {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* --- AI Suggestions Card Container --- */
+        .ai-suggestions-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 80px; /* Space for fixed footer */
+        }
+
+        .ai-suggestions-card .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-main);
+        }
+
+        /* --- Suggestion Grid --- */
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .suggestion-item {
+            background: #e0f2fe;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-blue);
+            position: relative;
+        }
+
+        .suggestion-item h4 {
+            font-size: 0.9rem;
+            color: var(--primary-blue);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .suggestion-item p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+
+        .suggestion-timestamp {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Footer Actions --- */
+        .footer-actions {
+            position: sticky;
+            bottom: 0;
+            background: #fff;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn-save { background: var(--primary-green); color: white; }
+        .btn-export { background: #075985; color: white; }
+        .btn-regen { background: #ea580c; color: white; }
+
+        /* Responsive Adjustments */
+        @media (max-width: 900px) {
+            .middle-section { grid-template-columns: 1fr; }
+            .sidebar-placeholder { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-placeholder"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-placeholder"></div>
+
+        <div class="content-container">
+            <h2 class="section-title">Metrics Breakdown</h2>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <i class="fa-solid fa-users metric-icon"></i>
+                        <span class="trend up">+3.2%</span>
+                    </div>
+                    <div class="metric-value">128</div>
+                    <div class="metric-label">Estimated Leads Required</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <i class="fa-solid fa-house-user metric-icon" style="color: purple;"></i>
+                        <span class="trend up">+1.8%</span>
+                    </div>
+                    <div class="metric-value">64</div>
+                    <div class="metric-label">Site Visits Needed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <i class="fa-solid fa-hand-dots metric-icon" style="color: red;"></i>
+                        <span class="trend down">-0.8%</span>
+                    </div>
+                    <div class="metric-value">116</div>
+                    <div class="metric-label">Revisits Required</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <i class="fa-solid fa-calendar-check metric-icon" style="color: orange;"></i>
+                        <span class="trend up">+2.0%</span>
+                    </div>
+                    <div class="metric-value">12</div>
+                    <div class="metric-label">Daily Booking Required</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <i class="fa-solid fa-comments metric-icon" style="color: #84cc16;"></i>
+                        <span class="trend down">-0.5%</span>
+                    </div>
+                    <div class="metric-value">27</div>
+                    <div class="metric-label">Suggested Agents</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <i class="fa-solid fa-comments metric-icon" style="color: #84cc16;"></i>
+                        <span class="trend down">-0.5%</span>
+                    </div>
+                    <div class="metric-value">27</div>
+                    <div class="metric-label">Avg followups cycles</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <i class="fa-solid fa-comments metric-icon" style="color: #84cc16;"></i>
+                        <span class="trend down">-0.5%</span>
+                    </div>
+                    <div class="metric-value">27</div>
+                    <div class="metric-label">Expected conversion rate</div>
+                </div>
+            </div>
+
+            <div class="middle-section">
+                <div class="property-card">
+                    <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=400" alt="Maaz Palace" class="property-img">
+                    <div class="property-info">
+                        <h3>Maaz Palace</h3>
+                        <div class="property-details">
+                            <p><i class="fa-solid fa-location-dot"></i> Kurla - City Center</p>
+                            <p><i class="fa-solid fa-users"></i> Team - West Zone</p>
+                            <p><i class="fa-solid fa-calendar"></i> 1 Jul - 31 Jul 2024</p>
+                        </div>
+                        <div class="ai-badge">
+                            <strong>AI Confidence Level: 82%</strong>
+                            <p style="font-size: 11px; margin-top: 4px;">Forecast based on past trends shows you are likely to meet this target.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="section-title">AI Suggestion</h3>
+                    <div class="chart-wrapper">
+                        <div class="y-axis">
+                            <div class="y-axis-label">100</div>
+                            <div class="y-axis-label">80</div>
+                            <div class="y-axis-label">60</div>
+                            <div class="y-axis-label">40</div>
+                            <div class="y-axis-label">20</div>
+                            <div class="y-axis-label">0</div>
+                        </div>
+                        <div class="chart-visual">
+                            <div class="bar-group">
+                                <div class="bar actual" style="height: 80px;"></div>
+                                <div class="bar forecast" style="height: 97.5px;"></div>
+                                <div class="bar target" style="height: 237.5px;"></div>
+                            </div>
+                            <div class="bar-group">
+                                <div class="bar actual" style="height: 120px;"></div>
+                                <div class="bar forecast" style="height: 137.5px;"></div>
+                                <div class="bar target" style="height: 237.5px;"></div>
+                            </div>
+                            <div class="bar-group">
+                                <div class="bar actual" style="height: 157.5px;"></div>
+                                <div class="bar forecast" style="height: 175px;"></div>
+                                <div class="bar target" style="height: 237.5px;"></div>
+                            </div>
+                            <div class="bar-group">
+                                <div class="bar actual" style="height: 215px;"></div>
+                                <div class="bar forecast" style="height: 225px;"></div>
+                                <div class="bar target" style="height: 237.5px;"></div>
+                            </div>
+                        </div>
+                        <div class="x-axis">
+                            <div class="x-axis-label">Week 1</div>
+                            <div class="x-axis-label">Week 2</div>
+                            <div class="x-axis-label">Week 3</div>
+                            <div class="x-axis-label">Week 4</div>
+                        </div>
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-square actual"></div>
+                            <span>Actual</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-square forecast"></div>
+                            <span>Forecast (AI)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-square target"></div>
+                            <span>Target</span>
+                        </div>
+                    </div>
+                    <div class="insight-banner">
+                        <span class="insight-timestamp">2 hour ago</span>
+                        <strong>Weekly Momentum Insight</strong><br>
+                        Week-over-week performance has improved by 32% — momentum strong. Maintain lead quality to sustain.
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-suggestions-card">
+                <h3 class="section-title">AI Suggestions</h3>
+                <div class="suggestions-grid">
+                    <div class="suggestion-item">
+                        <span class="suggestion-timestamp">2 hour ago</span>
+                        <h4>Low Activity</h4>
+                        <p>Only 2 visits logged this week — 8 short of her target (10)</p>
+                    </div>
+                    <div class="suggestion-item">
+                        <span class="suggestion-timestamp">2 hour ago</span>
+                        <h4>Time-Based Conversion</h4>
+                        <p>Weekend site visits show 18% higher conversion</p>
+                    </div>
+                    <div class="suggestion-item">
+                        <span class="suggestion-timestamp">2 hour ago</span>
+                        <h4>Regional Strength</h4>
+                        <p>Team A performs 23% better in Mumbai leads</p>
+                    </div>
+                    <div class="suggestion-item">
+                        <span class="suggestion-timestamp">2 hour ago</span>
+                        <h4>Inventory Insight</h4>
+                        <p>Luxury units perform better with 2+ revisits</p>
+                    </div>
+                    <div class="suggestion-item">
+                        <span class="suggestion-timestamp">2 hour ago</span>
+                        <h4>Lead Channel Efficiency</h4>
+                        <p>Facebook and 99acres leads convert 20% faster</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-actions">
+            <button class="btn btn-save"><i class="fa-solid fa-check"></i> Save Plan</button>
+            <button class="btn btn-export"><i class="fa-solid fa-file-pdf"></i> Export (PDF)</button>
+            <button class="btn btn-regen" onclick="regenerate()"><i class="fa-solid fa-rotate"></i> Re-Generate Plan</button>
+        </div>
+    </div>
+
+    <script>
+        function regenerate() {
+            alert("Regenerating AI Plan... This would normally trigger a data refresh.");
+            // Example of dynamic interaction:
+            const bars = document.querySelectorAll('.bar.forecast');
+            bars.forEach(bar => {
+                let randomHeight = Math.floor(Math.random() * 80) + 20;
+                bar.style.height = randomHeight + '%';
+            });
+        }
+    </script>
+</body>
+</html>

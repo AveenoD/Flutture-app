@@ -1,0 +1,3446 @@
+openapi: 3.0.3
+info:
+  title: Crownco Core API
+  description: Core API for Crownco CRM System
+  version: 1.0.0
+  contact:
+    name: Crownco API Support
+    email: support@crownco.com
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://api.crownco.com
+    description: Production server
+
+tags:
+  - name: Organizations
+    description: Organization management endpoints
+  - name: Authentication
+    description: Authentication and user profile management endpoints
+  - name: Users
+    description: User management endpoints (managers, presales, sales)
+  - name: Subscriptions
+    description: Subscription and plan management endpoints
+  - name: Teams
+    description: Team management endpoints
+  - name: Imported Data
+    description: CSV import and lead data management endpoints
+  - name: Projects
+    description: Real estate project management endpoints
+  - name: Units
+    description: Project unit management endpoints
+  - name: Addons
+    description: Project addon management endpoints
+
+paths:
+  /api/v1/organizations/onboard:
+    post:
+      tags:
+        - Organizations
+      summary: Onboard Organization with General Manager
+      description: Creates a new organization along with a required general manager. Both organization and GM emails must be unique.
+      operationId: onboardOrganization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardRequest'
+            examples:
+              example1:
+                summary: Example onboarding request
+                value:
+                  organization:
+                    name: "ABC Builders"
+                    email: "contact@abcbuilders.com"
+                    type: "builder"
+                    phone: "+919876543210"
+                    address: "123 Main Street, Andheri"
+                    city: "Mumbai"
+                    state: "Maharashtra"
+                    country: "India"
+                    pincode: "400001"
+                    company_size: "medium"
+                    website: "https://abcbuilders.com"
+                    tax_id: "TAX123456"
+                    gstin: "27ABAFB0749E1ZT"
+                  general_manager:
+                    name: "John Doe"
+                    email: "john.doe@abcbuilders.com"
+                    phone: "+919876543211"
+                    password: "SecurePass123!"
+                    gender: "male"
+                    dob: "1990-01-15"
+                    employee_id: "EMP001"
+      responses:
+        '201':
+          description: Organization and General Manager created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardResponse'
+              example:
+                success: true
+                message: "Organization and General Manager created successfully"
+                data:
+                  organization:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    name: "ABC Builders"
+                    email: "contact@abcbuilders.com"
+                    phone: "+919876543210"
+                    address: "123 Main Street, Andheri"
+                    city: "Mumbai"
+                    state: "Maharashtra"
+                    country: "India"
+                    pincode: "400001"
+                    type: "builder"
+                    company_size: "medium"
+                    status: "active"
+                    website: "https://abcbuilders.com"
+                    tax_id: "TAX123456"
+                    gstin: "27ABAFB0749E1ZT"
+                    created_at: "2024-01-22T16:30:00Z"
+                    updated_at: "2024-01-22T16:30:00Z"
+                  general_manager:
+                    id: "660e8400-e29b-41d4-a716-446655440000"
+                    organization_id: "550e8400-e29b-41d4-a716-446655440000"
+                    name: "John Doe"
+                    email: "john.doe@abcbuilders.com"
+                    phone: "+919876543211"
+                    gender: "male"
+                    dob: "1990-01-15"
+                    employee_id: "EMP001"
+                    avatar_url: null
+                    status: "active"
+                    created_at: "2024-01-22T16:30:00Z"
+                    updated_at: "2024-01-22T16:30:00Z"
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Validation failed"
+                errors:
+                  organization.name: "Name must be at least 3 characters"
+                  organization.email: "Invalid email format"
+                  general_manager.password: "Password must be at least 8 characters and contain uppercase, lowercase, and number"
+        '409':
+          description: Conflict - Organization or GM already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictResponse'
+              examples:
+                organizationExists:
+                  summary: Organization exists
+                  value:
+                    success: false
+                    message: "Organization with this email already exists"
+                    error_code: "ORGANIZATION_EXISTS"
+                gmExists:
+                  summary: General Manager exists
+                  value:
+                    success: false
+                    message: "General Manager with this email already exists"
+                    error_code: "GM_EXISTS"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/organizations/update:
+    put:
+      tags:
+        - Organizations
+      summary: Update Organization Details
+      description: Updates organization details. Only the General Manager associated with the organization can update it. Requires JWT authentication with general-manager role.
+      operationId: updateOrganization
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationRequest'
+            example:
+              name: "ABC Builders Updated"
+              email: "updated@abcbuilders.com"
+              phone: "+919876543210"
+              address: "456 New Street, Andheri"
+              city: "Mumbai"
+              state: "Maharashtra"
+              country: "India"
+              pincode: "400002"
+              type: "builder"
+              company_size: "large"
+              website: "https://abcbuilders-new.com"
+              tax_id: "TAX789012"
+              gstin: "27ABAFB0749E1ZT"
+              logo_url: "https://example.com/logo.jpg"
+      responses:
+        '200':
+          description: Organization updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+              example:
+                success: true
+                message: "Organization updated successfully"
+                data:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  name: "ABC Builders Updated"
+                  email: "updated@abcbuilders.com"
+                  phone: "+919876543210"
+                  address: "456 New Street, Andheri"
+                  city: "Mumbai"
+                  state: "Maharashtra"
+                  country: "India"
+                  pincode: "400002"
+                  type: "builder"
+                  company_size: "large"
+                  status: "active"
+                  logo_url: "https://example.com/logo.jpg"
+                  website: "https://abcbuilders-new.com"
+                  tax_id: "TAX789012"
+                  gstin: "27ABAFB0749E1ZT"
+                  created_at: "2024-01-22T16:30:00Z"
+                  updated_at: "2024-01-23T10:00:00Z"
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Validation failed"
+                errors:
+                  email: "Invalid email format"
+                  pincode: "Pincode must be exactly 6 digits"
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              example:
+                success: false
+                message: "Invalid or expired token"
+                error_code: "INVALID_TOKEN"
+        '403':
+          description: Forbidden - Only General Managers can update organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              example:
+                success: false
+                message: "Only General Managers can update organization details"
+                error_code: "FORBIDDEN"
+        '404':
+          description: User or Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              examples:
+                userNotFound:
+                  summary: User not found
+                  value:
+                    success: false
+                    message: "User not found"
+                    error_code: "USER_NOT_FOUND"
+                orgNotFound:
+                  summary: Organization not found
+                  value:
+                    success: false
+                    message: "Organization not found"
+                    error_code: "ORGANIZATION_NOT_FOUND"
+        '409':
+          description: Conflict - Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              example:
+                success: false
+                message: "Email already exists"
+                error_code: "EMAIL_ALREADY_EXISTS"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login User
+      description: Authenticates any user (General Manager, Manager, Presales, Sales) with email and password, returns JWT token along with user information and permissions. The system automatically detects the user type based on which table contains the email. Permissions are included in the response to help frontend show/hide UI elements based on user's allowed actions.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: "john.doe@abcbuilders.com"
+              password: "SecurePass123!"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                success: true
+                message: "Login successful"
+                data:
+                  token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  expires_in: 86400
+                  user:
+                    id: "660e8400-e29b-41d4-a716-446655440000"
+                    organization_id: "550e8400-e29b-41d4-a716-446655440000"
+                    user_type: "general-manager"
+                    name: "John Doe"
+                    email: "john.doe@abcbuilders.com"
+                    phone: "+919876543211"
+                    gender: "male"
+                    dob: "1990-01-15"
+                    employee_id: "EMP001"
+                    avatar_url: null
+                    status: "active"
+                    permissions: ["view_leads", "create_leads", "edit_leads"]
+        '400':
+          description: Validation error or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              example:
+                success: false
+                message: "Invalid email or password"
+                error_code: "INVALID_CREDENTIALS"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Request Password Reset
+      description: "Sends a password reset token to the user's email (if email exists). Works for all user types: General Manager, Manager, Presales, Sales."
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+            example:
+              email: "john.doe@abcbuilders.com"
+      responses:
+        '200':
+          description: Password reset email sent (if email exists)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessageResponse'
+              example:
+                success: true
+                message: "If the email exists, a password reset link has been sent"
+                data:
+                  message: "Check your email for password reset instructions"
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Reset Password
+      description: "Resets password using the token received via email. Works for all user types: General Manager, Manager, Presales, Sales."
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+            example:
+              token: "7299a11bce52e99012c1649bc2b42eec07eb9556c1ecad4d22380e144df4ef7a"
+              new_password: "NewSecurePass123!"
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessageResponse'
+              example:
+                success: true
+                message: "Password reset successfully"
+                data:
+                  message: "Your password has been reset successfully"
+        '400':
+          description: Validation error or invalid/expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              examples:
+                invalidToken:
+                  summary: Invalid or expired token
+                  value:
+                    success: false
+                    message: "Invalid or expired token"
+                    error_code: "INVALID_TOKEN"
+                validationError:
+                  summary: Validation error
+                  value:
+                    success: false
+                    message: "Validation failed"
+                    errors:
+                      new_password: "Password must be at least 8 characters and contain uppercase, lowercase, and number"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get Current User Profile
+      description: "Returns the profile of the currently authenticated user (works for all user types: General Manager, Manager, Presales, Sales)"
+      operationId: getMe
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+              example:
+                success: true
+                message: "Profile retrieved successfully"
+                data:
+                  id: "660e8400-e29b-41d4-a716-446655440000"
+                  organization_id: "550e8400-e29b-41d4-a716-446655440000"
+                  user_type: "general-manager"
+                  name: "John Doe"
+                  email: "john.doe@abcbuilders.com"
+                  phone: "+919876543211"
+                  gender: "male"
+                  dob: "1990-01-15"
+                  employee_id: "EMP001"
+                  avatar_url: "https://example.com/avatar.jpg"
+                  status: "active"
+                  permissions: ["view_leads", "create_leads", "edit_leads"]
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              example:
+                success: false
+                message: "Invalid or expired token"
+                error_code: "INVALID_TOKEN"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              example:
+                success: false
+                message: "User not found"
+                error_code: "USER_NOT_FOUND"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/change-password:
+    put:
+      tags:
+        - Authentication
+      summary: Change Password
+      description: Changes the user's password after verifying the current password
+      operationId: changePassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+            example:
+              current_password: "SecurePass123!"
+              new_password: "NewSecurePass123!"
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessageResponse'
+              example:
+                success: true
+                message: "Password changed successfully"
+                data:
+                  message: "Your password has been changed successfully"
+        '400':
+          description: Validation error or incorrect current password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              examples:
+                invalidPassword:
+                  summary: Incorrect current password
+                  value:
+                    success: false
+                    message: "Current password is incorrect"
+                    error_code: "INVALID_CURRENT_PASSWORD"
+                validationError:
+                  summary: Validation error
+                  value:
+                    success: false
+                    message: "Validation failed"
+                    errors:
+                      new_password: "Password must be at least 8 characters and contain uppercase, lowercase, and number"
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/profile:
+    put:
+      tags:
+        - Authentication
+      summary: Update Profile
+      description: Updates the user's profile. Email and phone can be updated (with uniqueness checks). Employee ID cannot be updated.
+      operationId: updateProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+            example:
+              name: "John Doe Updated"
+              email: "john.updated@abcbuilders.com"
+              phone: "+919876543212"
+              gender: "male"
+              dob: "1990-01-15"
+              avatar_url: "https://example.com/new-avatar.jpg"
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+              example:
+                success: true
+                message: "Profile updated successfully"
+                data:
+                  id: "660e8400-e29b-41d4-a716-446655440000"
+                  organization_id: "550e8400-e29b-41d4-a716-446655440000"
+                  user_type: "general-manager"
+                  name: "John Doe Updated"
+                  email: "john.updated@abcbuilders.com"
+                  phone: "+919876543212"
+                  gender: "male"
+                  dob: "1990-01-15"
+                  employee_id: "EMP001"
+                  avatar_url: "https://example.com/new-avatar.jpg"
+                  status: "active"
+                  permissions: ["view_leads", "create_leads", "edit_leads"]
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Validation failed"
+                errors:
+                  email: "Invalid email format"
+                  phone: "Phone must be between 10 and 20 characters"
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '409':
+          description: Conflict - Email or phone already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              examples:
+                emailExists:
+                  summary: Email already exists
+                  value:
+                    success: false
+                    message: "Email already exists"
+                    error_code: "EMAIL_ALREADY_EXISTS"
+                phoneExists:
+                  summary: Phone already exists
+                  value:
+                    success: false
+                    message: "Phone number already exists"
+                    error_code: "PHONE_ALREADY_EXISTS"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/plans:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get All Active Plans
+      description: Retrieves all active subscription plans with pricing, features, and limits
+      operationId: getPlans
+      responses:
+        '200':
+          description: Plans retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Plans retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Plan'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/subscription:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get Current Subscription
+      description: Gets the current organization's subscription with plan details and usage limits. Automatically derives organization from JWT token.
+      operationId: getCurrentSubscription
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Subscription retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Subscription retrieved successfully"
+                  data:
+                    $ref: '#/components/schemas/SubscriptionWithPlan'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              example:
+                success: false
+                message: "Subscription not found"
+                error_code: "SUBSCRIPTION_NOT_FOUND"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/subscriptions:
+    post:
+      tags:
+        - Subscriptions
+      summary: Create Subscription
+      description: Creates a new subscription for the organization. Only General Managers can create subscriptions. Validates that organization doesn't have an active subscription.
+      operationId: createSubscription
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionRequest'
+            example:
+              plan_id: "34aa89d1-a2cf-47c7-9928-971921023f63"
+              billing_cycle: "monthly"
+              payment_method: "credit_card"
+              auto_renew: true
+      responses:
+        '201':
+          description: Subscription created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Subscription created successfully"
+                  data:
+                    $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Validation error or invalid billing cycle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              examples:
+                invalidPlanID:
+                  summary: Invalid plan ID
+                  value:
+                    success: false
+                    message: "Invalid plan ID"
+                    error_code: "INVALID_PLAN_ID"
+                invalidBillingCycle:
+                  summary: Invalid billing cycle
+                  value:
+                    success: false
+                    message: "Invalid billing cycle"
+                    error_code: "INVALID_BILLING_CYCLE"
+                quarterlyNotAvailable:
+                  summary: Quarterly pricing not available
+                  value:
+                    success: false
+                    message: "Quarterly pricing not available for this plan"
+                    error_code: "QUARTERLY_PRICING_NOT_AVAILABLE"
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden - Only GMs can create subscriptions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '409':
+          description: Active subscription already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              example:
+                success: false
+                message: "Organization already has an active subscription"
+                error_code: "ACTIVE_SUBSCRIPTION_EXISTS"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/subscriptions/{id}:
+    put:
+      tags:
+        - Subscriptions
+      summary: Update Subscription
+      description: Updates subscription plan or billing cycle. Only General Managers can update their organization's subscription.
+      operationId: updateSubscription
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Subscription ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionRequest'
+            example:
+              plan_id: "34aa89d1-a2cf-47c7-9928-971921023f63"
+              billing_cycle: "yearly"
+              auto_renew: false
+      responses:
+        '200':
+          description: Subscription updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Subscription updated successfully"
+                  data:
+                    $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden - Subscription doesn't belong to organization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: Subscription or plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/subscriptions/{id}/cancel:
+    post:
+      tags:
+        - Subscriptions
+      summary: Cancel Subscription
+      description: Cancels a subscription. Subscription remains active until end_date. Only General Managers can cancel.
+      operationId: cancelSubscription
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Subscription ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelSubscriptionRequest'
+            example:
+              reason: "Moving to different plan"
+      responses:
+        '200':
+          description: Subscription cancelled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Subscription cancelled successfully"
+                  data:
+                    $ref: '#/components/schemas/Subscription'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/subscriptions/{id}/renew:
+    post:
+      tags:
+        - Subscriptions
+      summary: Renew Subscription
+      description: Manually renews a subscription, extending the end_date based on billing_cycle. Only General Managers can renew.
+      operationId: renewSubscription
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Subscription ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Subscription renewed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Subscription renewed successfully"
+                  data:
+                    $ref: '#/components/schemas/Subscription'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/teams:
+    get:
+      tags:
+        - Teams
+      summary: List All Teams
+      description: Retrieves all teams for the organization. Automatically derives organization from JWT token.
+      operationId: getAllTeams
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Teams retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      teams:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TeamWithMembers'
+                      count:
+                        type: integer
+                        example: 3
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Teams
+      summary: Create Team
+      description: Creates a new team. General Managers can create teams without permission. Managers need 'create_teams' permission.
+      operationId: createTeam
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTeamRequest'
+            example:
+              team_title: "Sales Team Alpha"
+              team_description: "High-performance sales team"
+              team_type: "sales"
+              manager_user_id: "550e8400-e29b-41d4-a716-446655440000"
+              labels: ["inbound", "luxury"]
+              team_rating_score: 9
+              team_logo_url: "https://example.com/logo.png"
+              working_region: ["Mumbai", "Delhi", "Bangalore"]
+      responses:
+        '201':
+          description: Team created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Team created successfully"
+                  data:
+                    $ref: '#/components/schemas/Team'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden - No permission to create teams
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+              example:
+                success: false
+                error_code: "FORBIDDEN"
+                message: "You don't have permission to create teams"
+        '404':
+          description: Manager not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/teams/{id}:
+    put:
+      tags:
+        - Teams
+      summary: Update Team
+      description: Updates team information. General Managers can update any team. Managers with 'create_teams' permission can update teams in their organization.
+      operationId: updateTeam
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Team ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTeamRequest'
+            example:
+              team_title: "Sales Team Alpha - Elite Division"
+              team_rating_score: 10
+              team_status: "active"
+      responses:
+        '200':
+          description: Team updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Team updated successfully"
+                  data:
+                    $ref: '#/components/schemas/Team'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/teams/{id}/members:
+    get:
+      tags:
+        - Teams
+      summary: Get Team Members
+      description: Retrieves all members of a team (managers, presales, sales).
+      operationId: getTeamMembers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Team ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Team members retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      members:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TeamMember'
+                      count:
+                        type: integer
+                        example: 5
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Teams
+      summary: Add Team Member
+      description: Adds a user (manager, presales, or sales) to a team. General Managers can add members. Managers with 'create_teams' permission can add members.
+      operationId: addTeamMember
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Team ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTeamMemberRequest'
+            example:
+              user_id: "660e8400-e29b-41d4-a716-446655440000"
+              user_type: "sales"
+      responses:
+        '200':
+          description: Member added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Member added to team successfully"
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: Team or user not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Teams
+      summary: Remove Team Member
+      description: Removes a user from a team. General Managers can remove members. Managers with 'create_teams' permission can remove members.
+      operationId: removeTeamMember
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Team ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveTeamMemberRequest'
+            example:
+              user_id: "660e8400-e29b-41d4-a716-446655440000"
+              user_type: "sales"
+      responses:
+        '200':
+          description: Member removed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Member removed from team successfully"
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: Team or user not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/users:
+    post:
+      tags:
+        - Users
+      summary: Create User
+      description: Creates a new user (manager, presales, or sales) in the organization. Only General Managers can create users.
+      operationId: createUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+            example:
+              user_type: "manager"
+              name: "John Manager"
+              email: "john.manager@company.com"
+              phone: "+919876543210"
+              password: "SecurePass123!"
+              gender: "male"
+              dob: "1990-01-15"
+              employee_id: "MGR001"
+              team_id: ""
+              avatar_url: "https://example.com/avatar.jpg"
+              permissions: ["view_leads", "create_leads", "edit_leads"]
+              status: "active"
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden - Only General Managers can create users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '409':
+          description: Conflict - Email or Employee ID already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/users/{id}:
+    put:
+      tags:
+        - Users
+      summary: Update User
+      description: Updates user details. Only General Managers can update users in their organization.
+      operationId: updateUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+            example:
+              name: "John Manager Updated"
+              phone: "+919876543211"
+              permissions: ["view_leads", "create_leads", "edit_leads", "view_deals"]
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '409':
+          description: Conflict - Email or Employee ID already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Users
+      summary: Delete User
+      description: Soft deletes a user (sets deleted_at). Only General Managers can delete users in their organization.
+      operationId: deleteUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID to delete
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessageResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/users/{id}/block:
+    put:
+      tags:
+        - Users
+      summary: Block/Unblock User
+      description: Updates user status (block/unblock). Only General Managers can block/unblock users in their organization.
+      operationId: blockUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID to block/unblock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockUserRequest'
+            example:
+              status: "suspended"
+      responses:
+        '200':
+          description: User status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessageResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/users/{id}/permissions:
+    post:
+      tags:
+        - Users
+      summary: Add Permission to User
+      description: Adds a permission to a user. Only General Managers can manage user permissions in their organization.
+      operationId: addUserPermission
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID to add permission to
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddPermissionRequest'
+            example:
+              permission: "edit_leads"
+      responses:
+        '200':
+          description: Permission added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "Permission added successfully"
+                data:
+                  id: "abc-123-def"
+                  organization_id: "org-123"
+                  user_type: "manager"
+                  name: "John Doe"
+                  email: "john@example.com"
+                  permissions: ["view_leads", "create_leads", "edit_leads"]
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '409':
+          description: Permission already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - Users
+      summary: Remove Permission from User
+      description: Removes a permission from a user. Only General Managers can manage user permissions in their organization.
+      operationId: removeUserPermission
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: User ID to remove permission from
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemovePermissionRequest'
+            example:
+              permission: "edit_leads"
+      responses:
+        '200':
+          description: Permission removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "Permission removed successfully"
+                data:
+                  id: "abc-123-def"
+                  organization_id: "org-123"
+                  user_type: "manager"
+                  name: "John Doe"
+                  email: "john@example.com"
+                  permissions: ["view_leads", "create_leads"]
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '404':
+          description: User not found or permission not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseWithCode'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      tags: []
+      summary: Health check endpoint
+      description: Returns the health status of the API
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  service:
+                    type: string
+                    example: "core-api"
+
+  /api/v1/imported-data/import:
+    post:
+      tags:
+        - Imported Data
+      summary: Import CSV data and create leads
+      description: |
+        Upload a CSV file to import leads into the system. The endpoint validates phone numbers,
+        checks lead limits, and creates leads with detailed error reporting.
+        
+        **CSV Format Requirements:**
+        - Required columns: name, phone
+        - Optional columns: email, city, state, budget_min, budget_max, lead_temperature
+        - Max file size: 10MB
+        
+        **Phone Number Validation:**
+        - Numbers with length >= 10 and <= 13 (including +) → saved as is
+        - +91XXXXXXXXXX (13 chars) → saved as is (no removal)
+        - 91XXXXXXXXXX (12 digits) → saved as is
+        - XXXXXXXXXX (10 digits) → saved as is
+        - Less than 10 digits → rejected with error
+        - More than 13 characters → rejected with error
+        
+        **Authorization:**
+        - GM: Always allowed
+        - Manager: Requires 'import_data' permission
+      operationId: importData
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - title
+                - file
+              properties:
+                title:
+                  type: string
+                  minLength: 3
+                  maxLength: 255
+                  description: Title for this import batch
+                  example: "Q1 2024 Lead Import"
+                description:
+                  type: string
+                  maxLength: 1000
+                  description: Optional description for this import
+                  example: "First batch of imported leads from real estate expo"
+                file:
+                  type: string
+                  format: binary
+                  description: CSV file containing lead data
+      responses:
+        '201':
+          description: Data imported successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Data imported successfully"
+                  data:
+                    $ref: '#/components/schemas/ImportDataResponse'
+        '400':
+          description: Validation error or lead limit exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "LEAD_LIMIT_EXCEEDED: 188 leads available, 195 leads in CSV"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Permission denied"
+                  data:
+                    type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "import_data permission required"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/imported-data/{id}/assign-users:
+    post:
+      tags:
+        - Imported Data
+      summary: Assign presales users to imported leads
+      description: |
+        Assigns multiple presales users to all leads from a specific import using round-robin distribution.
+        
+        **Round-Robin Logic:**
+        - If 7 leads and 2 users: User1 gets 4 leads, User2 gets 3 leads
+        - If 7 leads and 1 user: User1 gets all 7 leads
+        
+        **Authorization:**
+        - GM: Always allowed
+        - Manager: Always allowed
+      operationId: assignUsersToImportedData
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Imported data UUID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_ids
+              properties:
+                user_ids:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                    format: uuid
+                  description: Array of presales user UUIDs
+                  example: ["5566716a-ec77-4805-a4d6-ddcacefd4d00"]
+      responses:
+        '200':
+          description: Users assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Users assigned successfully"
+                  data:
+                    $ref: '#/components/schemas/AssignUsersResponse'
+        '400':
+          description: Validation error or no valid users/leads found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Imported data not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Imported data not found"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/imported-data/{id}:
+    delete:
+      tags:
+        - Imported Data
+      summary: Delete imported data and unqualified leads
+      description: |
+        Soft deletes the imported data record and all associated leads that are still 'unqualified'.
+        Qualified or processed leads are NOT deleted.
+        
+        **Delete Behavior:**
+        - Deletes only leads with status = 'unqualified'
+        - All other statuses (called, qualified, visit, etc.) are preserved
+        - Both imported_data and leads are soft-deleted (deleted_at timestamp)
+        
+        **Authorization:**
+        - GM: Always allowed
+        - Manager: Always allowed
+      operationId: deleteImportedData
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Imported data UUID
+      responses:
+        '200':
+          description: Imported data deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Imported data deleted successfully"
+                  data:
+                    $ref: '#/components/schemas/DeleteImportedDataResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Imported data not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Imported data not found"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    OnboardRequest:
+      type: object
+      required:
+        - organization
+        - general_manager
+      properties:
+        organization:
+          $ref: '#/components/schemas/OrganizationRequest'
+        general_manager:
+          $ref: '#/components/schemas/GeneralManagerRequest'
+
+    OrganizationRequest:
+      type: object
+      required:
+        - name
+        - email
+        - type
+        - phone
+        - address
+        - city
+        - state
+        - country
+        - pincode
+        - company_size
+        - website
+        - tax_id
+        - gstin
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 255
+          example: "ABC Builders"
+        email:
+          type: string
+          format: email
+          example: "contact@abcbuilders.com"
+        type:
+          type: string
+          enum: [builder, broker, agency]
+          example: "builder"
+        phone:
+          type: string
+          example: "+919876543210"
+        address:
+          type: string
+          minLength: 3
+          example: "123 Main Street, Andheri"
+        city:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: "Mumbai"
+        state:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: "Maharashtra"
+        country:
+          type: string
+          default: "India"
+          example: "India"
+        pincode:
+          type: string
+          pattern: '^\d{6}$'
+          example: "400001"
+        company_size:
+          type: string
+          enum: [small, medium, large, enterprise]
+          example: "medium"
+        website:
+          type: string
+          format: uri
+          example: "https://abcbuilders.com"
+        tax_id:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: "TAX123456"
+        gstin:
+          type: string
+          pattern: '^[A-Z0-9]{15}$'
+          description: GSTIN must be exactly 15 characters, alphanumeric uppercase
+          example: "27ABAFB0749E1ZT"
+
+    GeneralManagerRequest:
+      type: object
+      required:
+        - name
+        - email
+        - phone
+        - password
+        - gender
+        - dob
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 255
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john.doe@abcbuilders.com"
+        phone:
+          type: string
+          example: "+919876543211"
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: Must contain at least one uppercase letter, one lowercase letter, and one number
+          example: "SecurePass123!"
+        gender:
+          type: string
+          enum: [male, female, other]
+          example: "male"
+        dob:
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: Date of birth in YYYY-MM-DD format, must be in the past
+          example: "1990-01-15"
+        employee_id:
+          type: string
+          minLength: 3
+          maxLength: 50
+          example: "EMP001"
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/avatar.jpg"
+
+    Organization:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        pincode:
+          type: string
+        type:
+          type: string
+          enum: [builder, broker, agency]
+        company_size:
+          type: string
+          enum: [small, medium, large, enterprise]
+          nullable: true
+        status:
+          type: string
+          enum: [active, inactive, suspended, trial]
+        logo_url:
+          type: string
+          nullable: true
+        website:
+          type: string
+        tax_id:
+          type: string
+        gstin:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    GeneralManager:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        phone:
+          type: string
+        gender:
+          type: string
+          enum: [male, female, other]
+        dob:
+          type: string
+          format: date
+          nullable: true
+        email:
+          type: string
+          format: email
+        avatar_url:
+          type: string
+          nullable: true
+        employee_id:
+          type: string
+          nullable: true
+        team_id:
+          type: string
+          format: uuid
+          nullable: true
+        permissions:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [active, inactive, suspended, on_leave]
+        last_login_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    OnboardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Organization and General Manager created successfully"
+        data:
+          type: object
+          properties:
+            organization:
+              $ref: '#/components/schemas/Organization'
+            general_manager:
+              $ref: '#/components/schemas/GeneralManager'
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Validation failed"
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+
+    ConflictResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        error_code:
+          type: string
+          enum: [ORGANIZATION_EXISTS, GM_EXISTS]
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "john.doe@abcbuilders.com"
+        password:
+          type: string
+          format: password
+          example: "SecurePass123!"
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Login successful"
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            expires_in:
+              type: integer
+              description: Token expiration time in seconds
+              example: 86400
+            user:
+              $ref: '#/components/schemas/UserInfo'
+
+    UserInfo:
+      type: object
+      description: User information for all user types (General Manager, Manager, Presales, Sales)
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        user_type:
+          type: string
+          enum: [general-manager, manager, presales, sales]
+          description: Type of user (automatically detected during login)
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        gender:
+          type: string
+          enum: [male, female, other]
+        dob:
+          type: string
+          format: date
+          nullable: true
+        employee_id:
+          type: string
+          nullable: true
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+        status:
+          type: string
+          enum: [active, inactive, suspended, on_leave]
+        permissions:
+          type: array
+          items:
+            type: string
+            enum: [view_leads, create_leads, edit_leads, delete_leads, view_deals, create_deals, edit_deals, view_reports, view_analytics, manage_quotations, manage_visits, manage_negotiations, close_deals, manage_employees, manage_routing, manage_organizations, view_all_data, create_teams]
+          description: User permissions (only for manager, presales, sales users)
+          nullable: true
+
+    GeneralManagerInfo:
+      type: object
+      description: Kept for backward compatibility
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        gender:
+          type: string
+          enum: [male, female, other]
+        dob:
+          type: string
+          format: date
+          nullable: true
+        employee_id:
+          type: string
+          nullable: true
+          description: Employee ID cannot be updated via profile endpoint
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+        status:
+          type: string
+          enum: [active, inactive, suspended, on_leave]
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: "john.doe@abcbuilders.com"
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - new_password
+      properties:
+        token:
+          type: string
+          description: Password reset token received via email
+          example: "7299a11bce52e99012c1649bc2b42eec07eb9556c1ecad4d22380e144df4ef7a"
+        new_password:
+          type: string
+          format: password
+          minLength: 8
+          description: Must contain at least one uppercase letter, one lowercase letter, and one number
+          example: "NewSecurePass123!"
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - current_password
+        - new_password
+      properties:
+        current_password:
+          type: string
+          format: password
+          example: "SecurePass123!"
+        new_password:
+          type: string
+          format: password
+          minLength: 8
+          description: Must contain at least one uppercase letter, one lowercase letter, and one number
+          example: "NewSecurePass123!"
+
+    UpdateProfileRequest:
+      type: object
+      description: All fields are optional. Email and phone can be updated (with uniqueness checks). Employee ID cannot be updated.
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 255
+          example: "John Doe Updated"
+        email:
+          type: string
+          format: email
+          description: Can be updated, must be unique
+          example: "john.updated@abcbuilders.com"
+        phone:
+          type: string
+          minLength: 10
+          maxLength: 20
+          description: Can be updated, must be unique
+          example: "+919876543212"
+        gender:
+          type: string
+          enum: [male, female, other]
+          example: "male"
+        dob:
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: Date of birth in YYYY-MM-DD format
+          example: "1990-01-15"
+        avatar_url:
+          type: string
+          format: uri
+          example: "https://example.com/new-avatar.jpg"
+
+    ProfileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Profile retrieved successfully"
+        data:
+          $ref: '#/components/schemas/UserInfo'
+
+    SuccessMessageResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+
+    ErrorResponseWithCode:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        error_code:
+          type: string
+          enum: [INVALID_CREDENTIALS, INVALID_TOKEN, USER_NOT_FOUND, INVALID_CURRENT_PASSWORD, EMAIL_ALREADY_EXISTS, PHONE_ALREADY_EXISTS, FORBIDDEN, ORGANIZATION_NOT_FOUND, INVALID_USER_TYPE, EMPLOYEE_ID_ALREADY_EXISTS, INVALID_TARGET_USER_ID, USER_NOT_IN_ORGANIZATION, TEAM_NOT_FOUND, TEAM_NOT_IN_ORGANIZATION, INVALID_TEAM_ID, PERMISSION_ALREADY_EXISTS, PERMISSION_NOT_FOUND, SUBSCRIPTION_NOT_FOUND, ACTIVE_SUBSCRIPTION_EXISTS, PLAN_NOT_FOUND, INVALID_PLAN_ID, INVALID_BILLING_CYCLE, QUARTERLY_PRICING_NOT_AVAILABLE, YEARLY_PRICING_NOT_AVAILABLE, MANAGER_NOT_FOUND, MANAGER_NOT_IN_ORGANIZATION, INVALID_MANAGER_ID, USER_NOT_IN_TEAM, NO_FIELDS_TO_UPDATE]
+
+    CreateUserRequest:
+      type: object
+      required:
+        - user_type
+        - name
+        - email
+        - phone
+        - password
+        - gender
+        - dob
+        - employee_id
+        - team_id
+        - permissions
+        - status
+      properties:
+        user_type:
+          type: string
+          enum: [manager, presales, sales]
+          example: "manager"
+        name:
+          type: string
+          minLength: 3
+          maxLength: 255
+          example: "John Manager"
+        email:
+          type: string
+          format: email
+          example: "john.manager@company.com"
+        phone:
+          type: string
+          minLength: 10
+          maxLength: 20
+          example: "+919876543210"
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: Must contain at least one uppercase letter, one lowercase letter, and one number
+          example: "SecurePass123!"
+        gender:
+          type: string
+          enum: [male, female, other]
+          example: "male"
+        dob:
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          description: Date of birth in YYYY-MM-DD format, must be in the past
+          example: "1990-01-15"
+        employee_id:
+          type: string
+          minLength: 3
+          maxLength: 50
+          example: "MGR001"
+        team_id:
+          type: string
+          description: Team UUID or empty string (for NULL)
+          example: ""
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/avatar.jpg"
+        permissions:
+          type: array
+          items:
+            type: string
+            enum: [view_leads, create_leads, edit_leads, delete_leads, view_deals, create_deals, edit_deals, view_reports, view_analytics, manage_quotations, manage_visits, manage_negotiations, close_deals, manage_employees, manage_routing, manage_organizations, view_all_data, create_teams]
+          example: ["view_leads", "create_leads", "edit_leads"]
+        status:
+          type: string
+          enum: [active, inactive, suspended, on_leave]
+          example: "active"
+
+    UpdateUserRequest:
+      type: object
+      description: All fields are optional. Only provided fields will be updated.
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 255
+          example: "John Manager Updated"
+        email:
+          type: string
+          format: email
+          description: Can be updated, must be unique
+          example: "john.updated@company.com"
+        phone:
+          type: string
+          minLength: 10
+          maxLength: 20
+          example: "+919876543211"
+        gender:
+          type: string
+          enum: [male, female, other]
+          example: "male"
+        dob:
+          type: string
+          format: date
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+          example: "1990-01-15"
+        employee_id:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Can be updated, must be unique
+          example: "MGR002"
+        team_id:
+          type: string
+          description: Team UUID or empty string (for NULL)
+          example: ""
+        avatar_url:
+          type: string
+          format: uri
+          example: "https://example.com/new-avatar.jpg"
+        permissions:
+          type: array
+          items:
+            type: string
+            enum: [view_leads, create_leads, edit_leads, delete_leads, view_deals, create_deals, edit_deals, view_reports, view_analytics, manage_quotations, manage_visits, manage_negotiations, close_deals, manage_employees, manage_routing, manage_organizations, view_all_data, create_teams]
+          example: ["view_leads", "create_leads", "edit_leads", "view_deals"]
+        status:
+          type: string
+          enum: [active, inactive, suspended, on_leave]
+          example: "active"
+
+    BlockUserRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [inactive, suspended, on_leave]
+          description: Status to set (blocking statuses)
+          example: "suspended"
+
+    AddPermissionRequest:
+      type: object
+      required:
+        - permission
+      properties:
+        permission:
+          type: string
+          enum: [view_leads, create_leads, edit_leads, delete_leads, view_deals, create_deals, edit_deals, view_reports, view_analytics, manage_quotations, manage_visits, manage_negotiations, close_deals, manage_employees, manage_routing, manage_organizations, view_all_data, create_teams]
+          description: Permission to add to the user
+          example: "create_teams"
+
+    RemovePermissionRequest:
+      type: object
+      required:
+        - permission
+      properties:
+        permission:
+          type: string
+          enum: [view_leads, create_leads, edit_leads, delete_leads, view_deals, create_deals, edit_deals, view_reports, view_analytics, manage_quotations, manage_visits, manage_negotiations, close_deals, manage_employees, manage_routing, manage_organizations, view_all_data, create_teams]
+          description: Permission to remove from the user
+          example: "create_teams"
+
+    Plan:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Starter with AI"
+        description:
+          type: string
+          example: "AI-powered CRM for growing sales teams"
+        lead_limit:
+          type: integer
+          description: Maximum leads allowed (0 = unlimited)
+          example: 20000
+        user_limit:
+          type: integer
+          description: Maximum users allowed (0 = unlimited)
+          example: 20
+        features:
+          type: object
+          description: Plan features as key-value pairs
+          example:
+            call_recording: true
+            ai_call_summary: "basic"
+            max_projects: 10
+        monthly_price_per_user:
+          type: number
+          format: float
+          example: 499.00
+        quarterly_price_per_user:
+          type: number
+          format: float
+          nullable: true
+          example: null
+        yearly_price_per_user:
+          type: number
+          format: float
+          nullable: true
+          example: 399.00
+        currency:
+          type: string
+          example: "INR"
+        is_active:
+          type: boolean
+          example: true
+        trial_days:
+          type: integer
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        plan_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [active, expired, cancelled, trial, pending]
+          example: "trial"
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+        renewal_date:
+          type: string
+          format: date
+          nullable: true
+        auto_renew:
+          type: boolean
+          example: false
+        payment_method:
+          type: string
+          nullable: true
+          example: "credit_card"
+        billing_cycle:
+          type: string
+          enum: [monthly, quarterly, yearly]
+          example: "monthly"
+        amount_paid:
+          type: number
+          format: float
+          nullable: true
+        last_payment_at:
+          type: string
+          format: date-time
+          nullable: true
+        next_billing_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancellation_reason:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    SubscriptionWithPlan:
+      type: object
+      properties:
+        subscription:
+          $ref: '#/components/schemas/Subscription'
+        plan:
+          $ref: '#/components/schemas/Plan'
+        limits:
+          type: object
+          properties:
+            lead_limit:
+              type: integer
+              example: 200
+            lead_count:
+              type: integer
+              example: 0
+            user_limit:
+              type: integer
+              example: 5
+            user_count:
+              type: integer
+              example: 1
+
+    CreateSubscriptionRequest:
+      type: object
+      required:
+        - plan_id
+        - billing_cycle
+      properties:
+        plan_id:
+          type: string
+          format: uuid
+          description: ID of the plan to subscribe to
+        billing_cycle:
+          type: string
+          enum: [monthly, quarterly, yearly]
+          description: Billing cycle for the subscription
+        payment_method:
+          type: string
+          nullable: true
+          description: Payment method (optional)
+        auto_renew:
+          type: boolean
+          nullable: true
+          description: Whether to auto-renew (default true)
+
+    UpdateSubscriptionRequest:
+      type: object
+      properties:
+        plan_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: New plan ID (for upgrade/downgrade)
+        billing_cycle:
+          type: string
+          enum: [monthly, quarterly, yearly]
+          nullable: true
+          description: New billing cycle
+        auto_renew:
+          type: boolean
+          nullable: true
+          description: Update auto-renew setting
+
+    CancelSubscriptionRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          nullable: true
+          description: Reason for cancellation
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        organization_id:
+          type: string
+          format: uuid
+          example: "440e8400-e29b-41d4-a716-446655440000"
+        manager_user_id:
+          type: string
+          format: uuid
+          nullable: true
+          example: "660e8400-e29b-41d4-a716-446655440000"
+        team_title:
+          type: string
+          example: "Sales Team Alpha"
+        team_description:
+          type: string
+          nullable: true
+          example: "High-performance sales team"
+        team_type:
+          type: string
+          enum: [presales, sales, postsales, mixed]
+          example: "sales"
+        project_assigned_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          example: []
+        labels:
+          type: array
+          items:
+            type: string
+            enum: [inbound, outbound, luxury, budget, commercial, residential]
+          example: ["inbound", "luxury"]
+        team_rating_score:
+          type: integer
+          minimum: 1
+          maximum: 10
+          nullable: true
+          example: 9
+        team_logo_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/logo.png"
+        team_status:
+          type: string
+          enum: [active, inactive, blocked]
+          example: "active"
+        working_region:
+          type: array
+          items:
+            type: string
+          example: ["Mumbai", "Delhi", "Bangalore"]
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-01-22T16:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-01-22T16:30:00Z"
+
+    TeamWithMembers:
+      allOf:
+        - $ref: '#/components/schemas/Team'
+        - type: object
+          properties:
+            member_count:
+              type: integer
+              example: 5
+            manager_name:
+              type: string
+              nullable: true
+              example: "John Manager"
+
+    TeamMember:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "770e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          example: "John Sales"
+        email:
+          type: string
+          format: email
+          example: "john.sales@company.com"
+        phone:
+          type: string
+          example: "+919876543210"
+        user_type:
+          type: string
+          enum: [manager, presales, sales]
+          example: "sales"
+        employee_id:
+          type: string
+          nullable: true
+          example: "EMP001"
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/avatar.jpg"
+        status:
+          type: string
+          enum: [active, inactive, suspended, on_leave]
+          example: "active"
+        joined_at:
+          type: string
+          format: date-time
+          example: "2024-01-22T16:30:00Z"
+
+    CreateTeamRequest:
+      type: object
+      required:
+        - team_title
+        - team_type
+      properties:
+        team_title:
+          type: string
+          minLength: 3
+          maxLength: 255
+          example: "Sales Team Alpha"
+        team_description:
+          type: string
+          maxLength: 1000
+          nullable: true
+          example: "High-performance sales team"
+        team_type:
+          type: string
+          enum: [presales, sales, postsales, mixed]
+          example: "sales"
+        manager_user_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: UUID of manager to assign as team manager
+          example: "660e8400-e29b-41d4-a716-446655440000"
+        labels:
+          type: array
+          items:
+            type: string
+            enum: [inbound, outbound, luxury, budget, commercial, residential]
+          example: ["inbound", "luxury"]
+        team_rating_score:
+          type: integer
+          minimum: 1
+          maximum: 10
+          nullable: true
+          example: 9
+        team_logo_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/logo.png"
+        working_region:
+          type: array
+          items:
+            type: string
+          example: ["Mumbai", "Delhi", "Bangalore"]
+
+    UpdateTeamRequest:
+      type: object
+      properties:
+        team_title:
+          type: string
+          minLength: 3
+          maxLength: 255
+          example: "Sales Team Alpha - Elite Division"
+        team_description:
+          type: string
+          maxLength: 1000
+          nullable: true
+          example: "Updated description"
+        team_type:
+          type: string
+          enum: [presales, sales, postsales, mixed]
+          example: "sales"
+        manager_user_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: UUID of manager to assign as team manager. Set to empty string to remove manager.
+          example: "660e8400-e29b-41d4-a716-446655440000"
+        labels:
+          type: array
+          items:
+            type: string
+            enum: [inbound, outbound, luxury, budget, commercial, residential]
+          example: ["inbound", "luxury"]
+        team_rating_score:
+          type: integer
+          minimum: 1
+          maximum: 10
+          nullable: true
+          example: 10
+        team_logo_url:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://example.com/new-logo.png"
+        team_status:
+          type: string
+          enum: [active, inactive, blocked]
+          example: "active"
+        working_region:
+          type: array
+          items:
+            type: string
+          example: ["Mumbai", "Pune", "Bangalore"]
+
+    AddTeamMemberRequest:
+      type: object
+      required:
+        - user_id
+        - user_type
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: UUID of user to add to team
+          example: "770e8400-e29b-41d4-a716-446655440000"
+        user_type:
+          type: string
+          enum: [manager, presales, sales]
+          description: Type of user being added
+          example: "sales"
+
+    RemoveTeamMemberRequest:
+      type: object
+      required:
+        - user_id
+        - user_type
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: UUID of user to remove from team
+          example: "770e8400-e29b-41d4-a716-446655440000"
+        user_type:
+          type: string
+          enum: [manager, presales, sales]
+          description: Type of user being removed
+          example: "sales"
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        user_type:
+          type: string
+          enum: [manager, presales, sales]
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        gender:
+          type: string
+          enum: [male, female, other]
+          nullable: true
+        dob:
+          type: string
+          format: date
+          nullable: true
+        employee_id:
+          type: string
+          nullable: true
+        team_id:
+          type: string
+          format: uuid
+          nullable: true
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+        permissions:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [active, inactive, suspended, on_leave]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UpdateOrganizationRequest:
+      type: object
+      description: All fields are optional. Only the General Manager associated with the organization can update it.
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 255
+          example: "ABC Builders Updated"
+        email:
+          type: string
+          format: email
+          description: Can be updated, must be unique
+          example: "updated@abcbuilders.com"
+        phone:
+          type: string
+          example: "+919876543210"
+        address:
+          type: string
+          minLength: 3
+          example: "456 New Street, Andheri"
+        city:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: "Mumbai"
+        state:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: "Maharashtra"
+        country:
+          type: string
+          example: "India"
+        pincode:
+          type: string
+          pattern: '^\d{6}$'
+          example: "400002"
+        type:
+          type: string
+          enum: [builder, broker, agency]
+          example: "builder"
+        company_size:
+          type: string
+          enum: [small, medium, large, enterprise]
+          example: "large"
+        website:
+          type: string
+          format: uri
+          example: "https://abcbuilders-new.com"
+        tax_id:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: "TAX789012"
+        gstin:
+          type: string
+          pattern: '^[A-Z0-9]{15}$'
+          description: GSTIN must be exactly 15 characters, alphanumeric uppercase
+          example: "27ABAFB0749E1ZT"
+        logo_url:
+          type: string
+          format: uri
+          example: "https://example.com/logo.jpg"
+
+    OrganizationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Organization updated successfully"
+        data:
+          $ref: '#/components/schemas/Organization'
+
+    ImportDataResponse:
+      type: object
+      properties:
+        imported_data_id:
+          type: string
+          format: uuid
+          example: "8484ad75-f80a-4c7f-ab06-8c0418fbe3f6"
+        title:
+          type: string
+          example: "Q1 2024 Lead Import"
+        total_rows:
+          type: integer
+          description: Total number of rows in the CSV file
+          example: 7
+        successful:
+          type: integer
+          description: Number of leads successfully created
+          example: 6
+        failed:
+          type: integer
+          description: Number of rows that failed to import
+          example: 1
+        errors:
+          type: array
+          items:
+            type: string
+          description: List of error messages for failed rows
+          example: ["Row 5: Invalid phone: less than 10 digits"]
+        leads_created:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportedLeadInfo'
+
+    ImportedLeadInfo:
+      type: object
+      properties:
+        lead_id:
+          type: string
+          format: uuid
+          example: "ad95afcc-8896-4d1d-bde0-78d1ce649158"
+        name:
+          type: string
+          example: "Rajesh Kumar"
+        phone:
+          type: string
+          example: "9876543210"
+
+    AssignUsersResponse:
+      type: object
+      properties:
+        imported_data_id:
+          type: string
+          format: uuid
+          example: "8484ad75-f80a-4c7f-ab06-8c0418fbe3f6"
+        assigned_users_count:
+          type: integer
+          description: Number of users assigned
+          example: 2
+        leads_assigned:
+          type: integer
+          description: Total number of leads assigned
+          example: 7
+        assignment_summary:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Map of user_id to number of leads assigned
+          example:
+            "5566716a-ec77-4805-a4d6-ddcacefd4d00": 4
+            "7788aabb-1234-5678-abcd-1234567890ab": 3
+
+    DeleteImportedDataResponse:
+      type: object
+      properties:
+        imported_data_id:
+          type: string
+          format: uuid
+          example: "8484ad75-f80a-4c7f-ab06-8c0418fbe3f6"
+        deleted_leads_count:
+          type: integer
+          description: Number of unqualified leads deleted
+          example: 7
+        message:
+          type: string
+          example: "Imported data and 7 unqualified leads deleted successfully"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "JWT token obtained from login endpoint. Include as \"Authorization: Bearer {token}\""

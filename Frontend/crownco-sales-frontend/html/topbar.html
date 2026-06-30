@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Desktop Header</title>
+    <style>
+        /* Base Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #fcfcfc;
+        }
+
+        /* Header Container */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+            min-height: 100px;
+        }
+
+        /* User Profile Section */
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .avatar-container {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: #eee;
+        }
+
+        .avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Text Content Hierarchy */
+        .welcome-text h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .date-subtext {
+            font-size: 16px;
+            color: #757575;
+            font-weight: 400;
+        }
+
+        /* Notification Icon */
+        .notification-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-btn:hover {
+            background-color: #f0f0f0;
+        }
+
+        .notification-icon {
+            width: 28px;
+            height: 28px;
+            fill: none;
+            stroke: #1a1a1a;
+            stroke-width: 1.5;
+        }
+
+        /* Minimal Animation for Wave */
+        .wave {
+            display: inline-block;
+            animation: wave-animation 2.5s infinite;
+            transform-origin: 70% 70%;
+        }
+
+        @keyframes wave-animation {
+            0% { transform: rotate( 0.0deg) }
+           10% { transform: rotate(14.0deg) }
+           20% { transform: rotate(-8.0deg) }
+           30% { transform: rotate(14.0deg) }
+           40% { transform: rotate(-4.0deg) }
+           50% { transform: rotate(10.0deg) }
+          100% { transform: rotate( 0.0deg) }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="profile-section">
+            <div class="avatar-container">
+                <img src="https://i.pravatar.cc/150?u=sarah" alt="User Profile">
+            </div>
+            <div class="welcome-text">
+                <h1>Welcome Sarah <span class="wave">👋</span></h1>
+                <p class="date-subtext" id="current-date">23/6/2025</p>
+            </div>
+        </div>
+
+        <div class="action-section">
+            <button class="notification-btn" aria-label="Notifications">
+                <svg class="notification-icon" viewBox="0 0 24 24">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <script>
+        // Optional: Update date dynamically to match user's current date
+        // Remove this if you want the hardcoded date from your image.
+        function setDate() {
+            const dateElement = document.getElementById('current-date');
+            const now = new Date();
+            const day = now.getDate();
+            const month = now.getMonth() + 1;
+            const year = now.getFullYear();
+            
+            // Format: DD/M/YYYY to match your image style
+            dateElement.textContent = `${day}/${month}/${year}`;
+        }
+
+        // Uncomment below to enable real-time date
+        // setDate();
+
+        // Notification Click Logic
+        document.querySelector('.notification-btn').addEventListener('click', () => {
+            alert('Opening Notifications...');
+        });
+    </script>
+</body>
+</html>

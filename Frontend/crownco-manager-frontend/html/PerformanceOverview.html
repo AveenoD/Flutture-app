@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management Dashboard - Tplanzo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #0084ff;
+            --bg-light: #f8fafc;
+            --border-color: #edf2f7;
+            --text-dark: #2d3748;
+            --text-gray: #718096;
+            --white: #ffffff;
+            --success: #48bb78;
+            --danger: #f56565;
+            --warning: #ed8936;
+            --purple: #9f7aea;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- LAYOUT STRUCTURE --- */
+        .sidebar-placeholder {
+            width: 260px;
+            background: #fff;
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar-placeholder {
+            height: 70px;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        /* --- SCROLLABLE CONTAINER --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 25px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        /* --- SHARED COMPONENTS --- */
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .btn-view-all {
+            color: var(--primary-blue);
+            font-size: 12px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* --- PROFILE SECTION --- */
+        .profile-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .profile-info {
+            display: flex;
+            gap: 15px;
+        }
+
+        .profile-img {
+            width: 70px;
+            height: 70px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .profile-details h2 {
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+
+        .profile-details p {
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
+        .online-badge {
+            background: #e6fffa;
+            color: #38b2ac;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .contact-info {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--primary-blue);
+        }
+
+        .profile-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .btn-edit { background: #fff; }
+        .btn-suspend { background: #c53030; color: #fff; border: none; }
+        .btn-message { background: #fff; }
+        .btn-assign { background: var(--primary-blue); color: #fff; border: none; }
+        .btn-full { width: 100%; margin-top: 15px; background: var(--primary-blue); color: #fff; border: none; height: 38px;}
+
+        /* --- METRICS GRID --- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+            margin-bottom: 25px;
+        }
+
+        .metric-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .metric-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .metric-data h4 { font-size: 20px; color: var(--text-dark); }
+        .metric-data span { font-size: 12px; color: var(--text-gray); }
+
+        .trend { font-size: 11px; font-weight: 600; }
+        .trend.up { color: var(--success); }
+        .trend.down { color: var(--danger); }
+
+        /* --- TABS --- */
+        .tabs-container {
+            display: flex;
+            gap: 30px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+
+        .tab {
+            padding-bottom: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-gray);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--primary-blue);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-blue);
+        }
+
+        /* --- DASHBOARD CONTENT GRID --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 20px;
+        }
+
+        /* --- LEFT COLUMN COMPONENTS --- */
+        .chart-container {
+            height: 250px;
+            width: 100%;
+            position: relative;
+            background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 100%);
+            border-radius: 8px;
+            margin-top: 15px;
+            display: flex;
+            align-items: flex-end;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .wave-svg { width: 100%; height: 100px; }
+
+        .timeline-item {
+            display: flex;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        .tl-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .tl-body h5 { font-size: 13px; margin-bottom: 2px; }
+        .tl-body p { font-size: 11px; color: var(--text-gray); line-height: 1.4; }
+        .tl-time { margin-left: auto; text-align: right; min-width: 80px;}
+        .tl-time div { font-size: 10px; color: var(--text-gray); }
+
+        .followup-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        .followup-item img { width: 35px; height: 35px; border-radius: 50%; }
+        .status-pill {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+
+        /* --- RIGHT COLUMN COMPONENTS --- */
+        .alert-card {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 12px;
+            border-left: 4px solid transparent;
+        }
+        .alert-orange { background: #fffaf0; border-left-color: #ed8936; }
+        .alert-green { background: #f0fff4; border-left-color: #48bb78; }
+        .alert-red { background: #fff5f5; border-left-color: #f56565; }
+
+        .status-box-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .status-box {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .activity-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        .activity-table th { text-align: left; color: var(--text-gray); padding: 8px 0; font-weight: 500;}
+        .activity-table td { padding: 8px 0; border-top: 1px solid #f7fafc; }
+
+        .pill {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .donut-container {
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary-blue) 0% 75%, #cbd5e0 75% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .donut-inner {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        /* --- RESPONSIVENESS --- */
+        @media (max-width: 1150px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            .sidebar-placeholder { width: 0; display: none; }
+        }
+
+        @media (max-width: 600px) {
+            /* Horizontal scrollable KPIs on mobile */
+            .metrics-grid {
+                display: flex;
+                overflow-x: auto;
+                overflow-y: hidden;
+                gap: 16px;
+                padding-bottom: 8px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                scrollbar-color: var(--border-color) transparent;
+            }
+            
+            .metrics-grid::-webkit-scrollbar {
+                height: 6px;
+            }
+            
+            .metrics-grid::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            
+            .metrics-grid::-webkit-scrollbar-thumb {
+                background-color: var(--border-color);
+                border-radius: 3px;
+            }
+            
+            .metric-card {
+                min-width: 200px;
+                flex-shrink: 0;
+            }
+            
+            .profile-actions { width: 100%; }
+            .contact-info { 
+                flex-direction: column; 
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-placeholder"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-placeholder"></div>
+
+        <div class="main-content">
+            
+            <div class="card">
+                <div class="profile-section">
+                    <div class="profile-info">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150" alt="Sarah Johnson" class="profile-img">
+                        <div class="profile-details">
+                            <h2>Sarah Johnson <span class="online-badge"><i class="fa-solid fa-circle" style="font-size: 7px;"></i> Online</span></h2>
+                            <p>ID-Prop 2024 - 155 | Senior Sales Executive</p>
+                            <div class="contact-info">
+                                <span><i class="fa-regular fa-envelope"></i> Sarah@gmail.com</span>
+                                <span><i class="fa-solid fa-phone"></i> +91 800 123 554</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-actions">
+                        <button class="btn btn-edit"><i class="fa-regular fa-pen-to-square"></i> Edit Profile</button>
+                        <button class="btn btn-suspend">Suspend</button>
+                        <button class="btn btn-message"><i class="fa-regular fa-message"></i> Send Message</button>
+                        <button class="btn btn-assign"><i class="fa-solid fa-plus"></i> Assign Project</button>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Metrices Breakdown</h3>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-data">
+                        <div class="metric-icon" style="background: #e6f0ff; color: #0084ff;"><i class="fa-solid fa-user-group"></i></div>
+                        <h4>128</h4>
+                        <span>Leads Assigned</span>
+                    </div>
+                    <div class="trend down">-3.2%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-data">
+                        <div class="metric-icon" style="background: #f3ebff; color: #9f7aea;"><i class="fa-solid fa-house-chimney"></i></div>
+                        <h4>64</h4>
+                        <span>Property Visited</span>
+                    </div>
+                    <div class="trend up">+1.8%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-data">
+                        <div class="metric-icon" style="background: #fff4e6; color: #ed8936;"><i class="fa-solid fa-calendar-check"></i></div>
+                        <h4>12</h4>
+                        <span>Bookings Closed</span>
+                    </div>
+                    <div class="trend up">+2.0%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-data">
+                        <div class="metric-icon" style="background: #e6fffa; color: #38b2ac;"><i class="fa-solid fa-clock"></i></div>
+                        <h4>3.6sec</h4>
+                        <span>Avg. Response Time</span>
+                    </div>
+                    <div class="trend down">-2.1%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-data">
+                        <div class="metric-icon" style="background: #fff5f5; color: #f56565;"><i class="fa-solid fa-hand"></i></div>
+                        <h4>118</h4>
+                        <span>Rejected</span>
+                    </div>
+                    <div class="trend down">-0.8%</div>
+                </div>
+                <div class="metric-data metric-card">
+                    <div class="metric-data">
+                        <div class="metric-icon" style="background: #f0fff4; color: #48bb78;"><i class="fa-solid fa-chart-line"></i></div>
+                        <h4>9.4%</h4>
+                        <span>Conversion Rate</span>
+                    </div>
+                    <div class="trend up">+0.7%</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-data">
+                        <div class="metric-icon" style="background: #fff0f6; color: #d53f8c;"><i class="fa-solid fa-star"></i></div>
+                        <h4>4.7/5</h4>
+                        <span>Client Satisfaction</span>
+                    </div>
+                    <div class="trend up">+2.2%</div>
+                </div>
+            </div>
+
+            <div class="tabs-container">
+                <div class="tab active">Performance Overview</div>
+                <div class="tab">Activity & Tasks</div>
+            </div>
+
+            <div class="dashboard-grid">
+                
+                <div class="left-content">
+                    
+                    <div class="card">
+                        <div class="section-header">
+                            <h3>User Journey Metrics</h3>
+                            <div style="display: flex; gap: 5px;">
+                                <button class="btn" style="padding: 4px 8px; font-size: 10px; background: #0056b3; color: #fff; border:none;">Week</button>
+                                <button class="btn" style="padding: 4px 8px; font-size: 10px;">Month</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <svg class="wave-svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                                <path fill="#0084ff22" d="M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,138.7C672,128,768,160,864,186.7C960,213,1056,235,1152,218.7C1248,203,1344,149,1392,122.7L1440,96V320H0Z"></path>
+                                <path fill="none" stroke="#0084ff" stroke-width="3" d="M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,138.7C672,128,768,160,864,186.7C960,213,1056,235,1152,218.7C1248,203,1344,149,1392,122.7L1440,96"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-header">
+                            <h3>Activity Timeline</h3>
+                            <a href="#" class="btn-view-all">View All</a>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="tl-icon" style="background: #e6f0ff; color: #0084ff;"><i class="fa-solid fa-user-plus"></i></div>
+                            <div class="tl-body">
+                                <h5>New Lead Assigned</h5>
+                                <p>Luxury Apartment inquiry from John Miller - Seaside Heights Project</p>
+                            </div>
+                            <div class="tl-time"><div>11/11/2024</div><div>09:30 AM</div></div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="tl-icon" style="background: #e6fffa; color: #38b2ac;"><i class="fa-solid fa-phone"></i></div>
+                            <div class="tl-body">
+                                <h5>Client Call Completed</h5>
+                                <p>Follow up call with Sarah Chen - 15 minutes discussion about payment plans</p>
+                            </div>
+                            <div class="tl-time"><div>11/11/2024</div><div>11:45 PM</div></div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="tl-icon" style="background: #f3ebff; color: #9f7aea;"><i class="fa-solid fa-location-dot"></i></div>
+                            <div class="tl-body">
+                                <h5>Site Visit Conducted</h5>
+                                <p>Showed 2 units at Skyline Towers to the Rodriguez Family</p>
+                            </div>
+                            <div class="tl-time"><div>11/11/2024</div><div>01:20 PM</div></div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="tl-icon" style="background: #fff4e6; color: #ed8936;"><i class="fa-solid fa-book"></i></div>
+                            <div class="tl-body">
+                                <h5>Booking Closed</h5>
+                                <p>Custom Penthouse sold (Unit 404) in Marina Bay - $450,000</p>
+                            </div>
+                            <div class="tl-time"><div>11/11/2024</div><div>03:15 PM</div></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-header">
+                            <h3><i class="fa-solid fa-phone" style="color:var(--primary-blue); margin-right:8px;"></i> Recent Follow-Ups</h3>
+                        </div>
+                        <div class="followup-item">
+                            <img src="https://i.pravatar.cc/100?img=11" alt="">
+                            <div class="tl-body">
+                                <h5>Sarah Johnson <span class="status-pill" style="background: #e6fffa; color: #38b2ac;">Active</span></h5>
+                                <p>Robert Taylor - Ocean View Residences<br>Interested in 2BHK and scheduled a visit</p>
+                            </div>
+                            <div class="tl-time">2 hour ago</div>
+                        </div>
+                        <div class="followup-item">
+                            <img src="https://i.pravatar.cc/100?img=12" alt="">
+                            <div class="tl-body">
+                                <h5>Mike Chan <span class="status-pill" style="background: #fff4e6; color: #ed8936;">No Reply</span></h5>
+                                <p>Jennifer Davis - Downtown Plaza<br>Left voice mail, will try again tomorrow</p>
+                            </div>
+                            <div class="tl-time">4 hour ago</div>
+                        </div>
+                        <button class="btn btn-full">View All Follow-Ups</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-header">
+                            <h3><i class="fa-solid fa-calendar" style="color:var(--warning); margin-right:8px;"></i> Scheduled Visits</h3>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="tl-body">
+                                <h5>Sarah Johnson <span class="status-pill" style="background: #e6fffa; color: #38b2ac;">Confirmed</span></h5>
+                                <p>Amanda Jameson - Skyline Tower</p>
+                            </div>
+                            <div class="tl-time" style="color:var(--text-dark); font-weight:600;">Today 2:00 PM</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="tl-body">
+                                <h5>Sarah Johnson <span class="status-pill" style="background: #fff5f5; color: #f56565;">Pending</span></h5>
+                                <p>Thomas Miller - Ocean View Residences</p>
+                            </div>
+                            <div class="tl-time" style="color:var(--text-dark); font-weight:600;">Today 4:30 PM</div>
+                        </div>
+                        <button class="btn btn-full">View All Visits</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-header">
+                            <h3><i class="fa-solid fa-circle-xmark" style="color:var(--danger); margin-right:8px;"></i> Missed Follow-Ups</h3>
+                        </div>
+                        <div class="followup-item">
+                            <div class="tl-body">
+                                <h5>Emma Davis</h5>
+                                <p>Thomas Miller - Ocean View Residences<br>Agent Unavailable</p>
+                            </div>
+                            <div class="tl-time">2 hour ago</div>
+                        </div>
+                        <button class="btn btn-full">Reschedule All</button>
+                    </div>
+
+                </div>
+
+                <div class="right-content">
+                    
+                    <div class="card">
+                        <div class="section-header">
+                            <h3>Manager Alerts</h3>
+                            <span style="font-size: 10px; color: #f56565; cursor: pointer;">3 Alerts</span>
+                        </div>
+                        <div class="alert-card alert-orange">
+                            <strong>Communication Analysis</strong><span style="float:right; color:#a0aec0;">2 hour ago</span><br>
+                            AI detected speech tone in 35% of calls
+                        </div>
+                        <div class="alert-card alert-green">
+                            <strong>Follow-up Consistency</strong><span style="float:right; color:#a0aec0;">5 hour ago</span><br>
+                            Excellent follow-up pattern with 98% consistency
+                        </div>
+                        <div class="alert-card alert-red">
+                            <strong>Missed Follow-up</strong><span style="float:right; color:#a0aec0;">2 hour ago</span><br>
+                            Premium lead from Ocean View Residences missed 2nd follow-up
+                        </div>
+                        <button class="btn btn-full">View All Alerts</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-header"><h3>Work Status</h3></div>
+                        <div class="status-box-grid">
+                            <div class="status-box" style="background: #f0fff4; color: #38b2ac;">
+                                <strong style="font-size: 18px;">22</strong><br><span style="font-size: 10px;">Active Workdays</span>
+                            </div>
+                            <div class="status-box" style="background: #fff5f5; color: #f56565;">
+                                <strong style="font-size: 18px;">2</strong><br><span style="font-size: 10px;">Unscheduled Absence</span>
+                            </div>
+                            <div class="status-box" style="background: #ebf8ff; color: #3182ce;">
+                                <strong style="font-size: 18px;">4</strong><br><span style="font-size: 10px;">Approved Leaves</span>
+                            </div>
+                            <div class="status-box" style="background: #fffaf0; color: #ed8936;">
+                                <strong style="font-size: 18px;">3</strong><br><span style="font-size: 10px;">Late Check Ins</span>
+                            </div>
+                        </div>
+
+                        <h4 style="font-size: 12px; margin-bottom: 10px;">Recent Activity</h4>
+                        <table class="activity-table">
+                            <thead>
+                                <tr><th>Date</th><th>Status</th><th>In</th><th>Out</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Jan 15</td><td><span class="pill" style="background: #f0fff4; color: #38b2ac;">Present</span></td><td>09:15</td><td>06:30</td></tr>
+                                <tr><td>Jan 14</td><td><span class="pill" style="background: #f0fff4; color: #38b2ac;">Present</span></td><td>09:15</td><td>06:30</td></tr>
+                                <tr><td>Jan 13</td><td><span class="pill" style="background: #fffaf0; color: #ed8936;">Late</span></td><td>10:45</td><td>06:30</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-header"><h3>Client Feedbacks</h3></div>
+                        <div style="border-bottom: 1px solid #edf2f7; padding-bottom: 10px; margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="font-size: 12px;">David Park</strong>
+                                <span style="color: #ecc94b; font-size: 10px;">★★★★★</span>
+                            </div>
+                            <p style="font-size: 11px; color: var(--text-gray); font-style: italic; margin-top: 5px;">"Sarah was extremely professional and helped us find the perfect home. Her knowledge is outstanding."</p>
+                        </div>
+                    </div>
+
+                    <div class="card" style="background: #fff5f5; border: 1px solid #feb2b2;">
+                        <div class="section-header"><h3>Recent Complaint</h3> <span class="pill" style="background:#f56565; color:white; font-size:9px;">Resolved</span></div>
+                        <p style="font-size: 11px;">"Issue with document collection timing was handled within 2 hours."</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-header"><h3>Lead Sources</h3></div>
+                        <div class="donut-container">
+                            <div class="donut-inner"></div>
+                        </div>
+                        <div style="display: flex; justify-content: center; gap: 15px; font-size: 11px;">
+                            <span><i class="fa-solid fa-circle" style="color:var(--primary-blue)"></i> Assign By Calls (75%)</span>
+                            <span><i class="fa-solid fa-circle" style="color:#cbd5e0"></i> Walking (25%)</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Simple tab switching logic
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

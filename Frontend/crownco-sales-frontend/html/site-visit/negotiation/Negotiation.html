@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Detail - Negotiation Updated</title>
+    <style>
+        :root {
+            --primary-blue: #0081FF;
+            --primary-blue-hover: #0066CC;
+            --bg-light: #F8FAFD;
+            --border-color: #E6EBF1;
+            --text-dark: #333C48;
+            --text-gray: #7A8699;
+            --success: #27AE60;
+            --danger: #EB5757;
+            --hot-bg: #FFEAEA;
+            --icon-bg: #E6F0FF;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Layout Structure */
+        .sidebar-placeholder {
+            width: 260px;
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+            background: white;
+        }
+
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            min-width: 0;
+        }
+
+        .topbar-placeholder {
+            height: 64px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--text-dark);
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .topbar-placeholder h3 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .topbar-placeholder h3:hover {
+            color: var(--primary-blue);
+        }
+
+        /* Scrollable Content */
+        .page-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background-color: var(--bg-light);
+            scroll-behavior: smooth;
+        }
+
+        /* Stepper Section */
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 900px;
+            margin: 0 auto 30px;
+            position: relative;
+            padding: 0 20px;
+        }
+
+        .stepper::before {
+            content: "";
+            position: absolute;
+            top: 20px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #E0E0E0;
+            z-index: 1;
+        }
+
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            background: transparent;
+            padding: 0 8px;
+            font-size: 12px;
+            color: var(--text-gray);
+            flex: 1;
+            min-width: 0;
+        }
+
+        .step-label {
+            font-size: 11px;
+            margin-top: 8px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+        }
+
+        .step.inactive .step-icon {
+            background: #fff;
+            border: 2px solid #E0E0E0;
+            color: #999;
+            box-shadow: none;
+        }
+
+        .step.active .step-icon {
+            transform: scale(1.1);
+        }
+
+        /* Tabs */
+        .tabs {
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+            display: flex;
+            gap: 40px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            padding-bottom: 12px;
+            font-weight: 500;
+            color: var(--text-gray);
+            cursor: pointer;
+            position: relative;
+            white-space: nowrap;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            color: var(--primary-blue);
+        }
+
+        .tab.active {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-blue);
+            border-radius: 2px 2px 0 0;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            background: white;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-header {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header h2 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .add-more-btn {
+            color: var(--primary-blue);
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .add-more-btn:hover {
+            color: var(--primary-blue-hover);
+            text-decoration: underline;
+        }
+
+        /* Lead Profile Section */
+        .profile-box {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            object-fit: cover;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .profile-info {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .profile-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .badge-hot {
+            background: var(--hot-bg);
+            color: var(--danger);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .profile-detail {
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .profile-budget {
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-blue {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-blue:hover {
+            background: var(--primary-blue-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-outline-blue {
+            background: white;
+            border: 1.5px solid var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .btn-outline-blue:hover {
+            background: var(--icon-bg);
+            transform: translateY(-1px);
+        }
+
+        /* Property Section */
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .prop-card {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .prop-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .prop-img {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            object-fit: cover;
+        }
+
+        .prop-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--primary-blue);
+            margin-bottom: 4px;
+        }
+
+        .prop-location {
+            font-size: 11px;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+        }
+
+        .tag-row {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .amenity-tag {
+            font-size: 10px;
+            padding: 3px 8px;
+            background: #F0F4FF;
+            color: var(--primary-blue);
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        /* Amenities Section */
+        .amenities-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .a-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            font-size: 13px;
+            color: var(--text-gray);
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .a-tab:hover {
+            color: var(--primary-blue);
+        }
+
+        .a-tab.active {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .a-tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 10%;
+            width: 80%;
+            height: 2px;
+            background: var(--primary-blue);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .a-tab h3 {
+            font-size: 13px;
+            margin: 0;
+            font-weight: inherit;
+        }
+
+        .amenities-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .amenity-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 8px;
+            border: 1px solid #F1F3F6;
+            border-radius: 10px;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .amenity-item:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .amenity-icon-circle {
+            width: 40px;
+            height: 40px;
+            background: var(--icon-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            color: var(--primary-blue);
+            font-size: 20px;
+        }
+
+        .amenity-label {
+            font-size: 11px;
+            color: var(--text-dark);
+            text-align: center;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        /* Negotiation Chat */
+        .chat-box {
+            background: #F8FAFD;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 380px;
+            max-height: 500px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-box::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        .bubble {
+            max-width: 75%;
+            padding: 12px 16px;
+            font-size: 13px;
+            line-height: 1.5;
+            border-radius: 16px;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bubble.sent {
+            background: var(--primary-blue);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .bubble.received {
+            background: white;
+            color: var(--text-dark);
+            align-self: flex-start;
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 4px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .time {
+            font-size: 10px;
+            margin-top: 6px;
+            display: block;
+            text-align: right;
+            opacity: 0.7;
+        }
+
+        .bubble.received .time {
+            text-align: left;
+        }
+
+        /* Unit Selection */
+        .unit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+        }
+
+        .unit {
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 8px;
+            border: 1.5px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .unit:hover:not(.booked):not(.selected) {
+            border-color: var(--primary-blue);
+            background: var(--icon-bg);
+        }
+
+        .unit.available {
+            background: #E9FBF0;
+            color: #27AE60;
+            border: 1.5px solid #27AE60;
+        }
+
+        .unit.booked {
+            background: #FFF0F0;
+            color: #EB5757;
+            border: 1.5px solid #EB5757;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .unit.selected {
+            background: #E6F2FF;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+            font-weight: 600;
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Price Breakdown */
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            font-size: 14px;
+            color: var(--text-dark);
+            padding-bottom: 12px;
+            border-bottom: 1px solid #F1F3F6;
+        }
+
+        .price-row:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .final-price-box {
+            border-top: 2px dashed #CCC;
+            padding-top: 20px;
+            margin-top: 20px;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--success);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Remarks */
+        .remarks-list {
+            padding-left: 20px;
+            font-size: 14px;
+            color: var(--text-gray);
+            line-height: 2;
+        }
+
+        .remarks-list li {
+            margin-bottom: 8px;
+        }
+
+        /* Footer */
+        .footer-actions {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+            background: white;
+            position: sticky;
+            bottom: 0;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-footer {
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            min-width: 120px;
+        }
+
+        .btn-reject {
+            background: white;
+            border: 1.5px solid #CCC;
+            color: var(--text-dark);
+        }
+
+        .btn-reject:hover {
+            background: #F5F5F5;
+            border-color: var(--danger);
+            color: var(--danger);
+            transform: translateY(-1px);
+        }
+
+        .btn-approve {
+            background: var(--primary-blue);
+            border: none;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: var(--primary-blue-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Responsive Design */
+        /* Tablet */
+        @media (max-width: 1024px) {
+            .sidebar-placeholder {
+                display: none;
+            }
+
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .page-content {
+                padding: 20px;
+            }
+
+            .stepper {
+                max-width: 100%;
+                padding: 0 10px;
+            }
+
+            .step-label {
+                font-size: 10px;
+            }
+
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 12px;
+            }
+
+            .amenities-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .unit-grid {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .topbar-placeholder {
+                height: 56px;
+                padding: 0 16px;
+                font-size: 16px;
+            }
+
+            .page-content {
+                padding: 16px;
+            }
+
+            .stepper {
+                flex-direction: column;
+                gap: 20px;
+                padding: 0;
+            }
+
+            .stepper::before {
+                display: none;
+            }
+
+            .step {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                text-align: left;
+                width: 100%;
+                padding: 0;
+            }
+
+            .step-icon {
+                margin: 0;
+                flex-shrink: 0;
+            }
+
+            .step-label {
+                margin: 0;
+                font-size: 13px;
+            }
+
+            .tabs {
+                gap: 24px;
+                margin-bottom: 20px;
+            }
+
+            .tab {
+                font-size: 13px;
+            }
+
+            .card {
+                padding: 16px;
+                margin-bottom: 16px;
+                border-radius: 10px;
+            }
+
+            .section-header {
+                font-size: 15px;
+                margin-bottom: 12px;
+            }
+
+            .section-header h2 {
+                font-size: 15px;
+            }
+
+            .profile-box {
+                gap: 12px;
+            }
+
+            .avatar {
+                width: 56px;
+                height: 56px;
+                font-size: 18px;
+            }
+
+            .profile-name {
+                font-size: 15px;
+            }
+
+            .btn-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-action {
+                width: 100%;
+            }
+
+            .property-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .amenities-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .amenity-item {
+                padding: 12px 6px;
+            }
+
+            .amenity-icon-circle {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+
+            .amenity-label {
+                font-size: 10px;
+            }
+
+            .chat-box {
+                min-height: 300px;
+                max-height: 400px;
+                padding: 16px;
+            }
+
+            .bubble {
+                max-width: 85%;
+                font-size: 12px;
+                padding: 10px 14px;
+            }
+
+            .unit-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+                gap: 8px;
+            }
+
+            .unit {
+                padding: 10px 6px;
+                font-size: 11px;
+            }
+
+            .price-row {
+                font-size: 13px;
+                margin-bottom: 12px;
+            }
+
+            .final-price-box {
+                font-size: 16px;
+                padding-top: 16px;
+                margin-top: 16px;
+            }
+
+            .footer-actions {
+                padding: 12px 16px;
+                flex-direction: column-reverse;
+                gap: 12px;
+            }
+
+            .btn-footer {
+                width: 100%;
+                padding: 14px;
+            }
+
+            .add-more-btn {
+                font-size: 12px;
+            }
+        }
+
+        /* Small Mobile */
+        @media (max-width: 480px) {
+            .page-content {
+                padding: 12px;
+            }
+
+            .stepper {
+                gap: 16px;
+            }
+
+            .step-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 11px;
+            }
+
+            .step-label {
+                font-size: 12px;
+            }
+
+            .card {
+                padding: 14px;
+            }
+
+            .amenities-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .unit-grid {
+                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            }
+
+            .unit {
+                padding: 8px 4px;
+                font-size: 10px;
+            }
+
+            .chat-box {
+                min-height: 250px;
+                max-height: 350px;
+                padding: 12px;
+            }
+
+            .bubble {
+                max-width: 90%;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-placeholder"></div>
+
+    <div class="main-container">
+        <div class="topbar-placeholder">
+            <h3>← Lead Detail</h3>
+        </div>
+
+        <div class="page-content">
+            <div class="stepper">
+                <div class="step active">
+                    <div class="step-icon">S</div>
+                    <div class="step-label">Summary</div>
+                </div>
+                <div class="step active">
+                    <div class="step-icon">P</div>
+                    <div class="step-label">Property Visit</div>
+                </div>
+                <div class="step active">
+                    <div class="step-icon">N</div>
+                    <div class="step-label">Negotiation</div>
+                </div>
+                <div class="step inactive">
+                    <div class="step-icon">B</div>
+                    <div class="step-label">Booking</div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active">Overview</div>
+                <div class="tab">Follow Ups</div>
+            </div>
+
+            <div class="dashboard-layout">
+                <div class="col-left">
+                    <div class="section-header">
+                        <h2>Lead Profile</h2>
+                    </div>
+                    <div class="card">
+                        <div class="profile-box">
+                            <div class="avatar">SM</div>
+                            <div class="profile-info">
+                                <div class="profile-header">
+                                    <h3 class="profile-name">Shaikh Maaz</h3>
+                                    <span class="badge-hot">Very Hot</span>
+                                </div>
+                                <div class="profile-detail">📞 (808) 555-0111</div>
+                                <div class="profile-detail">📍 Pembroke Pines</div>
+                                <div class="profile-budget">Budget - ₹40L - ₹50L</div>
+                            </div>
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn-action btn-blue">📞 Call Now</button>
+                            <button class="btn-action btn-outline-blue">💬 Chat Now</button>
+                        </div>
+                    </div>
+
+                    <div class="section-header">
+                        <h2>Selected Property</h2>
+                        <span class="add-more-btn">+ Add More</span>
+                    </div>
+                    <div class="card">
+                        <div class="property-grid">
+                            <div class="prop-card">
+                                <div class="prop-img"></div>
+                                <div class="prop-title">Maaz Palace</div>
+                                <div class="prop-location">Kurla - City Center</div>
+                                <div class="tag-row">
+                                    <span class="amenity-tag">Sea Facing</span>
+                                    <span class="amenity-tag">Smart Homes</span>
+                                </div>
+                            </div>
+                            <div class="prop-card">
+                                <div class="prop-img"></div>
+                                <div class="prop-title">Maaz Palace</div>
+                                <div class="prop-location">Kurla - City Center</div>
+                                <div class="tag-row">
+                                    <span class="amenity-tag">Play Ground</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="amenities-tabs">
+                            <div class="a-tab active"><h3>Base Amenities</h3></div>
+                            <div class="a-tab"><h3>Extra Charges</h3></div>
+                        </div>
+                        <div class="amenities-grid">
+                            <div class="amenity-item">
+                                <div class="amenity-icon-circle">🏊</div>
+                                <div class="amenity-label">Swimming Pool</div>
+                            </div>
+                            <div class="amenity-item">
+                                <div class="amenity-icon-circle">🏋️</div>
+                                <div class="amenity-label">Gym</div>
+                            </div>
+                            <div class="amenity-item">
+                                <div class="amenity-icon-circle">⚡</div>
+                                <div class="amenity-label">Power Backup</div>
+                            </div>
+                            <div class="amenity-item">
+                                <div class="amenity-icon-circle">🅿️</div>
+                                <div class="amenity-label">Parking</div>
+                            </div>
+                            <div class="amenity-item">
+                                <div class="amenity-icon-circle">🩺</div>
+                                <div class="amenity-label">Medical</div>
+                            </div>
+                            <div class="amenity-item">
+                                <div class="amenity-icon-circle">⚽</div>
+                                <div class="amenity-label">Indoor Game</div>
+                            </div>
+                            <div class="amenity-item">
+                                <div class="amenity-icon-circle">🧘</div>
+                                <div class="amenity-label">Yoga Area</div>
+                            </div>
+                            <div class="amenity-item">
+                                <div class="amenity-icon-circle">🛡️</div>
+                                <div class="amenity-label">Security</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-header">
+                        <h2>Price Breakdown</h2>
+                    </div>
+                    <div class="card">
+                        <div class="price-row">
+                            <span>Property Base Price</span>
+                            <span>+ ₹ 3,00,00,000</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Add-On: Luxury Washroom</span>
+                            <span>+ ₹ 90,000</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Add-On: Modular Kitchen</span>
+                            <span>+ ₹ 70,000</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Commission</span>
+                            <span>+ ₹ 1,00,000</span>
+                        </div>
+                        <div class="price-row" style="color: var(--danger);">
+                            <span>Discount (Diwali Special)</span>
+                            <span>- ₹ 75,00,000</span>
+                        </div>
+                        <div class="final-price-box">
+                            <span>Final Deal Price</span>
+                            <span>₹ 2,27,45,000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-right">
+                    <div class="section-header">
+                        <h2>Negotiation Thread</h2>
+                    </div>
+                    <div class="card">
+                        <div class="chat-box" id="chatThread">
+                            <div class="bubble sent">
+                                Sir, your total deal price is ₹2.26 Cr
+                                <span class="time">4:27 PM</span>
+                            </div>
+                            <div class="bubble received">
+                                That's a bit high. Can you adjust something?
+                                <span class="time">4:28 PM</span>
+                            </div>
+                            <div class="bubble sent">
+                                We've already added a ₹75L discount. The base price is fixed from builder side.
+                                <span class="time">4:29 PM</span>
+                            </div>
+                            <div class="bubble received">
+                                I'm okay with ₹2 Cr — that's my final offer.
+                                <span class="time">4:30 PM</span>
+                            </div>
+                            <div class="bubble sent">
+                                Let me check with my manager and get back. Will also remind you of the current festive offer that ends this week.
+                                <span class="time">4:31 PM</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-header">
+                        <h2>Unit Selection</h2>
+                        <span class="add-more-btn">+ Add Filter</span>
+                    </div>
+                    <div class="card">
+                        <div class="unit-grid">
+                            <div class="unit available">A-101</div>
+                            <div class="unit available">A-102</div>
+                            <div class="unit booked">A-103</div>
+                            <div class="unit available">A-104</div>
+                            <div class="unit available">A-105</div>
+                            <div class="unit available">A-106</div>
+                            <div class="unit available">A-107</div>
+                            <div class="unit available">A-108</div>
+                            <div class="unit booked">A-109</div>
+                            <div class="unit selected">A-110</div>
+                            <div class="unit booked">B-101</div>
+                            <div class="unit booked">B-102</div>
+                            <div class="unit booked">B-103</div>
+                            <div class="unit booked">B-104</div>
+                            <div class="unit booked">B-105</div>
+                            <div class="unit booked">B-106</div>
+                        </div>
+                    </div>
+
+                    <div class="section-header">
+                        <h2>Remarks</h2>
+                    </div>
+                    <div class="card">
+                        <ul class="remarks-list">
+                            <li>Client is interested in 2BHK, corner-facing unit.</li>
+                            <li>Shared pricing PDF via WhatsApp.</li>
+                            <li>Next follow-up scheduled for Thursday, 11 AM.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-actions">
+            <button class="btn-footer btn-reject">✕ Rejected</button>
+            <button class="btn-footer btn-approve">Approved ≫</button>
+        </div>
+    </div>
+
+    <script>
+        // Auto-scroll chat to bottom
+        const chat = document.getElementById('chatThread');
+        if (chat) {
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // Unit selection toggle
+        document.querySelectorAll('.unit').forEach(unit => {
+            unit.addEventListener('click', function() {
+                if(!this.classList.contains('booked')) {
+                    document.querySelectorAll('.unit').forEach(u => u.classList.remove('selected'));
+                    this.classList.add('selected');
+                }
+            });
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Amenities tab switching
+        document.querySelectorAll('.a-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Button hover effects
+        document.querySelectorAll('.btn-action, .btn-footer').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-1px)';
+            });
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

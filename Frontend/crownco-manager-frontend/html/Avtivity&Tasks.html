@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team & Employees Management - Professional Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0081FF;
+            --success: #12B76A;
+            --danger: #F04438;
+            --warning: #F79009;
+            --info: #2E90FA;
+            --text-main: #101828;
+            --text-muted: #667085;
+            --bg-body: #F9FAFB;
+            --white: #FFFFFF;
+            --border: #EAECF0;
+            --sidebar-w: 240px;
+            --topbar-h: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden; /* Only center content scrolls */
+        }
+
+        /* --- PLACEHOLDERS --- */
+        .sidebar-placeholder {
+            width: var(--sidebar-w);
+            height: 100vh;
+            background: transparent;
+            flex-shrink: 0;
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            min-width: 0;
+        }
+
+        .topbar-placeholder {
+            height: var(--topbar-h);
+            width: 100%;
+            background: transparent;
+            flex-shrink: 0;
+        }
+
+        /* --- CENTER CONTENT (SCROLLABLE) --- */
+        .content-scrollable {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            scroll-behavior: smooth;
+        }
+
+        .content-scrollable::-webkit-scrollbar { width: 6px; }
+        .content-scrollable::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
+
+        /* --- PROFILE SECTION --- */
+        .profile-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .profile-info { display: flex; gap: 20px; align-items: center; }
+        .avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
+        .profile-details h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .profile-details p { color: var(--text-muted); font-size: 13px; margin: 4px 0; }
+        .job-title-row { display: flex; align-items: center; gap: 8px; }
+        .status-badge { background: #ECFDF3; color: #027A48; font-size: 11px; padding: 2px 10px; border-radius: 100px; font-weight: 600; }
+        .contact-links { display: flex; gap: 15px; margin-top: 8px; font-size: 13px; flex-wrap: wrap; }
+        .contact-item { display: flex; align-items: center; gap: 6px; font-weight: 500; }
+        .contact-item i { font-size: 12px; }
+        .email-item { color: #2E90FA; }
+        .phone-item { color: #12B76A; }
+
+        .action-btns { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
+            min-width: 280px;
+        }
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: white;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn i { font-size: 14px; }
+        .btn-primary { background: var(--primary); color: white; border: none; }
+        .btn-danger { background: #B42318; color: white; border: none; }
+        .btn:hover { filter: brightness(0.95); }
+
+        /* --- METRICS BREAKDOWN (7-Card Grid) --- */
+        .section-header { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .metric-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .icon-sq { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .trend { font-size: 12px; font-weight: 700; }
+        .up { color: var(--success); }
+        .down { color: var(--danger); }
+        .metric-val { font-size: 26px; font-weight: 700; }
+        .metric-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+        /* --- TABS --- */
+        .tabs-bar { display: flex; gap: 32px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+        .tab { padding: 12px 4px; font-size: 14px; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; }
+        .tab.active { color: var(--primary); border-color: var(--primary); font-weight: 600; }
+
+        /* --- TABLE DATA CARDS --- */
+        .data-block {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .block-head {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .block-head h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .block-head .controls-row {
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Search wrapper without Column button - align left */
+        .column-search-wrapper input:only-child {
+            max-width: 300px;
+        }
+
+        .controls-row { display: flex; gap: 10px; align-items: center; }
+        .search-input { padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; width: 240px; outline: none; }
+        
+        /* Column and search wrapper for mobile */
+        .column-search-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; text-align: left; }
+        th { background: #F9FAFB; padding: 14px 20px; font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        td { padding: 16px 20px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+
+        .user-flex { display: flex; align-items: center; gap: 12px; }
+        .user-flex img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        
+        .pill { padding: 4px 12px; border-radius: 100px; font-size: 11px; font-weight: 500; }
+        .pill-green { background: #ECFDF3; color: #027A48; }
+        .pill-blue { background: #EFF8FF; color: #175CD3; }
+        .pill-orange { background: #FFFAEB; color: #B54708; }
+        .pill-red { background: #FEF3F2; color: #B42318; }
+
+        .pagination-footer { 
+            padding: 16px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            color: var(--text-muted); 
+            font-size: 12px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .pagination-footer > div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .pagination-footer .btn {
+            padding: 4px 8px;
+            min-width: auto;
+            font-size: 12px;
+        }
+
+        /* --- Header Card Wrapper (for mobile) --- */
+        .header-card-wrapper {
+            display: none;
+        }
+
+        /* --- Mobile Card Layout --- */
+        .mobile-cards-container {
+            display: none;
+            padding: 16px;
+            gap: 16px;
+            flex-direction: column;
+        }
+
+        .lead-card, .booking-card, .team-history-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .card-checkbox {
+            margin-top: 4px;
+        }
+
+        .card-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+        }
+
+        .card-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .card-user-details {
+            flex-grow: 1;
+        }
+
+        .card-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .card-phone {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .card-value {
+            font-size: 14px;
+            color: var(--text-main);
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .card-actions .btn-view {
+            flex-grow: 1;
+        }
+
+        .btn-view {
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .mobile-action-buttons {
+            display: none;
+            padding: 16px 20px;
+            gap: 12px;
+            border-top: 1px solid var(--border);
+            background: var(--white);
+            flex-wrap: wrap;
+        }
+
+        .mobile-action-buttons .btn {
+            flex: 1;
+            justify-content: center;
+            min-width: 120px;
+        }
+
+        /* --- ACTIVE TEAM GRID --- */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .team-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            background: var(--white);
+            position: relative;
+        }
+
+        .card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .card-top img { width: 44px; height: 44px; border-radius: 50%; }
+        .edit-pen { position: absolute; top: 15px; right: 15px; color: var(--text-muted); cursor: pointer; font-size: 14px; }
+        .card-stats { margin-bottom: 20px; }
+        .stat-line { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+        .tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .mini-tag { background: #F2F4F7; color: #344054; font-size: 10px; padding: 3px 10px; border-radius: 4px; font-weight: 500; }
+
+        /* --- RESPONSIVE LOGIC --- */
+        @media (max-width: 1300px) {
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            .team-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar-placeholder { width: 70px; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-placeholder { display: none; }
+            .topbar-placeholder { height: 50px; }
+            .content-scrollable { padding: 15px; }
+            
+            /* Show header as separate card in mobile */
+            .header-card-wrapper {
+                display: block;
+                background: var(--white);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                margin-bottom: 16px;
+                overflow: hidden;
+            }
+            
+            .header-card-wrapper .block-head {
+                padding: 20px;
+            }
+            
+            /* Hide desktop header inside data-block in mobile */
+            .data-block .desktop-header {
+                display: none;
+            }
+            
+            /* Controls layout for mobile */
+            .controls-row {
+                flex-direction: row;
+                gap: 10px;
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            
+            /* Column and search wrapper stays horizontal */
+            .column-search-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex: 1;
+                min-width: 0;
+            }
+            
+            .column-search-wrapper .btn {
+                flex-shrink: 0;
+            }
+            
+            .column-search-wrapper .search-input {
+                flex: 1;
+                min-width: 0;
+                width: auto;
+            }
+            
+            /* Hide Export, Refresh, Delete buttons in mobile (direct children of controls-row) */
+            .controls-row > .btn {
+                display: none;
+            }
+            
+            /* Show btn-primary if it exists */
+            .controls-row > .btn-primary {
+                display: flex;
+                width: 100%;
+                justify-content: center;
+                margin-top: 10px;
+                white-space: nowrap;
+            }
+            
+            /* Prevent button text wrapping in mobile */
+            .btn {
+                white-space: nowrap;
+            }
+            
+            /* Keep column-search-wrapper visible */
+            .controls-row > .column-search-wrapper {
+                display: flex;
+            }
+            
+            /* Hide mobile action buttons (Export, Delete) */
+            .mobile-action-buttons {
+                display: none;
+            }
+            
+            /* Hide table and show cards in mobile */
+            .table-responsive {
+                display: none;
+            }
+            
+            .mobile-cards-container {
+                display: flex;
+            }
+            
+            /* Hide checkbox in mobile cards */
+            .lead-card .card-checkbox,
+            .booking-card .card-checkbox,
+            .team-history-card .card-checkbox {
+                display: none;
+            }
+            
+            /* Hide pagination footer in mobile */
+            .pagination-footer {
+                display: none;
+            }
+            
+            /* Horizontal scrollable KPIs on mobile */
+            .metrics-grid {
+                display: flex;
+                overflow-x: auto;
+                overflow-y: hidden;
+                gap: 16px;
+                padding-bottom: 8px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                scrollbar-color: var(--border) transparent;
+            }
+            
+            .metrics-grid::-webkit-scrollbar {
+                height: 6px;
+            }
+            
+            .metrics-grid::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            
+            .metrics-grid::-webkit-scrollbar-thumb {
+                background-color: var(--border);
+                border-radius: 3px;
+            }
+            
+            .metric-card {
+                min-width: 200px;
+                flex-shrink: 0;
+            }
+            
+            .profile-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .contact-links {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .action-btns {
+                width: 100%;
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .action-btns .btn {
+                width: 100%;
+                justify-content: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-placeholder"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-placeholder"></div>
+
+        <div class="content-scrollable">
+            
+            <div class="profile-card">
+                <div class="profile-info">
+                    <img src="https://i.pravatar.cc/150?u=sarahj" class="avatar" alt="Sarah">
+                    <div class="profile-details">
+                        <h2>Sarah Johnson</h2>
+                        <p>ID-Emp-2024-156</p>
+                        <p class="job-title-row">Senior Sales Executive <span class="status-badge">Active</span></p>
+                        <div class="contact-links">
+                            <span class="contact-item email-item"><i class="fas fa-envelope"></i> sarahj@gmail.com</span>
+                            <span class="contact-item phone-item"><i class="fas fa-phone"></i> +1 (603) 578-654</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-btns">
+                    <button class="btn"><i class="fas fa-edit"></i> Edit Profile</button>
+                    <button class="btn btn-danger"><i class="fas fa-pause"></i> Suspend</button>
+                    <button class="btn"><i class="fas fa-comment"></i> Send Message</button>
+                    <button class="btn btn-primary"><i class="fas fa-briefcase"></i> Assign Project</button>
+                </div>
+            </div>
+
+            <h3 class="section-header">Metrics Breakdown</h3>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-head"><div class="icon-sq" style="background:#EFF8FF; color:#2E90FA;">👤</div><span class="trend up">+3.2%</span></div>
+                    <div class="metric-val">128</div>
+                    <div class="metric-label">Leads Assigned</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-head"><div class="icon-sq" style="background:#F4F3FF; color:#7F56D9;">🏠</div><span class="trend up">+1.8%</span></div>
+                    <div class="metric-val">64</div>
+                    <div class="metric-label">Property Visited</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-head"><div class="icon-sq" style="background:#FEF6EE; color:#F79009;">📅</div><span class="trend up">+2.0%</span></div>
+                    <div class="metric-val">12</div>
+                    <div class="metric-label">Bookings Closed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-head"><div class="icon-sq" style="background:#EFF8FF; color:#2E90FA;">⏱️</div><span class="trend down">-2.1%</span></div>
+                    <div class="metric-val">3.6sec</div>
+                    <div class="metric-label">Avg. Response Time</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-head"><div class="icon-sq" style="background:#FEF3F2; color:#F04438;">✋</div><span class="trend down">+0.8%</span></div>
+                    <div class="metric-val">116</div>
+                    <div class="metric-label">Rejected</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-head"><div class="icon-sq" style="background:#ECFDF3; color:#12B76A;">📈</div><span class="trend up">+0.7%</span></div>
+                    <div class="metric-val">9.4%</div>
+                    <div class="metric-label">Conversion Rate</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-head"><div class="icon-sq" style="background:#FFFAEB; color:#F79009;">⭐</div><span class="trend up">+2.2%</span></div>
+                    <div class="metric-val">4.7/5</div>
+                    <div class="metric-label">Client Satisfaction</div>
+                </div>
+            </div>
+
+            <div class="tabs-bar">
+                <div class="tab">Performance Overview</div>
+                <div class="tab active">Activity & Tasks</div>
+            </div>
+
+            <!-- Header Card (separate in mobile) -->
+            <div class="header-card-wrapper">
+                <div class="block-head">
+                    <h3 style="font-size:16px;">All Leads</h3>
+                    <div class="controls-row">
+                        <div class="column-search-wrapper">
+                            <button class="btn">Column</button>
+                            <input type="text" class="search-input" placeholder="Search leads...">
+                        </div>
+                        <button class="btn">Export</button>
+                        <button class="btn">Refresh</button>
+                        <button class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-block">
+                <!-- Desktop header (hidden in mobile) -->
+                <div class="block-head desktop-header">
+                    <h3 style="font-size:16px;">All Leads</h3>
+                    <div class="controls-row">
+                        <div class="column-search-wrapper">
+                            <button class="btn">Column</button>
+                            <input type="text" class="search-input" placeholder="Search leads...">
+                        </div>
+                        <button class="btn">Export</button>
+                        <button class="btn">Refresh</button>
+                        <button class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox"></th>
+                                <th>Name & Phone</th>
+                                <th>Budget</th>
+                                <th>Prog. Name & Time</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Sources</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td><div class="user-flex"><img src="https://i.pravatar.cc/150?u=1"><div><strong>Zishan Shaikh</strong><br><small>(408) 555-0103</small></div></div></td>
+                                <td><strong style="color:var(--primary)">40L - 75L</strong></td>
+                                <td>G001<br><small>15 mins ago</small></td>
+                                <td>Mustakim Saiyed</td>
+                                <td><span class="pill pill-green">Badge</span></td>
+                                <td><span class="pill pill-green">Average</span></td>
+                                <td><button class="btn btn-primary" style="padding:4px 10px; font-size:12px;">View Detail</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td><div class="user-flex"><img src="https://i.pravatar.cc/150?u=2"><div><strong>Maaz Khan</strong><br><small>(408) 555-0105</small></div></div></td>
+                                <td><strong style="color:var(--primary)">40L - 75L</strong></td>
+                                <td>G002<br><small>2 weeks ago</small></td>
+                                <td>Zishan Shaikh</td>
+                                <td><span class="badge status-badge" style="background:#ECFDF3;color:#027A48">Badge</span></td>
+                                <td><span class="pill pill-green">Excellent</span></td>
+                                <td><button class="btn btn-primary" style="padding:4px 10px; font-size:12px;">View Detail</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Cards View -->
+                <div class="mobile-cards-container">
+                    <!-- Lead Card 1 -->
+                    <div class="lead-card">
+                        <div class="card-header">
+                            <input type="checkbox" class="card-checkbox">
+                            <div class="card-user-info">
+                                <img src="https://i.pravatar.cc/150?u=1" class="card-avatar">
+                                <div class="card-user-details">
+                                    <span class="card-name">Zishan Shaikh</span>
+                                    <span class="card-phone">(408) 555-0103</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-row">
+                                <span class="card-label">Budget</span>
+                                <span class="card-value" style="color:var(--primary)">40L - 75L</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Prog. Name & Time</span>
+                                <span class="card-value">G001<br><small style="font-size:11px; color:var(--text-muted);">15 mins ago</small></span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Location</span>
+                                <span class="card-value">Mustakim Saiyed</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Status</span>
+                                <span class="pill pill-green">Badge</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Sources</span>
+                                <span class="pill pill-green">Average</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-view">View Detail</button>
+                        </div>
+                    </div>
+
+                    <!-- Lead Card 2 -->
+                    <div class="lead-card">
+                        <div class="card-header">
+                            <input type="checkbox" class="card-checkbox">
+                            <div class="card-user-info">
+                                <img src="https://i.pravatar.cc/150?u=2" class="card-avatar">
+                                <div class="card-user-details">
+                                    <span class="card-name">Maaz Khan</span>
+                                    <span class="card-phone">(408) 555-0105</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-row">
+                                <span class="card-label">Budget</span>
+                                <span class="card-value" style="color:var(--primary)">40L - 75L</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Prog. Name & Time</span>
+                                <span class="card-value">G002<br><small style="font-size:11px; color:var(--text-muted);">2 weeks ago</small></span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Location</span>
+                                <span class="card-value">Zishan Shaikh</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Status</span>
+                                <span class="pill pill-green">Badge</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Sources</span>
+                                <span class="pill pill-green">Excellent</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-view">View Detail</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mobile-action-buttons">
+                    <button class="btn">Export</button>
+                    <button class="btn">Refresh</button>
+                    <button class="btn btn-danger">Delete</button>
+                </div>
+
+                <div class="pagination-footer">
+                    <div>Row Per Page: 10</div>
+                    <div>
+                        <span>1 - 4 of 4</span>
+                        <button class="btn">&lt;</button>
+                        <button class="btn">&gt;</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Card (separate in mobile) -->
+            <div class="header-card-wrapper">
+                <div class="block-head">
+                    <h3 style="font-size:16px;">Current Bookings</h3>
+                    <div class="controls-row">
+                        <div class="column-search-wrapper">
+                            <button class="btn">Column</button>
+                            <input type="text" class="search-input" placeholder="Search bookings...">
+                        </div>
+                        <button class="btn">Export</button>
+                        <button class="btn">Refresh</button>
+                        <button class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-block">
+                <!-- Desktop header (hidden in mobile) -->
+                <div class="block-head desktop-header">
+                    <h3 style="font-size:16px;">Current Bookings</h3>
+                    <div class="controls-row">
+                        <div class="column-search-wrapper">
+                            <button class="btn">Column</button>
+                            <input type="text" class="search-input" placeholder="Search bookings...">
+                        </div>
+                        <button class="btn">Export</button>
+                        <button class="btn">Refresh</button>
+                        <button class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox"></th>
+                                <th>Full Name</th>
+                                <th>Booking ID</th>
+                                <th>Project & Unit</th>
+                                <th>Amount</th>
+                                <th>Agent</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td><div class="user-flex"><img src="https://i.pravatar.cc/150?u=5"><div><strong>Zishan Shaikh</strong><br><small>(408) 555-0103</small></div></div></td>
+                                <td>BK001</td>
+                                <td>Garden View Residency<br><small>5BHK - Tower A, Floor 12</small></td>
+                                <td><strong>₹24,50,000</strong></td>
+                                <td>Mustakim Saiyed</td>
+                                <td><span class="pill pill-green">Confirmed</span></td>
+                                <td><button class="btn btn-primary" style="padding:4px 10px; font-size:12px;">View Detail</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Cards View -->
+                <div class="mobile-cards-container">
+                    <!-- Booking Card 1 -->
+                    <div class="booking-card">
+                        <div class="card-header">
+                            <input type="checkbox" class="card-checkbox">
+                            <div class="card-user-info">
+                                <img src="https://i.pravatar.cc/150?u=5" class="card-avatar">
+                                <div class="card-user-details">
+                                    <span class="card-name">Zishan Shaikh</span>
+                                    <span class="card-phone">(408) 555-0103</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-row">
+                                <span class="card-label">Booking ID</span>
+                                <span class="card-value">BK001</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Project & Unit</span>
+                                <span class="card-value">Garden View Residency<br><small style="font-size:11px; color:var(--text-muted);">5BHK - Tower A, Floor 12</small></span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Amount</span>
+                                <span class="card-value"><strong>₹24,50,000</strong></span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Agent</span>
+                                <span class="card-value">Mustakim Saiyed</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Status</span>
+                                <span class="pill pill-green">Confirmed</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-view">View Detail</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mobile-action-buttons">
+                    <button class="btn">Export</button>
+                    <button class="btn">Refresh</button>
+                    <button class="btn btn-danger">Delete</button>
+                </div>
+            </div>
+
+            <!-- Header Card (separate in mobile) -->
+            <div class="header-card-wrapper">
+                <div class="block-head">
+                    <h3 style="font-size:16px;">Active Team</h3>
+                    <div class="controls-row">
+                        <div class="column-search-wrapper">
+                            <button class="btn">Column</button>
+                            <input type="text" class="search-input" placeholder="Search teams...">
+                        </div>
+                        <button class="btn btn-primary">+ Add to Team</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-block">
+                <!-- Desktop header (hidden in mobile) -->
+                <div class="block-head desktop-header">
+                    <h3 style="font-size:16px;">Active Team</h3>
+                    <div class="controls-row">
+                        <div class="column-search-wrapper">
+                            <button class="btn">Column</button>
+                            <input type="text" class="search-input" placeholder="Search teams...">
+                        </div>
+                        <button class="btn btn-primary">+ Add to Team</button>
+                    </div>
+                </div>
+                <div class="team-grid">
+                    <div class="team-card">
+                        <span class="edit-pen">✎</span>
+                        <div class="card-top">
+                            <img src="https://i.pravatar.cc/150?u=10">
+                            <div><strong>North Zone</strong><br><small>Zishan Shaikh</small></div>
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-line">👥 8 Members</div>
+                            <div class="stat-line">📁 3 Projects Assigned</div>
+                        </div>
+                        <div class="tag-row">
+                            <span class="mini-tag">Luxury Projects</span>
+                            <span class="mini-tag" style="background:#ECFDF3; color:#027A48;">High Performance</span>
+                        </div>
+                        <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:20px;">View Detail</button>
+                    </div>
+                    <div class="team-card">
+                        <span class="edit-pen">✎</span>
+                        <div class="card-top">
+                            <img src="https://i.pravatar.cc/150?u=11">
+                            <div><strong>South Zone</strong><br><small>Maaz Khan</small></div>
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-line">👥 4 Members</div>
+                            <div class="stat-line">📁 3 Projects Assigned</div>
+                        </div>
+                        <div class="tag-row">
+                            <span class="mini-tag">Luxury Projects</span>
+                            <span class="mini-tag" style="background:#ECFDF3; color:#027A48;">High Performance</span>
+                        </div>
+                        <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:20px;">View Detail</button>
+                    </div>
+                    <div class="team-card">
+                        <span class="edit-pen">✎</span>
+                        <div class="card-top">
+                            <img src="https://i.pravatar.cc/150?u=12">
+                            <div><strong>Budget 50-80L</strong><br><small>Mustakim Saiyed</small></div>
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-line">👥 12 Members</div>
+                            <div class="stat-line">📁 3 Projects Assigned</div>
+                        </div>
+                        <div class="tag-row">
+                            <span class="mini-tag">Luxury Projects</span>
+                            <span class="mini-tag" style="background:#ECFDF3; color:#027A48;">High Performance</span>
+                        </div>
+                        <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:20px;">View Detail</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Card (separate in mobile) -->
+            <div class="header-card-wrapper">
+                <div class="block-head">
+                    <h3 style="font-size:16px;">Team History</h3>
+                    <div class="controls-row">
+                        <div class="column-search-wrapper">
+                            <button class="btn">Column</button>
+                            <input type="text" class="search-input" placeholder="Search teams...">
+                        </div>
+                        <button class="btn">Export</button>
+                        <button class="btn">Refresh</button>
+                        <button class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-block">
+                <!-- Desktop header (hidden in mobile) -->
+                <div class="block-head desktop-header">
+                    <h3 style="font-size:16px;">Team History</h3>
+                    <div class="controls-row">
+                        <div class="column-search-wrapper">
+                            <button class="btn">Column</button>
+                            <input type="text" class="search-input" placeholder="Search teams...">
+                        </div>
+                        <button class="btn">Export</button>
+                        <button class="btn">Refresh</button>
+                        <button class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox"></th>
+                                <th>Team Name</th>
+                                <th>Team Leader</th>
+                                <th>Sales Roles</th>
+                                <th>Project</th>
+                                <th>Reporting Period</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>Luxury Homes Division</td>
+                                <td>Sarah Johnson</td>
+                                <td>Property Consultant</td>
+                                <td>Golden Gate Residency</td>
+                                <td>2024-06-01 to 2024-12-15</td>
+                                <td><span class="pill pill-orange">Average</span></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>Residential Team A</td>
+                                <td>Maaz Khatik</td>
+                                <td>Sales Manager</td>
+                                <td>Garden View Apartments</td>
+                                <td>2023-01-15 to 2023-08-30</td>
+                                <td><span class="pill pill-blue">Good</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Cards View -->
+                <div class="mobile-cards-container">
+                    <!-- Team History Card 1 -->
+                    <div class="team-history-card">
+                        <div class="card-header">
+                            <input type="checkbox" class="card-checkbox">
+                            <div class="card-user-details">
+                                <span class="card-name">Luxury Homes Division</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-row">
+                                <span class="card-label">Team Leader</span>
+                                <span class="card-value">Sarah Johnson</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Sales Roles</span>
+                                <span class="card-value">Property Consultant</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Project</span>
+                                <span class="card-value">Golden Gate Residency</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Reporting Period</span>
+                                <span class="card-value" style="font-size:12px;">2024-06-01 to 2024-12-15</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Performance</span>
+                                <span class="pill pill-orange">Average</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Team History Card 2 -->
+                    <div class="team-history-card">
+                        <div class="card-header">
+                            <input type="checkbox" class="card-checkbox">
+                            <div class="card-user-details">
+                                <span class="card-name">Residential Team A</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-row">
+                                <span class="card-label">Team Leader</span>
+                                <span class="card-value">Maaz Khatik</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Sales Roles</span>
+                                <span class="card-value">Sales Manager</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Project</span>
+                                <span class="card-value">Garden View Apartments</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Reporting Period</span>
+                                <span class="card-value" style="font-size:12px;">2023-01-15 to 2023-08-30</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Performance</span>
+                                <span class="pill pill-blue">Good</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mobile-action-buttons">
+                    <button class="btn">Export</button>
+                    <button class="btn">Refresh</button>
+                    <button class="btn btn-danger">Delete</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Internal Logic for Interactive Tabs
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+
+        // "Select All" Logic for Checkboxes in Tables
+        document.querySelectorAll('thead input[type="checkbox"]').forEach(headerCb => {
+            headerCb.addEventListener('change', (e) => {
+                const table = e.target.closest('table');
+                table.querySelectorAll('tbody input[type="checkbox"]').forEach(cb => {
+                    cb.checked = e.target.checked;
+                });
+            });
+        });
+    </script>
+</body>
+</html>

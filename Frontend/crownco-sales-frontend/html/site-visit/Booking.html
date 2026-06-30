@@ -1,0 +1,2795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Detail - CRM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #007bff;
+            --primary-blue-hover: #0056b3;
+            --secondary-blue: #0056b3;
+            --bg-gray: #f5f7fa;
+            --bg-white: #ffffff;
+            --border-color: #e1e8ed;
+            --border-hover: #cbd5e0;
+            --text-main: #1a202c;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --success-green: #10b981;
+            --success-light: #d1fae5;
+            --error-red: #ef4444;
+            --error-light: #fee2e2;
+            --pending-orange: #f59e0b;
+            --pending-light: #fef3c7;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Empty Sidebar/Topbar Space */
+        .sidebar-placeholder { 
+            width: 250px; 
+            flex-shrink: 0; 
+            background: var(--bg-white); 
+            border-right: 1px solid var(--border-color);
+            display: none; /* Hidden by default for mobile */
+        }
+        
+        .topbar-placeholder { 
+            height: 60px; 
+            background: var(--bg-white); 
+            border-bottom: 1px solid var(--border-color); 
+            width: 100%; 
+            position: absolute; 
+            top: 0; 
+            box-shadow: var(--shadow-sm);
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            margin-left: 0;
+            padding-top: 60px; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            width: 100%;
+        }
+
+        /* Scrollable Container */
+        .scroll-container {
+            padding: 24px;
+            overflow-y: auto;
+            flex-grow: 1;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Grid Layout */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .left-col,
+        .right-col {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Card order for desktop */
+        .profile-card { order: 1; }
+        .breakdown-card { order: 2; }
+        .documents-card { order: 3; }
+        .remarks-card { order: 4; }
+        .booking-card { order: 5; }
+
+        .card {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        h3 { 
+            font-size: 20px; 
+            margin-bottom: 20px; 
+            color: var(--text-main);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+        
+        /* Booking Price Card Special Styling */
+        .booking-price-card {
+            border: 2px dashed var(--primary-blue) !important;
+        }
+        
+        .booking-price-card h3 {
+            border-bottom: 2px dashed var(--primary-blue);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        
+        /* Input with icon */
+        .input-with-icon {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 16px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .input-with-icon input {
+            padding-left: 45px;
+        }
+
+        /* Profile Section */
+        .profile-header { 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 16px; 
+            margin-bottom: 16px;
+        }
+        
+        .avatar { 
+            width: 60px; 
+            height: 60px; 
+            border-radius: 50%; 
+            object-fit: cover;
+            border: 3px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .badge-hot { 
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: var(--error-red); 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 11px; 
+            font-weight: 600;
+            float: right;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .contact-info { 
+            font-size: 14px; 
+            color: var(--text-muted); 
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .contact-info i {
+            color: var(--primary-blue);
+            margin-right: 4px;
+        }
+        
+        .action-btns { 
+            display: flex; 
+            gap: 12px; 
+            margin-top: 20px; 
+        }
+        
+        .btn { 
+            flex: 1; 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            text-align: center; 
+            text-decoration: none; 
+            font-size: 14px;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-blue { 
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-blue:hover {
+            background: linear-gradient(135deg, var(--primary-blue-hover) 0%, var(--secondary-blue) 100%);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        
+        .btn-blue:active {
+            transform: translateY(0);
+        }
+        
+        .btn-outline { 
+            border: 2px solid var(--border-color); 
+            background: white;
+            color: var(--text-main);
+        }
+        
+        .btn-outline:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            background: var(--bg-gray);
+        }
+
+        /* Breakdown Table */
+        .breakdown-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            padding: 12px 0; 
+            font-size: 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .breakdown-row:last-child {
+            border-bottom: none;
+        }
+        
+        .row-total { 
+            font-weight: 700; 
+            border-top: 2px solid var(--border-color); 
+            margin-top: 12px; 
+            padding-top: 16px; 
+            color: var(--success-green);
+            font-size: 16px;
+        }
+        
+        .price-val { 
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .positive { 
+            color: var(--primary-blue);
+        }
+        
+        .negative { 
+            color: var(--error-red);
+        }
+
+        /* Form Controls */
+        .input-group { 
+            margin-bottom: 20px; 
+        }
+        
+        label { 
+            display: block; 
+            font-size: 14px; 
+            margin-bottom: 8px; 
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="date"] {
+            width: 100%; 
+            padding: 12px 16px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: #f5f5f5;
+            color: var(--text-main);
+        }
+        
+        input[type="text"]:hover,
+        input[type="date"]:hover {
+            background: #eeeeee;
+        }
+        
+        input[type="text"]:focus,
+        input[type="date"]:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            background: #f5f5f5;
+        }
+        
+        input[type="text"]::placeholder {
+            color: var(--text-muted);
+        }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            opacity: 0;
+            position: absolute;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        /* Toggle Switch */
+        .toggle-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+        }
+        
+        .toggle-option-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #d1d5db;
+            transition: var(--transition);
+            border-radius: 26px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--primary-blue);
+        }
+        
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+        
+        .toggle-switch input:focus + .toggle-slider {
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .toggle-separator {
+            border-top: 1px dashed var(--border-color);
+            margin: 0;
+        }
+        
+        /* Extra Charges Section */
+        .extra-charges-section,
+        .emi-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .extra-charges-section.show,
+        .emi-section.show {
+            display: block;
+        }
+        
+        .extra-charges-header,
+        .emi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .extra-charges-header h4,
+        .emi-header h4 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .upload-box {
+            border: 2px dashed var(--border-color); 
+            border-radius: 12px; 
+            padding: 40px 20px; 
+            text-align: center;
+            color: var(--text-muted); 
+            cursor: pointer; 
+            position: relative;
+            transition: var(--transition);
+            background: var(--bg-gray);
+        }
+        
+        .upload-box:hover {
+            border-color: var(--primary-blue);
+            background: rgba(0, 123, 255, 0.05);
+        }
+        
+        .upload-box i {
+            font-size: 32px;
+            color: var(--primary-blue);
+            margin-bottom: 12px;
+            display: block;
+        }
+        
+        .upload-box p {
+            margin: 8px 0;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .upload-box small {
+            color: var(--text-muted);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        
+        .upload-box small i {
+            font-size: 12px;
+        }
+        
+        /* Radio Buttons */
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            transition: var(--transition);
+            margin-bottom: 0;
+        }
+        
+        .radio-group label:hover {
+            border-color: var(--primary-blue);
+            background: rgba(0, 123, 255, 0.05);
+        }
+        
+        .radio-group input[type="radio"] {
+            margin: 0;
+            cursor: pointer;
+            accent-color: var(--primary-blue);
+        }
+        
+        .radio-group input[type="radio"]:checked + span {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        /* Required Docs */
+        .doc-item {
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            padding: 14px 16px;
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            margin-bottom: 10px; 
+            font-size: 14px;
+            background: var(--bg-white);
+            transition: var(--transition);
+        }
+        
+        .doc-item:hover {
+            background: var(--bg-gray);
+            border-color: var(--border-hover);
+        }
+        
+        .doc-item i.success { 
+            color: var(--success-green);
+            font-size: 18px;
+        }
+        
+        .doc-item i.warning { 
+            color: var(--pending-orange);
+            font-size: 18px;
+        }
+        
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .doc-header a {
+            font-size: 13px; 
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .doc-header a:hover {
+            text-decoration: underline;
+        }
+
+        /* Remarks Section */
+        .remarks-list {
+            list-style: none;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        
+        .remarks-list li {
+            margin-bottom: 12px;
+            padding-left: 24px;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .remarks-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+        }
+        
+        /* Suggested Action Box */
+        .suggested-action {
+            background: var(--bg-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        
+        .suggested-action-text {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        
+        .suggested-action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--text-main);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 300;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        
+        .suggested-action-btn:hover {
+            background: var(--primary-blue);
+            transform: scale(1.1);
+        }
+        
+        .remarks-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .remarks-input-wrapper input {
+            padding-left: 45px;
+            padding-right: 120px;
+        }
+        
+        .remarks-emoji-btn {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 20px;
+            transition: var(--transition);
+            z-index: 1;
+        }
+        
+        .remarks-emoji-btn:hover {
+            transform: translateY(-50%) scale(1.15);
+        }
+        
+        .remarks-input-icons {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .remarks-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 16px;
+        }
+        
+        .remarks-icon-link {
+            background: #8b5cf6;
+            color: white;
+        }
+        
+        .remarks-icon-link:hover {
+            background: #7c3aed;
+            transform: scale(1.1);
+        }
+        
+        .remarks-icon-camera {
+            background: var(--bg-gray);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+        
+        .remarks-icon-camera:hover {
+            background: var(--border-color);
+            transform: scale(1.1);
+        }
+        
+        .remarks-icon-mic {
+            background: var(--primary-blue);
+            color: white;
+        }
+        
+        .remarks-icon-mic:hover {
+            background: var(--primary-blue-hover);
+            transform: scale(1.1);
+        }
+
+        /* Responsive Design */
+        
+        /* Tablet (768px - 1024px) */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .scroll-container {
+                padding: 20px;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .sidebar-placeholder {
+                display: none;
+            }
+        }
+        
+        /* Mobile (< 768px) */
+        @media (max-width: 767px) {
+            body {
+                overflow-x: hidden;
+            }
+            
+            .sidebar-placeholder {
+                display: none;
+            }
+            
+            .topbar-placeholder {
+                height: 56px;
+            }
+            
+            .main-wrapper {
+                padding-top: 56px;
+            }
+            
+            .scroll-container {
+                padding: 16px;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .left-col,
+            .right-col {
+                width: 100%;
+                display: contents; /* Remove wrapper to allow direct ordering */
+            }
+            
+            /* Reorder cards for mobile: Breakdown first, then Booking */
+            .breakdown-card { 
+                order: 1 !important; 
+                margin-bottom: 16px;
+            }
+            .booking-card { 
+                order: 2 !important; 
+                margin-bottom: 16px;
+            }
+            .profile-card { 
+                order: 3 !important; 
+                margin-bottom: 16px;
+            }
+            .documents-card { 
+                order: 4 !important; 
+                margin-bottom: 16px;
+            }
+            .remarks-card { 
+                order: 5 !important; 
+                margin-bottom: 16px;
+            }
+            
+            .card {
+                padding: 16px;
+                margin-bottom: 0;
+                border-radius: 12px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
+            /* Better spacing and alignment */
+            .breakdown-row {
+                font-size: 14px;
+                padding: 12px 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .breakdown-row span {
+                word-break: break-word;
+            }
+            
+            .price-val {
+                font-size: 14px;
+                white-space: nowrap;
+                margin-left: 8px;
+            }
+            
+            h3 {
+                font-size: 18px;
+                margin-bottom: 16px;
+            }
+            
+            .profile-header {
+                gap: 12px;
+            }
+            
+            .avatar {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .badge-hot {
+                font-size: 10px;
+                padding: 3px 10px;
+            }
+            
+            .contact-info {
+                font-size: 12px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .action-btns {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 14px;
+            }
+            
+            .breakdown-row {
+                font-size: 14px;
+                padding: 10px 0;
+            }
+            
+            .price-val {
+                font-size: 14px;
+            }
+            
+            .row-total {
+                font-size: 15px;
+            }
+            
+            .input-group {
+                margin-bottom: 16px;
+            }
+            
+            input[type="text"] {
+                padding: 14px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .radio-group label {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .upload-box {
+                padding: 30px 16px;
+            }
+            
+            .upload-box i {
+                font-size: 28px;
+            }
+            
+            .doc-item {
+                padding: 12px;
+                font-size: 13px;
+            }
+            
+            .remarks-list {
+                font-size: 13px;
+            }
+            
+            .remarks-list li {
+                margin-bottom: 10px;
+                padding-left: 20px;
+            }
+            
+            .suggested-action {
+                padding: 10px 12px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .suggested-action-text {
+                font-size: 12px;
+            }
+            
+            .suggested-action-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 16px;
+                align-self: flex-end;
+            }
+            
+            .remarks-input-wrapper input {
+                padding-left: 40px;
+                padding-right: 100px;
+                font-size: 16px;
+            }
+            
+            .remarks-emoji-btn {
+                font-size: 18px;
+            }
+            
+            .remarks-input-icons {
+                gap: 6px;
+            }
+            
+            .remarks-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+            
+            .toggle-option {
+                padding: 14px 0;
+            }
+            
+            .toggle-option-label {
+                font-size: 13px;
+            }
+            
+            .toggle-switch {
+                width: 44px;
+                height: 24px;
+            }
+            
+            .toggle-slider:before {
+                height: 18px;
+                width: 18px;
+            }
+            
+            .toggle-switch input:checked + .toggle-slider:before {
+                transform: translateX(20px);
+            }
+            
+            .extra-charges-section,
+            .emi-section {
+                margin-top: 20px;
+                padding-top: 20px;
+            }
+            
+            .extra-charges-header h4,
+            .emi-header h4 {
+                font-size: 16px;
+            }
+        }
+        
+        /* Large Desktop (> 1400px) */
+        @media (min-width: 1400px) {
+            .content-grid {
+                gap: 32px;
+            }
+            
+            .card {
+                padding: 32px;
+            }
+            
+            .sidebar-placeholder {
+                display: block;
+            }
+        }
+        
+        /* Smooth scrolling */
+        .scroll-container {
+            scroll-behavior: smooth;
+        }
+        
+        /* Custom scrollbar */
+        .scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .scroll-container::-webkit-scrollbar-track {
+            background: var(--bg-gray);
+        }
+        
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+        
+        /* Share Drawer */
+        .share-drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .share-drawer-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .share-drawer {
+            position: fixed;
+            right: -100%;
+            top: 0;
+            width: 500px;
+            max-width: 90vw;
+            height: 100vh;
+            background: var(--bg-white);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .share-drawer.open {
+            right: 0;
+        }
+        
+        .share-drawer-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-white);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .share-drawer-header h3 {
+            margin: 0;
+            font-size: 20px;
+            color: var(--text-main);
+        }
+        
+        .share-drawer-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        
+        .share-drawer-close:hover {
+            background: var(--bg-gray);
+            color: var(--text-main);
+        }
+        
+        .share-drawer-content {
+            padding: 24px;
+            flex: 1;
+        }
+        
+        .share-detail-section {
+            margin-bottom: 24px;
+        }
+        
+        .share-detail-section h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .share-detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .share-detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .share-detail-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        .share-detail-value {
+            font-size: 14px;
+            color: var(--text-main);
+            font-weight: 600;
+            text-align: right;
+        }
+        
+        .share-detail-value.positive {
+            color: var(--primary-blue);
+        }
+        
+        .share-detail-value.negative {
+            color: var(--error-red);
+        }
+        
+        .share-detail-value.success {
+            color: var(--success-green);
+        }
+        
+        .share-uploaded-file {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-gray);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .share-uploaded-file i {
+            font-size: 24px;
+            color: var(--primary-blue);
+        }
+        
+        .share-uploaded-file-info {
+            flex: 1;
+        }
+        
+        .share-uploaded-file-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+        
+        .share-uploaded-file-size {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .share-actions {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+            background: var(--bg-white);
+            position: sticky;
+            bottom: 0;
+        }
+        
+        .share-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        
+        .share-btn-email {
+            background: var(--error-red);
+            color: white;
+        }
+        
+        .share-btn-email:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .share-btn-whatsapp {
+            background: #25d366;
+            color: white;
+        }
+        
+        .share-btn-whatsapp:hover {
+            background: #20ba5a;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .share-emi-section {
+            background: var(--bg-gray);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        
+        .share-emi-section h5 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+        
+        @media (max-width: 767px) {
+            .share-drawer {
+                width: 100vw;
+                max-width: 100vw;
+            }
+            
+            .share-actions {
+                flex-direction: column;
+            }
+        }
+        
+        /* Document Upload Drawer */
+        .doc-drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .doc-drawer-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .doc-drawer {
+            position: fixed;
+            right: -100%;
+            top: 0;
+            width: 600px;
+            max-width: 90vw;
+            height: 100vh;
+            background: var(--bg-white);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border-left: 3px solid var(--primary-blue);
+        }
+        
+        .doc-drawer.open {
+            right: 0;
+        }
+        
+        .doc-drawer-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-white);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .doc-drawer-header h3 {
+            margin: 0;
+            font-size: 20px;
+            color: var(--text-main);
+        }
+        
+        .doc-drawer-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        
+        .doc-drawer-close:hover {
+            background: var(--bg-gray);
+            color: var(--text-main);
+        }
+        
+        .doc-drawer-content {
+            padding: 24px;
+            flex: 1;
+        }
+        
+        .doc-upload-zone {
+            border: 2px dashed var(--primary-blue);
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            background: var(--bg-gray);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 24px;
+            position: relative;
+        }
+        
+        .doc-upload-zone:hover {
+            background: rgba(0, 123, 255, 0.05);
+            border-color: var(--primary-blue-hover);
+        }
+        
+        .doc-upload-zone.dragover {
+            background: rgba(0, 123, 255, 0.1);
+            border-color: var(--primary-blue);
+        }
+        
+        .doc-upload-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 16px;
+        }
+        
+        .doc-upload-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .doc-upload-info {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .doc-upload-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .doc-list {
+            margin-bottom: 24px;
+        }
+        
+        .doc-list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-gray);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .doc-list-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .doc-list-item-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+        
+        .doc-list-item-remove {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--error-red);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        
+        .doc-list-item-remove:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+        
+        .doc-remark-section {
+            margin-top: 24px;
+        }
+        
+        .doc-remark-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .doc-remark-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: var(--transition);
+        }
+        
+        .doc-remark-textarea:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .doc-remark-counter {
+            text-align: right;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        @media (max-width: 767px) {
+            .doc-drawer {
+                width: 100vw;
+                max-width: 100vw;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-placeholder"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-placeholder"></div>
+
+        <div class="scroll-container">
+            <div class="content-grid">
+                <div class="left-col">
+                    <div class="card">
+                        <div class="profile-header">
+                            <img src="https://via.placeholder.com/50" class="avatar" alt="User">
+                            <div style="flex-grow:1">
+                                <span class="badge-hot">Very Hot</span>
+                                <strong>Shaikh Maaz</strong><br>
+                                <small>Crown Heights</small>
+                                <div class="contact-info">
+                                    <i class="fa fa-phone"></i> (808) 555-0111 | <i class="fa fa-map-marker-alt"></i> Pembroke Pines
+                                </div>
+                            </div>
+                        </div>
+                        <div class="action-btns">
+                            <button class="btn btn-blue"><i class="fa fa-phone"></i> Call Now</button>
+                            <button class="btn btn-blue"><i class="fa fa-comment"></i> Chat Now</button>
+                        </div>
+                    </div>
+
+                    <div class="card breakdown-card">
+                        <h3>Final Breakdown</h3>
+                        <div class="breakdown-row">
+                            <span>Final Deal Price</span>
+                            <span class="price-val" id="finalDealPrice">₹0</span>
+                        </div>
+                        <div class="breakdown-row" id="maintenanceChargesRow" style="display: none;">
+                            <span>Maintenance Charges</span>
+                            <span class="price-val positive" id="maintenanceChargesValue">+ ₹0</span>
+                        </div>
+                        <div class="breakdown-row" id="legalChargesRow" style="display: none;">
+                            <span>Legal Charges</span>
+                            <span class="price-val positive" id="legalChargesValue">+ ₹0</span>
+                        </div>
+                        <div class="breakdown-row" id="stampDutyRow" style="display: none;">
+                            <span>Stamp Duty</span>
+                            <span class="price-val positive" id="stampDutyValue">+ ₹0</span>
+                        </div>
+                        <div class="breakdown-row" id="parkingRow" style="display: none;">
+                            <span>Parking</span>
+                            <span class="price-val positive" id="parkingValue">+ ₹0</span>
+                        </div>
+                        <div class="breakdown-row row-total">
+                            <span>Total Payable (Incl. Charges)</span>
+                            <span id="totalPayable">₹0</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span>Amount Received</span>
+                            <span class="price-val negative" id="amountReceived">- ₹0</span>
+                        </div>
+                        <div class="breakdown-row" style="font-size: 18px; font-weight: bold; color: var(--success-green);">
+                            <span>Balance Pending</span>
+                            <span id="balancePending">₹0</span>
+                        </div>
+                        <button class="btn btn-blue" style="width:100%; margin-top:20px;" onclick="shareBreakdown()">
+                            <i class="fa fa-share-alt"></i>
+                            <span>Share</span>
+                        </button>
+                    </div>
+
+                    <div class="card documents-card">
+                        <div class="doc-header">
+                            <h3>Required Documents</h3>
+                            <a href="#" onclick="openDocDrawer(); return false;">See All →</a>
+                        </div>
+                        <div class="doc-item"><i class="fa fa-check-circle success"></i> <span>Aadhar Card</span></div>
+                        <div class="doc-item"><i class="fa fa-check-circle success"></i> <span>Pan Card</span></div>
+                        <div class="doc-item"><i class="fa fa-exclamation-circle warning"></i> <span>Passport Size Photograph</span></div>
+                        <small style="color:var(--primary-blue); font-weight: 500; margin-top: 8px; display: block;">3/5 Verified</small>
+                    </div>
+
+                    <div class="card remarks-card">
+                        <h3>Remarks</h3>
+                        <ul class="remarks-list">
+                            <li>Client is interested in 2BHK, corner-facing unit.</li>
+                            <li>Shared pricing PDF via WhatsApp.</li>
+                            <li>Next follow-up scheduled for Thursday, 11 AM.</li>
+                        </ul>
+                        <div class="suggested-action">
+                            <div class="suggested-action-text">
+                                Send a follow-up reminder 1 day before the scheduled call on Thursday, 11 AM.
+                            </div>
+                            <button class="suggested-action-btn" onclick="handleSuggestedAction()">+</button>
+                        </div>
+                        <div class="input-group remarks-input-wrapper">
+                            <span class="remarks-emoji-btn" onclick="toggleEmojiPicker()">😊</span>
+                            <input type="text" placeholder="Add a new remark...">
+                            <div class="remarks-input-icons">
+                                <div class="remarks-icon remarks-icon-link" onclick="handleLinkClick()" title="Attach link">
+                                    <i class="fa fa-link"></i>
+                                </div>
+                                <div class="remarks-icon remarks-icon-camera" onclick="handleCameraClick()" title="Attach image">
+                                    <i class="fa fa-camera"></i>
+                                </div>
+                                <div class="remarks-icon remarks-icon-mic" onclick="handleMicClick()" title="Voice input">
+                                    <i class="fa fa-microphone"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-col">
+                    <div class="card booking-price-card booking-card">
+                        <h3>Booking Price</h3>
+                        <div class="input-group">
+                            <label>Final Price</label>
+                            <div class="input-with-icon">
+                                <i class="fa fa-search input-icon"></i>
+                                <input type="text" placeholder="Enter your title here" id="finalPriceInput">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Advance Amount/Token</label>
+                            <div class="input-with-icon">
+                                <i class="fa fa-search input-icon"></i>
+                                <input type="text" placeholder="Enter your title here" id="advanceAmountInput">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Date Of First Token</label>
+                            <div class="input-with-icon">
+                                <i class="fa fa-search input-icon"></i>
+                                <input type="text" placeholder="Enter your title here" id="dateOfFirstToken">
+                            </div>
+                        </div>
+                        
+                        <label>Payment Mode</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="pay" checked>
+                                <span>UPI</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="pay">
+                                <span>Cheque</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="pay">
+                                <span>Net Banking</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="pay">
+                                <span>DD</span>
+                            </label>
+                        </div>
+
+                        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+                            <i class="fa fa-plus-circle"></i>
+                            <p>Upload receipt or payment proof (PDF/JPG)</p>
+                            <small><i class="fa fa-info-circle"></i> Max file size 10 MB</small>
+                            <input type="file" id="fileInput" style="display:none" accept="image/*,.pdf,.doc,.docx">
+                        </div>
+
+                        <div class="toggle-option">
+                            <label class="toggle-option-label">If Emi Applicable</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="emiToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="emi-section" id="emiSection">
+                            <div class="emi-header">
+                                <h4>EMI Details</h4>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="emiSectionToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Loan Amount</label>
+                                <div class="input-with-icon">
+                                    <i class="fa fa-search input-icon"></i>
+                                    <input type="text" placeholder="Enter loan amount" id="loanAmount">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Interest Rate (%)</label>
+                                <div class="input-with-icon">
+                                    <i class="fa fa-search input-icon"></i>
+                                    <input type="text" placeholder="Enter interest rate" id="interestRate">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Tenure (Months)</label>
+                                <div class="input-with-icon">
+                                    <i class="fa fa-search input-icon"></i>
+                                    <input type="text" placeholder="Enter tenure in months" id="tenureMonths">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Down Payment</label>
+                                <div class="input-with-icon">
+                                    <i class="fa fa-search input-icon"></i>
+                                    <input type="text" placeholder="Enter down payment amount" id="downPayment">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Monthly EMI Amount</label>
+                                <div class="input-with-icon">
+                                    <i class="fa fa-search input-icon"></i>
+                                    <input type="text" placeholder="Enter monthly EMI" id="monthlyEmi">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Bank/Financial Institution</label>
+                                <div class="input-with-icon">
+                                    <i class="fa fa-search input-icon"></i>
+                                    <input type="text" placeholder="Enter bank name" id="bankName">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="toggle-separator">
+                        
+                        <div class="toggle-option">
+                            <label class="toggle-option-label">Extra Charges</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="extraChargesToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="extra-charges-section" id="extraChargesSection">
+                            <div class="extra-charges-header">
+                                <h4>Extra Charges</h4>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="extraChargesSectionToggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Maintanance Charges</label>
+                                <div class="input-with-icon">
+                                    <i class="fa fa-search input-icon"></i>
+                                    <input type="text" placeholder="Enter your title here" id="maintenanceCharges">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Legal Charges</label>
+                                <div class="input-with-icon">
+                                    <i class="fa fa-search input-icon"></i>
+                                    <input type="text" placeholder="Enter your title here" id="legalCharges">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Stamp Duty</label>
+                                <div class="input-with-icon">
+                                    <i class="fa fa-search input-icon"></i>
+                                    <input type="text" placeholder="Enter your title here" id="stampDuty">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Parking</label>
+                                <div class="input-with-icon">
+                                    <i class="fa fa-search input-icon"></i>
+                                    <input type="text" placeholder="Enter your title here" id="parking">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-blue" style="width:100%; margin-top:20px;">
+                            Submit Booking Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Drawer -->
+    <div class="share-drawer-overlay" id="shareDrawerOverlay" onclick="closeShareDrawer()">
+        <div class="share-drawer" id="shareDrawer" onclick="event.stopPropagation()">
+            <div class="share-drawer-header">
+                <h3>Booking Details</h3>
+                <button class="share-drawer-close" onclick="closeShareDrawer()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="share-drawer-content" id="shareDrawerContent">
+                <!-- Content will be populated dynamically -->
+            </div>
+            
+            <div class="share-actions">
+                <button class="share-btn share-btn-email" onclick="shareViaEmail()">
+                    <i class="fa fa-envelope"></i>
+                    <span>Email</span>
+                </button>
+                <button class="share-btn share-btn-whatsapp" onclick="shareViaWhatsApp()">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>WhatsApp</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Upload Drawer -->
+    <div class="doc-drawer-overlay" id="docDrawerOverlay" onclick="closeDocDrawer()">
+        <div class="doc-drawer" id="docDrawer" onclick="event.stopPropagation()">
+            <div class="doc-drawer-header">
+                <h3>Upload Document</h3>
+                <button class="doc-drawer-close" onclick="closeDocDrawer()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="doc-drawer-content">
+                <div class="doc-upload-zone" id="docUploadZone" onclick="document.getElementById('docFileInput').click()">
+                    <div class="doc-upload-icon">
+                        <i class="fa fa-plus"></i>
+                    </div>
+                    <div class="doc-upload-text">Drag and drop or click to choose file</div>
+                    <div class="doc-upload-info">
+                        <i class="fa fa-info-circle"></i>
+                        <span>Max file size 10 MB</span>
+                    </div>
+                    <input type="file" id="docFileInput" class="doc-upload-input" accept="image/*,.pdf,.doc,.docx" multiple>
+                </div>
+                
+                <div class="doc-list" id="docList">
+                    <!-- Documents will be populated here -->
+                </div>
+                
+                <div class="doc-remark-section">
+                    <label class="doc-remark-label">Remark</label>
+                    <textarea 
+                        class="doc-remark-textarea" 
+                        id="docRemarkTextarea" 
+                        placeholder="Add Remark For This Documents"
+                        maxlength="500"
+                    ></textarea>
+                    <div class="doc-remark-counter">
+                        <span id="docRemarkCounter">0</span>/500
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced file upload functionality
+        const fileInput = document.getElementById('fileInput');
+        const uploadBox = document.querySelector('.upload-box');
+        
+        if (fileInput && uploadBox) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const fileName = file.name;
+                    const fileSize = (file.size / 1024 / 1024).toFixed(2); // Convert to MB
+                    
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('File size exceeds 10MB limit. Please choose a smaller file.');
+                        fileInput.value = '';
+                        return;
+                    }
+                    
+                    // Update upload box to show selected file
+                    uploadBox.innerHTML = `
+                        <i class="fa fa-check-circle" style="color: var(--success-green); font-size: 32px; margin-bottom: 12px; display: block;"></i>
+                        <p style="margin: 8px 0; font-weight: 500; color: var(--text-secondary);">${fileName}</p>
+                        <small style="color: var(--text-muted); font-size: 12px;">${fileSize} MB</small>
+                        <button onclick="resetFileInput()" style="margin-top: 12px; padding: 6px 12px; background: var(--error-red); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">Remove</button>
+                    `;
+                }
+            });
+        }
+        
+        function resetFileInput() {
+            fileInput.value = '';
+            uploadBox.innerHTML = `
+                <i class="fa fa-plus-circle" style="font-size: 32px; color: var(--primary-blue); margin-bottom: 12px; display: block;"></i>
+                <p style="margin: 8px 0; font-weight: 500; color: var(--text-secondary);">Upload receipt or payment proof</p>
+                <small style="color: var(--text-muted); font-size: 12px;">Max file size 10MB</small>
+            `;
+        }
+        
+        // Add remark functionality
+        const remarksInput = document.querySelector('.remarks-input-wrapper input');
+        const remarksList = document.querySelector('.remarks-list');
+        
+        if (remarksInput) {
+            remarksInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && this.value.trim()) {
+                    const newRemark = document.createElement('li');
+                    newRemark.textContent = this.value.trim();
+                    remarksList.appendChild(newRemark);
+                    this.value = '';
+                }
+            });
+        }
+        
+        // Handle suggested action
+        function handleSuggestedAction() {
+            const actionText = document.querySelector('.suggested-action-text').textContent.trim();
+            if (remarksInput && actionText) {
+                remarksInput.value = actionText;
+                remarksInput.focus();
+                // Optionally remove the suggested action after adding
+                // document.querySelector('.suggested-action').style.display = 'none';
+            }
+        }
+        
+        // Handle emoji picker
+        function toggleEmojiPicker() {
+            // You can integrate an emoji picker library here
+            alert('Emoji picker will open here');
+        }
+        
+        // Handle link attachment
+        function handleLinkClick() {
+            const url = prompt('Enter URL to attach:');
+            if (url && remarksInput) {
+                remarksInput.value = remarksInput.value + (remarksInput.value ? ' ' : '') + url;
+                remarksInput.focus();
+            }
+        }
+        
+        // Handle camera/image attachment
+        function handleCameraClick() {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Handle image upload here
+                    alert('Image attached: ' + file.name);
+                }
+            };
+            fileInput.click();
+        }
+        
+        // Handle microphone/voice input
+        function handleMicClick() {
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                
+                recognition.onstart = function() {
+                    remarksInput.placeholder = 'Listening...';
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    if (remarksInput) {
+                        remarksInput.value = transcript;
+                        remarksInput.focus();
+                    }
+                };
+                
+                recognition.onerror = function(event) {
+                    alert('Speech recognition error: ' + event.error);
+                };
+                
+                recognition.onend = function() {
+                    remarksInput.placeholder = 'Add a new remark...';
+                };
+                
+                recognition.start();
+            } else {
+                alert('Speech recognition not supported in this browser');
+            }
+        }
+        
+        // Smooth scroll behavior
+        const container = document.querySelector('.scroll-container');
+        if (container) {
+            // Auto-adjust scroll behavior
+            if (container.scrollHeight > container.clientHeight) {
+                container.style.overflowY = 'auto';
+            }
+        }
+        
+        // Add loading state to buttons
+        document.querySelectorAll('.btn-blue').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const buttonText = this.textContent.trim() || this.innerText.trim();
+                if (buttonText.includes('Submit Booking Details')) {
+                    // Add loading state
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<i class="fa fa-spinner fa-spin"></i> <span>Submitting...</span>';
+                    this.disabled = true;
+                    this.style.opacity = '0.7';
+                    this.style.cursor = 'not-allowed';
+                    
+                    // Simulate form submission (replace with actual API call)
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                        this.style.opacity = '1';
+                        this.style.cursor = 'pointer';
+                        alert('Booking details submitted successfully!');
+                    }, 2000);
+                }
+            });
+        });
+        
+        // Toggle switch handlers
+        const emiToggle = document.getElementById('emiToggle');
+        const extraChargesToggle = document.getElementById('extraChargesToggle');
+        
+        if (emiToggle) {
+            const emiSection = document.getElementById('emiSection');
+            const emiSectionToggle = document.getElementById('emiSectionToggle');
+            
+            emiToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    console.log('EMI is now enabled');
+                    if (emiSection) {
+                        emiSection.classList.add('show');
+                    }
+                } else {
+                    console.log('EMI is now disabled');
+                    if (emiSection) {
+                        emiSection.classList.remove('show');
+                    }
+                }
+            });
+            
+            // Sync the section toggle with main toggle
+            if (emiSectionToggle) {
+                emiSectionToggle.addEventListener('change', function() {
+                    if (!this.checked && emiToggle.checked) {
+                        // If section toggle is turned off, also turn off main toggle
+                        emiToggle.checked = false;
+                        emiToggle.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+            
+            // Auto-calculate EMI
+            const loanAmountInput = document.getElementById('loanAmount');
+            const interestRateInput = document.getElementById('interestRate');
+            const tenureMonthsInput = document.getElementById('tenureMonths');
+            const monthlyEmiInput = document.getElementById('monthlyEmi');
+            
+            function calculateEMI() {
+                if (loanAmountInput && interestRateInput && tenureMonthsInput && monthlyEmiInput) {
+                    const loanAmount = parseFloat(loanAmountInput.value.replace(/[₹,\s]/g, '')) || 0;
+                    const interestRate = parseFloat(interestRateInput.value) || 0;
+                    const tenureMonths = parseFloat(tenureMonthsInput.value) || 0;
+                    
+                    if (loanAmount > 0 && interestRate > 0 && tenureMonths > 0) {
+                        const monthlyRate = interestRate / 12 / 100;
+                        const emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenureMonths)) / 
+                                    (Math.pow(1 + monthlyRate, tenureMonths) - 1);
+                        
+                        if (!isNaN(emi) && isFinite(emi)) {
+                            monthlyEmiInput.value = '₹' + Math.round(emi).toLocaleString('en-IN');
+                        }
+                    }
+                }
+            }
+            
+            if (loanAmountInput) {
+                loanAmountInput.addEventListener('blur', calculateEMI);
+            }
+            if (interestRateInput) {
+                interestRateInput.addEventListener('blur', calculateEMI);
+            }
+            if (tenureMonthsInput) {
+                tenureMonthsInput.addEventListener('blur', calculateEMI);
+            }
+        }
+        
+        if (extraChargesToggle) {
+            const extraChargesSection = document.getElementById('extraChargesSection');
+            const extraChargesSectionToggle = document.getElementById('extraChargesSectionToggle');
+            
+            extraChargesToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    console.log('Extra Charges is now enabled');
+                    if (extraChargesSection) {
+                        extraChargesSection.classList.add('show');
+                    }
+                } else {
+                    console.log('Extra Charges is now disabled');
+                    if (extraChargesSection) {
+                        extraChargesSection.classList.remove('show');
+                    }
+                }
+                // Update breakdown when toggle changes
+                updateFinalBreakdown();
+            });
+            
+            // Sync the section toggle with main toggle
+            if (extraChargesSectionToggle) {
+                extraChargesSectionToggle.addEventListener('change', function() {
+                    if (!this.checked && extraChargesToggle.checked) {
+                        // If section toggle is turned off, also turn off main toggle
+                        extraChargesToggle.checked = false;
+                        extraChargesToggle.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+        }
+        
+        // Function to parse currency value
+        function parseCurrency(value) {
+            if (!value) return 0;
+            return parseFloat(value.toString().replace(/[₹,\s]/g, '')) || 0;
+        }
+        
+        // Function to format currency
+        function formatCurrency(amount) {
+            return '₹' + Math.round(amount).toLocaleString('en-IN');
+        }
+        
+        // Function to calculate and update Final Breakdown
+        function updateFinalBreakdown() {
+            // Get values from input fields
+            const finalPrice = parseCurrency(document.getElementById('finalPriceInput')?.value || 0);
+            const advanceAmount = parseCurrency(document.getElementById('advanceAmountInput')?.value || 0);
+            
+            // Get extra charges values (only if extra charges toggle is enabled)
+            const extraChargesToggleCheck = document.getElementById('extraChargesToggle');
+            let maintenanceCharges = 0;
+            let legalCharges = 0;
+            let stampDuty = 0;
+            let parking = 0;
+            
+            if (extraChargesToggleCheck && extraChargesToggleCheck.checked) {
+                maintenanceCharges = parseCurrency(document.getElementById('maintenanceCharges')?.value || 0);
+                legalCharges = parseCurrency(document.getElementById('legalCharges')?.value || 0);
+                stampDuty = parseCurrency(document.getElementById('stampDuty')?.value || 0);
+                parking = parseCurrency(document.getElementById('parking')?.value || 0);
+            }
+            
+            // Calculate total charges
+            const totalExtraCharges = maintenanceCharges + legalCharges + stampDuty + parking;
+            
+            // Calculate total payable
+            const totalPayable = finalPrice + totalExtraCharges;
+            
+            // Calculate balance pending
+            const balancePending = totalPayable - advanceAmount;
+            
+            // Update Final Breakdown display
+            const finalDealPriceEl = document.getElementById('finalDealPrice');
+            const totalPayableEl = document.getElementById('totalPayable');
+            const amountReceivedEl = document.getElementById('amountReceived');
+            const balancePendingEl = document.getElementById('balancePending');
+            
+            if (finalDealPriceEl) {
+                finalDealPriceEl.textContent = formatCurrency(finalPrice);
+            }
+            
+            if (totalPayableEl) {
+                totalPayableEl.textContent = formatCurrency(totalPayable);
+            }
+            
+            if (amountReceivedEl) {
+                amountReceivedEl.textContent = '- ' + formatCurrency(advanceAmount);
+            }
+            
+            if (balancePendingEl) {
+                balancePendingEl.textContent = formatCurrency(balancePending);
+            }
+            
+            // Update extra charges rows visibility
+            const maintenanceRow = document.getElementById('maintenanceChargesRow');
+            const legalRow = document.getElementById('legalChargesRow');
+            const stampDutyRow = document.getElementById('stampDutyRow');
+            const parkingRow = document.getElementById('parkingRow');
+            
+            if (maintenanceRow) {
+                if (maintenanceCharges > 0 && extraChargesToggleCheck && extraChargesToggleCheck.checked) {
+                    maintenanceRow.style.display = 'flex';
+                    document.getElementById('maintenanceChargesValue').textContent = '+ ' + formatCurrency(maintenanceCharges);
+                } else {
+                    maintenanceRow.style.display = 'none';
+                }
+            }
+            
+            if (legalRow) {
+                if (legalCharges > 0 && extraChargesToggleCheck && extraChargesToggleCheck.checked) {
+                    legalRow.style.display = 'flex';
+                    document.getElementById('legalChargesValue').textContent = '+ ' + formatCurrency(legalCharges);
+                } else {
+                    legalRow.style.display = 'none';
+                }
+            }
+            
+            if (stampDutyRow) {
+                if (stampDuty > 0 && extraChargesToggleCheck && extraChargesToggleCheck.checked) {
+                    stampDutyRow.style.display = 'flex';
+                    document.getElementById('stampDutyValue').textContent = '+ ' + formatCurrency(stampDuty);
+                } else {
+                    stampDutyRow.style.display = 'none';
+                }
+            }
+            
+            if (parkingRow) {
+                if (parking > 0 && extraChargesToggleCheck && extraChargesToggleCheck.checked) {
+                    parkingRow.style.display = 'flex';
+                    document.getElementById('parkingValue').textContent = '+ ' + formatCurrency(parking);
+                } else {
+                    parkingRow.style.display = 'none';
+                }
+            }
+        }
+        
+        // Add event listeners to all relevant input fields
+        const finalPriceInput = document.getElementById('finalPriceInput');
+        const advanceAmountInput = document.getElementById('advanceAmountInput');
+        const maintenanceChargesInput = document.getElementById('maintenanceCharges');
+        const legalChargesInput = document.getElementById('legalCharges');
+        const stampDutyInput = document.getElementById('stampDuty');
+        const parkingInput = document.getElementById('parking');
+        const extraChargesToggleForBreakdown = document.getElementById('extraChargesToggle');
+        
+        // Add input event listeners for real-time updates
+        if (finalPriceInput) {
+            finalPriceInput.addEventListener('input', updateFinalBreakdown);
+            finalPriceInput.addEventListener('blur', function() {
+                const value = parseCurrency(this.value);
+                if (value > 0) {
+                    this.value = formatCurrency(value);
+                }
+                updateFinalBreakdown();
+            });
+        }
+        
+        if (advanceAmountInput) {
+            advanceAmountInput.addEventListener('input', updateFinalBreakdown);
+            advanceAmountInput.addEventListener('blur', function() {
+                const value = parseCurrency(this.value);
+                if (value > 0) {
+                    this.value = formatCurrency(value);
+                }
+                updateFinalBreakdown();
+            });
+        }
+        
+        if (maintenanceChargesInput) {
+            maintenanceChargesInput.addEventListener('input', updateFinalBreakdown);
+            maintenanceChargesInput.addEventListener('blur', function() {
+                const value = parseCurrency(this.value);
+                if (value > 0) {
+                    this.value = formatCurrency(value);
+                }
+                updateFinalBreakdown();
+            });
+        }
+        
+        if (legalChargesInput) {
+            legalChargesInput.addEventListener('input', updateFinalBreakdown);
+            legalChargesInput.addEventListener('blur', function() {
+                const value = parseCurrency(this.value);
+                if (value > 0) {
+                    this.value = formatCurrency(value);
+                }
+                updateFinalBreakdown();
+            });
+        }
+        
+        if (stampDutyInput) {
+            stampDutyInput.addEventListener('input', updateFinalBreakdown);
+            stampDutyInput.addEventListener('blur', function() {
+                const value = parseCurrency(this.value);
+                if (value > 0) {
+                    this.value = formatCurrency(value);
+                }
+                updateFinalBreakdown();
+            });
+        }
+        
+        if (parkingInput) {
+            parkingInput.addEventListener('input', updateFinalBreakdown);
+            parkingInput.addEventListener('blur', function() {
+                const value = parseCurrency(this.value);
+                if (value > 0) {
+                    this.value = formatCurrency(value);
+                }
+                updateFinalBreakdown();
+            });
+        }
+        
+        // Update breakdown when extra charges toggle changes
+        if (extraChargesToggleForBreakdown) {
+            extraChargesToggleForBreakdown.addEventListener('change', function() {
+                updateFinalBreakdown();
+            });
+        }
+        
+        // Share breakdown function - Opens drawer
+        function shareBreakdown() {
+            const drawer = document.getElementById('shareDrawer');
+            const overlay = document.getElementById('shareDrawerOverlay');
+            const content = document.getElementById('shareDrawerContent');
+            
+            if (!drawer || !overlay || !content) return;
+            
+            // Populate drawer content
+            populateShareDrawer(content);
+            
+            // Open drawer
+            overlay.classList.add('show');
+            setTimeout(() => {
+                drawer.classList.add('open');
+            }, 10);
+            
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Close drawer function
+        function closeShareDrawer() {
+            const drawer = document.getElementById('shareDrawer');
+            const overlay = document.getElementById('shareDrawerOverlay');
+            
+            if (drawer && overlay) {
+                drawer.classList.remove('open');
+                setTimeout(() => {
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }, 300);
+            }
+        }
+        
+        // Populate drawer with all booking details
+        function populateShareDrawer(content) {
+            // Get all booking details
+            const finalPrice = document.getElementById('finalPriceInput')?.value || 'Not entered';
+            const advanceAmount = document.getElementById('advanceAmountInput')?.value || 'Not entered';
+            const dateOfFirstToken = document.getElementById('dateOfFirstToken')?.value || 'Not entered';
+            
+            // Get payment mode
+            const paymentModeRadios = document.querySelectorAll('input[name="pay"]');
+            let paymentMode = 'Not selected';
+            paymentModeRadios.forEach(radio => {
+                if (radio.checked) {
+                    paymentMode = radio.nextElementSibling?.textContent || 'Not selected';
+                }
+            });
+            
+            // Get uploaded file info
+            const fileInput = document.getElementById('fileInput');
+            let uploadedFile = null;
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                uploadedFile = {
+                    name: file.name,
+                    size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                    type: file.type
+                };
+            }
+            
+            // Get EMI details
+            const emiToggle = document.getElementById('emiToggle');
+            const isEmiEnabled = emiToggle && emiToggle.checked;
+            let emiDetails = null;
+            if (isEmiEnabled) {
+                emiDetails = {
+                    loanAmount: document.getElementById('loanAmount')?.value || 'Not entered',
+                    interestRate: document.getElementById('interestRate')?.value || 'Not entered',
+                    tenureMonths: document.getElementById('tenureMonths')?.value || 'Not entered',
+                    downPayment: document.getElementById('downPayment')?.value || 'Not entered',
+                    monthlyEmi: document.getElementById('monthlyEmi')?.value || 'Not entered',
+                    bankName: document.getElementById('bankName')?.value || 'Not entered'
+                };
+            }
+            
+            // Get Extra Charges
+            const extraChargesToggle = document.getElementById('extraChargesToggle');
+            const isExtraChargesEnabled = extraChargesToggle && extraChargesToggle.checked;
+            let extraCharges = null;
+            if (isExtraChargesEnabled) {
+                extraCharges = {
+                    maintenance: document.getElementById('maintenanceCharges')?.value || '₹0',
+                    legal: document.getElementById('legalCharges')?.value || '₹0',
+                    stampDuty: document.getElementById('stampDuty')?.value || '₹0',
+                    parking: document.getElementById('parking')?.value || '₹0'
+                };
+            }
+            
+            // Get breakdown values
+            const finalDealPrice = document.getElementById('finalDealPrice')?.textContent || '₹0';
+            const totalPayable = document.getElementById('totalPayable')?.textContent || '₹0';
+            const amountReceived = document.getElementById('amountReceived')?.textContent || '₹0';
+            const balancePending = document.getElementById('balancePending')?.textContent || '₹0';
+            
+            // Build HTML content
+            let html = `
+                <div class="share-detail-section">
+                    <h4>Booking Price Details</h4>
+                    <div class="share-detail-item">
+                        <span class="share-detail-label">Final Price</span>
+                        <span class="share-detail-value">${finalPrice}</span>
+                    </div>
+                    <div class="share-detail-item">
+                        <span class="share-detail-label">Advance Amount/Token</span>
+                        <span class="share-detail-value">${advanceAmount}</span>
+                    </div>
+                    <div class="share-detail-item">
+                        <span class="share-detail-label">Date Of First Token</span>
+                        <span class="share-detail-value">${dateOfFirstToken}</span>
+                    </div>
+                    <div class="share-detail-item">
+                        <span class="share-detail-label">Payment Mode</span>
+                        <span class="share-detail-value">${paymentMode}</span>
+                    </div>
+                </div>
+                
+                <div class="share-detail-section">
+                    <h4>Final Breakdown</h4>
+                    <div class="share-detail-item">
+                        <span class="share-detail-label">Final Deal Price</span>
+                        <span class="share-detail-value">${finalDealPrice}</span>
+                    </div>
+            `;
+            
+            // Add extra charges if enabled
+            if (isExtraChargesEnabled && extraCharges) {
+                if (parseCurrency(extraCharges.maintenance) > 0) {
+                    html += `
+                        <div class="share-detail-item">
+                            <span class="share-detail-label">Maintenance Charges</span>
+                            <span class="share-detail-value positive">+ ${extraCharges.maintenance}</span>
+                        </div>
+                    `;
+                }
+                if (parseCurrency(extraCharges.legal) > 0) {
+                    html += `
+                        <div class="share-detail-item">
+                            <span class="share-detail-label">Legal Charges</span>
+                            <span class="share-detail-value positive">+ ${extraCharges.legal}</span>
+                        </div>
+                    `;
+                }
+                if (parseCurrency(extraCharges.stampDuty) > 0) {
+                    html += `
+                        <div class="share-detail-item">
+                            <span class="share-detail-label">Stamp Duty</span>
+                            <span class="share-detail-value positive">+ ${extraCharges.stampDuty}</span>
+                        </div>
+                    `;
+                }
+                if (parseCurrency(extraCharges.parking) > 0) {
+                    html += `
+                        <div class="share-detail-item">
+                            <span class="share-detail-label">Parking</span>
+                            <span class="share-detail-value positive">+ ${extraCharges.parking}</span>
+                        </div>
+                    `;
+                }
+            }
+            
+            html += `
+                    <div class="share-detail-item">
+                        <span class="share-detail-label">Total Payable (Incl. Charges)</span>
+                        <span class="share-detail-value success">${totalPayable}</span>
+                    </div>
+                    <div class="share-detail-item">
+                        <span class="share-detail-label">Amount Received</span>
+                        <span class="share-detail-value negative">${amountReceived}</span>
+                    </div>
+                    <div class="share-detail-item">
+                        <span class="share-detail-label">Balance Pending</span>
+                        <span class="share-detail-value success">${balancePending}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Add EMI section if enabled
+            if (isEmiEnabled && emiDetails) {
+                html += `
+                    <div class="share-detail-section">
+                        <h4>EMI Details</h4>
+                        <div class="share-emi-section">
+                            <div class="share-detail-item">
+                                <span class="share-detail-label">Loan Amount</span>
+                                <span class="share-detail-value">${emiDetails.loanAmount}</span>
+                            </div>
+                            <div class="share-detail-item">
+                                <span class="share-detail-label">Interest Rate</span>
+                                <span class="share-detail-value">${emiDetails.interestRate}%</span>
+                            </div>
+                            <div class="share-detail-item">
+                                <span class="share-detail-label">Tenure</span>
+                                <span class="share-detail-value">${emiDetails.tenureMonths} Months</span>
+                            </div>
+                            <div class="share-detail-item">
+                                <span class="share-detail-label">Down Payment</span>
+                                <span class="share-detail-value">${emiDetails.downPayment}</span>
+                            </div>
+                            <div class="share-detail-item">
+                                <span class="share-detail-label">Monthly EMI</span>
+                                <span class="share-detail-value success">${emiDetails.monthlyEmi}</span>
+                            </div>
+                            <div class="share-detail-item">
+                                <span class="share-detail-label">Bank/Financial Institution</span>
+                                <span class="share-detail-value">${emiDetails.bankName}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add uploaded file section
+            if (uploadedFile) {
+                html += `
+                    <div class="share-detail-section">
+                        <h4>Uploaded Documents</h4>
+                        <div class="share-uploaded-file">
+                            <i class="fa fa-file-pdf"></i>
+                            <div class="share-uploaded-file-info">
+                                <div class="share-uploaded-file-name">${uploadedFile.name}</div>
+                                <div class="share-uploaded-file-size">${uploadedFile.size}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            content.innerHTML = html;
+        }
+        
+        // Share via Email
+        function shareViaEmail() {
+            const content = document.getElementById('shareDrawerContent');
+            if (!content) return;
+            
+            const subject = encodeURIComponent('Booking Details - Crown Heights');
+            let body = 'Booking Details:\n\n';
+            
+            // Get all text content from drawer
+            const textContent = content.innerText || content.textContent;
+            body += textContent;
+            
+            body = encodeURIComponent(body);
+            
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+        
+        // Share via WhatsApp
+        function shareViaWhatsApp() {
+            const content = document.getElementById('shareDrawerContent');
+            if (!content) return;
+            
+            let message = '*Booking Details - Crown Heights*\n\n';
+            
+            // Get all text content from drawer
+            const textContent = content.innerText || content.textContent;
+            message += textContent;
+            
+            message = encodeURIComponent(message);
+            
+            window.open(`https://wa.me/?text=${message}`, '_blank');
+        }
+        
+        // Enhanced input validation and formatting
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            const placeholder = input.placeholder.toLowerCase();
+            if (placeholder.includes('price') || placeholder.includes('amount')) {
+                // Format as currency on blur
+                input.addEventListener('blur', function() {
+                    if (this.value.trim()) {
+                        const value = this.value.replace(/[^\d]/g, '');
+                        if (value && !isNaN(value)) {
+                            // Format with Indian currency format
+                            const formatted = new Intl.NumberFormat('en-IN', {
+                                maximumFractionDigits: 0
+                            }).format(value);
+                            this.value = '₹' + formatted;
+                        }
+                    }
+                });
+                
+                // Remove formatting on focus
+                input.addEventListener('focus', function() {
+                    this.value = this.value.replace(/[₹,\s]/g, '');
+                });
+            }
+        });
+        
+        // Initialize breakdown on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            updateFinalBreakdown();
+            initializeDocDrawer();
+        });
+        
+        // Document Upload Drawer Functions
+        let uploadedDocuments = [
+            { name: 'Pan Card', id: 'pan-card' },
+            { name: 'Aadhar Card', id: 'aadhar-card' },
+            { name: 'Booking Agreement', id: 'booking-agreement' },
+            { name: 'Passport Size Photograph', id: 'passport-photo' },
+            { name: 'Electricity Bill', id: 'electricity-bill' }
+        ];
+        
+        function openDocDrawer() {
+            const drawer = document.getElementById('docDrawer');
+            const overlay = document.getElementById('docDrawerOverlay');
+            
+            if (drawer && overlay) {
+                overlay.classList.add('show');
+                setTimeout(() => {
+                    drawer.classList.add('open');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+                renderDocList();
+            }
+        }
+        
+        function closeDocDrawer() {
+            const drawer = document.getElementById('docDrawer');
+            const overlay = document.getElementById('docDrawerOverlay');
+            
+            if (drawer && overlay) {
+                drawer.classList.remove('open');
+                setTimeout(() => {
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }, 300);
+            }
+        }
+        
+        function initializeDocDrawer() {
+            const docFileInput = document.getElementById('docFileInput');
+            const docUploadZone = document.getElementById('docUploadZone');
+            const docRemarkTextarea = document.getElementById('docRemarkTextarea');
+            const docRemarkCounter = document.getElementById('docRemarkCounter');
+            
+            // File input change handler
+            if (docFileInput) {
+                docFileInput.addEventListener('change', function(e) {
+                    handleFileUpload(e.target.files);
+                });
+            }
+            
+            // Drag and drop handlers
+            if (docUploadZone) {
+                docUploadZone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    docUploadZone.classList.add('dragover');
+                });
+                
+                docUploadZone.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    docUploadZone.classList.remove('dragover');
+                });
+                
+                docUploadZone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    docUploadZone.classList.remove('dragover');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        handleFileUpload(files);
+                    }
+                });
+            }
+            
+            // Remark character counter
+            if (docRemarkTextarea && docRemarkCounter) {
+                docRemarkTextarea.addEventListener('input', function() {
+                    const length = this.value.length;
+                    docRemarkCounter.textContent = length;
+                    
+                    if (length > 450) {
+                        docRemarkCounter.style.color = '#ef4444';
+                    } else {
+                        docRemarkCounter.style.color = '#718096';
+                    }
+                });
+            }
+        }
+        
+        function handleFileUpload(files) {
+            Array.from(files).forEach(file => {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`File "${file.name}" exceeds 10MB limit.`);
+                    return;
+                }
+                
+                // Add file to documents array if not already present
+                const fileId = file.name.toLowerCase().replace(/\s+/g, '-');
+                const existingDoc = uploadedDocuments.find(doc => doc.id === fileId);
+                
+                if (!existingDoc) {
+                    uploadedDocuments.push({
+                        name: file.name,
+                        id: fileId,
+                        file: file,
+                        size: (file.size / 1024 / 1024).toFixed(2) + ' MB'
+                    });
+                } else {
+                    existingDoc.file = file;
+                    existingDoc.size = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+                }
+            });
+            
+            renderDocList();
+        }
+        
+        function removeDocument(docId) {
+            uploadedDocuments = uploadedDocuments.filter(doc => doc.id !== docId);
+            renderDocList();
+        }
+        
+        function renderDocList() {
+            const docList = document.getElementById('docList');
+            if (!docList) return;
+            
+            if (uploadedDocuments.length === 0) {
+                docList.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 20px;">No documents uploaded yet</p>';
+                return;
+            }
+            
+            let html = '';
+            uploadedDocuments.forEach(doc => {
+                const hasFile = doc.file ? '✓' : '';
+                html += `
+                    <div class="doc-list-item">
+                        <div class="doc-list-item-icon">
+                            <i class="fa fa-file"></i>
+                        </div>
+                        <div class="doc-list-item-name">${doc.name} ${hasFile}</div>
+                        <button class="doc-list-item-remove" onclick="removeDocument('${doc.id}')" title="Remove">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            
+            docList.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

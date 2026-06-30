@@ -1,0 +1,51 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: crownco-production-ingress
+  namespace: crownco-production
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.crownco.ai
+      http:
+        paths:
+          - path: /core(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: crownco-core-api
+                port:
+                  number: 80
+    - host: presales.crownco.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: crownco-presales-ui
+                port:
+                  number: 80
+    - host: sales.crownco.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: crownco-sales-ui
+                port:
+                  number: 80
+    - host: manager.crownco.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: crownco-manager-ui
+                port:
+                  number: 80

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rejection Form - Crownco</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0084FF;
+            --bg-gray: #F8F9FC;
+            --border-color: #E3E6F0;
+            --text-main: #2D3748;
+            --text-muted: #718096;
+            --white: #ffffff;
+            --error-red: #E74A3B;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Layout Placeholders for Sidebar and Topbar */
+        .sidebar-placeholder {
+            width: 260px;
+            flex-shrink: 0;
+            background: white;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar-placeholder {
+            height: 70px;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        /* Scrollable Content Area */
+        .content-container {
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .form-content {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* Header */
+        .header-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        /* Form Card */
+        .rejection-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .question-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .asterisk {
+            color: var(--error-red);
+        }
+
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 30px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .option-btn.active {
+            background: #EBF5FF;
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        /* Comment/Input Box */
+        .input-group {
+            position: relative;
+            background: #F9FAFB;
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            padding: 5px 15px;
+        }
+
+        .emoji-trigger {
+            font-size: 1.2rem;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .text-input {
+            flex-grow: 1;
+            border: none;
+            background: transparent;
+            padding: 10px;
+            font-size: 0.95rem;
+            outline: none;
+            color: var(--text-main);
+        }
+
+        .input-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-muted);
+        }
+
+        .icon-action {
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .mic-btn, .send-btn {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .send-btn {
+            background: #10B981;
+        }
+
+        .send-btn:hover {
+            background: #059669;
+            transform: scale(1.05);
+        }
+
+        .mic-btn.hidden, .send-btn.hidden {
+            display: none;
+        }
+
+        /* Footer Action */
+        .save-btn {
+            width: 100%;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 50px;
+            transition: opacity 0.2s;
+        }
+
+        .save-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Scrollbar styling for professional look */
+        .content-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .content-container::-webkit-scrollbar-thumb {
+            background: #D1D5DB;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-placeholder"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-placeholder"></div>
+
+        <div class="content-container">
+            <div class="form-content">
+                
+                <div class="header-section">
+                    <div class="back-btn">←</div>
+                    <h1 style="font-size: 1.4rem; font-weight: 700;">Rejection Form</h1>
+                </div>
+
+                <div class="rejection-card">
+                    <p class="question-text"><span class="asterisk">*</span> Was the customer budget not matching the project?</p>
+                    <div class="options-grid">
+                        <div class="option-btn" onclick="toggleOption(this)">Budget too low</div>
+                        <div class="option-btn" onclick="toggleOption(this)">Looking for cheaper options</div>
+                        <div class="option-btn" onclick="toggleOption(this)">EMI not affordable</div>
+                        <div class="option-btn" onclick="toggleOption(this)">Loan not approved</div>
+                    </div>
+                    <div class="input-group">
+                        <span class="emoji-trigger">😊</span>
+                        <input type="text" class="text-input" placeholder="Type Here" oninput="handleInputChange(this, 'budget')" onkeypress="handleKeyPress(event, 'budget')">
+                        <div class="input-actions">
+                            <span class="icon-action">🔗</span>
+                            <span class="icon-action">📷</span>
+                        </div>
+                        <div class="mic-btn" id="mic-budget">🎙️</div>
+                        <div class="send-btn hidden" id="send-budget" onclick="sendComment('budget')">➤</div>
+                    </div>
+                </div>
+
+                <div class="rejection-card">
+                    <p class="question-text"><span class="asterisk">*</span> Is the customer looking in a different location?</p>
+                    <div class="options-grid">
+                        <div class="option-btn" onclick="toggleOption(this)">Too far from workplace</div>
+                        <div class="option-btn" onclick="toggleOption(this)">Prefers different city/area</div>
+                        <div class="option-btn" onclick="toggleOption(this)">Bad connectivity</div>
+                        <div class="option-btn" onclick="toggleOption(this)">Not a suitable neighborhood</div>
+                    </div>
+                    <div class="input-group">
+                        <span class="emoji-trigger">😊</span>
+                        <input type="text" class="text-input" placeholder="Type Here" oninput="handleInputChange(this, 'location')" onkeypress="handleKeyPress(event, 'location')">
+                        <div class="input-actions">
+                            <span class="icon-action">🔗</span>
+                            <span class="icon-action">📷</span>
+                        </div>
+                        <div class="mic-btn" id="mic-location">🎙️</div>
+                        <div class="send-btn hidden" id="send-location" onclick="sendComment('location')">➤</div>
+                    </div>
+                </div>
+
+                <div class="rejection-card">
+                    <p class="question-text"><span class="asterisk">*</span> Was the customer not satisfied with the project?</p>
+                    <div class="options-grid">
+                        <div class="option-btn" onclick="toggleOption(this)">Didn't like layout</div>
+                        <div class="option-btn" onclick="toggleOption(this)">Missing key amenities</div>
+                        <div class="option-btn" onclick="toggleOption(this)">Bad builder reviews</div>
+                        <div class="option-btn" onclick="toggleOption(this)">Not value for money</div>
+                    </div>
+                    <div class="input-group">
+                        <span class="emoji-trigger">😊</span>
+                        <input type="text" class="text-input" placeholder="Type Here" oninput="handleInputChange(this, 'satisfaction')" onkeypress="handleKeyPress(event, 'satisfaction')">
+                        <div class="input-actions">
+                            <span class="icon-action">🔗</span>
+                            <span class="icon-action">📷</span>
+                        </div>
+                        <div class="mic-btn" id="mic-satisfaction">🎙️</div>
+                        <div class="send-btn hidden" id="send-satisfaction" onclick="sendComment('satisfaction')">➤</div>
+                    </div>
+                </div>
+
+                <div class="rejection-card">
+                    <p class="question-text"><span class="asterisk">*</span> Has the customer already booked or dropped the plan?</p>
+                    <div class="options-grid">
+                        <div class="option-btn" onclick="toggleOption(this)">Booked elsewhere</div>
+                        <div class="option-btn" onclick="toggleOption(this)">Postponed decision</div>
+                        <div class="option-btn" onclick="toggleOption(this)">Not interested anymore</div>
+                        <div class="option-btn" onclick="toggleOption(this)">Personal reasons</div>
+                    </div>
+                    <div class="input-group">
+                        <span class="emoji-trigger">😊</span>
+                        <input type="text" class="text-input" placeholder="Type Here" oninput="handleInputChange(this, 'booking')" onkeypress="handleKeyPress(event, 'booking')">
+                        <div class="input-actions">
+                            <span class="icon-action">🔗</span>
+                            <span class="icon-action">📷</span>
+                        </div>
+                        <div class="mic-btn" id="mic-booking">🎙️</div>
+                        <div class="send-btn hidden" id="send-booking" onclick="sendComment('booking')">➤</div>
+                    </div>
+                </div>
+
+                <button class="save-btn" onclick="saveForm()">Save Form</button>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // UX: Single selection for options - only one option can be selected at a time per section
+        function toggleOption(element) {
+            // Find the parent options-grid container
+            const optionsGrid = element.closest('.options-grid');
+            
+            // Remove active class from all options in this section
+            const allOptions = optionsGrid.querySelectorAll('.option-btn');
+            allOptions.forEach(option => {
+                option.classList.remove('active');
+            });
+            
+            // Add active class to the clicked option
+            element.classList.add('active');
+        }
+
+        // Handle input change - toggle between mic and send button
+        function handleInputChange(input, sectionId) {
+            const micBtn = document.getElementById(`mic-${sectionId}`);
+            const sendBtn = document.getElementById(`send-${sectionId}`);
+            const hasText = input.value.trim().length > 0;
+
+            if (hasText) {
+                micBtn.classList.add('hidden');
+                sendBtn.classList.remove('hidden');
+            } else {
+                micBtn.classList.remove('hidden');
+                sendBtn.classList.add('hidden');
+            }
+        }
+
+        // Handle Enter key press to send comment
+        function handleKeyPress(event, sectionId) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendComment(sectionId);
+            }
+        }
+
+        // Send comment function
+        function sendComment(sectionId) {
+            const input = document.querySelector(`input[oninput*="${sectionId}"]`);
+            const comment = input.value.trim();
+            
+            if (comment) {
+                // Here you can add logic to save the comment
+                console.log(`Comment for ${sectionId}:`, comment);
+                // Optionally clear the input after sending
+                // input.value = '';
+                // handleInputChange(input, sectionId);
+                
+                // Show a brief feedback (optional)
+                const sendBtn = document.getElementById(`send-${sectionId}`);
+                const originalContent = sendBtn.innerHTML;
+                sendBtn.innerHTML = '✓';
+                sendBtn.style.background = '#10B981';
+                
+                setTimeout(() => {
+                    sendBtn.innerHTML = originalContent;
+                }, 1000);
+            }
+        }
+
+        // Logic for form submission
+        function saveForm() {
+            const activeOptions = document.querySelectorAll('.option-btn.active');
+            if(activeOptions.length === 0) {
+                alert("Please select at least one reason before saving.");
+            } else {
+                alert("Form saved successfully!");
+            }
+        }
+    </script>
+</body>
+</html>

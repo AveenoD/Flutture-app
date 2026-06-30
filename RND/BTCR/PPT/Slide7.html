@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=1280, height=720, initial-scale=1.0" name="viewport"/>
+<title>Firmware Flow + Protocol</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #050508;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3, .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Flow Chart Nodes */
+        .flow-node {
+            background: rgba(18, 18, 28, 0.8);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            position: relative;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .flow-node:hover {
+            border-color: rgba(168, 85, 247, 0.8);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .node-start {
+            border-color: rgba(59, 130, 246, 0.5);
+            background: rgba(30, 58, 138, 0.2);
+        }
+
+        .node-process {
+            border-color: rgba(168, 85, 247, 0.5);
+            background: rgba(88, 28, 135, 0.2);
+        }
+
+        .node-end {
+            border-color: rgba(236, 72, 153, 0.5);
+            background: rgba(131, 24, 67, 0.2);
+        }
+
+        /* Connecting Lines */
+        .connector-line {
+            position: absolute;
+            background-color: rgba(168, 85, 247, 0.3);
+            z-index: 0;
+        }
+
+        .connector-arrow {
+            position: absolute;
+            color: rgba(168, 85, 247, 0.5);
+            font-size: 14px;
+        }
+
+        /* Audio Processing Blocks */
+        .dsp-block {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 11px;
+            text-align: center;
+            color: #d8b4fe;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Protocol Stack Layers */
+        .protocol-layer {
+            border-left: 3px solid #a855f7;
+            padding-left: 10px;
+            margin-bottom: 8px;
+        }
+
+        /* Data Packet Animation */
+        @keyframes flow-horizontal {
+            0% { left: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { left: 100%; opacity: 0; }
+        }
+
+        .packet-anim {
+            position: absolute;
+            height: 4px;
+            width: 12px;
+            background: #d8b4fe;
+            border-radius: 2px;
+            top: -2px;
+            box-shadow: 0 0 8px #a855f7;
+            animation: flow-horizontal 2s infinite linear;
+        }
+
+        /* Background Grid */
+        .grid-bg {
+            background-image: 
+                linear-gradient(rgba(168, 85, 247, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(168, 85, 247, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="w-[1280px] h-[720px] p-0 relative bg-[#050508] grid-bg">
+<!-- Header -->
+<header class="absolute top-0 left-0 w-full p-8 z-20 flex justify-between items-start">
+<div>
+<div class="flex items-center space-x-3 mb-2">
+<div class="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]"></div>
+<p class="text-purple-400 text-sm font-semibold tracking-widest uppercase font-mono">Firmware Architecture</p>
+</div>
+<h1 class="text-4xl font-bold text-white font-display">Audio Pipeline State Machine</h1>
+</div>
+<div class="flex items-center space-x-4">
+<div class="bg-purple-900/20 border border-purple-500/30 px-4 py-2 rounded-lg backdrop-blur-md">
+<p class="text-xs text-purple-300 font-mono uppercase mb-1">Processing Latency</p>
+<p class="text-xl font-bold text-white font-display">&lt; 15ms</p>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="w-full h-full flex pt-24 pb-12 px-12 relative z-10 flex-col">
+<!-- Top Section: State Machine Flow -->
+<div class="flex-1 relative flex items-center justify-between mb-8">
+<!-- Connection Line Background -->
+<div class="absolute top-1/2 left-0 w-full h-[2px] bg-gray-800 -translate-y-1/2 z-0"></div>
+<!-- Step 1: Pairing -->
+<div class="flow-node node-start z-10">
+<div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-2 text-blue-400">
+<i class="fab fa-bluetooth-b"></i>
+</div>
+<h3 class="text-sm font-bold text-white">Pairing / Idle</h3>
+<p class="text-[10px] text-gray-400 mt-1">HFP Connected</p>
+</div>
+<!-- Arrow -->
+<div class="z-10 bg-[#050508] p-1 rounded-full border border-gray-700">
+<i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+</div>
+<!-- Step 2: Call Event -->
+<div class="flow-node node-process z-10">
+<div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-2 text-purple-400">
+<i class="fas fa-phone-alt"></i>
+</div>
+<h3 class="text-sm font-bold text-white">Call Start</h3>
+<p class="text-[10px] text-gray-400 mt-1">Event Interrupt</p>
+</div>
+<!-- Arrow -->
+<div class="z-10 bg-[#050508] p-1 rounded-full border border-gray-700">
+<i class="fas fa-chevron-right text-gray-500 text-xs"></i>
+</div>
+<!-- Step 3: SCO Link -->
+<div class="flow-node node-process z-10">
+<div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-2 text-purple-400">
+<i class="fas fa-wave-square"></i>
+</div>
+<h3 class="text-sm font-bold text-white">Open SCO</h3>
+<p class="text-[10px] text-gray-400 mt-1">Sync Audio Link</p>
+</div>
+<!-- Arrow with animated packet -->
+<div class="relative w-16 h-4 z-10">
+<div class="packet-anim"></div>
+</div>
+<!-- Step 4: Decoding -->
+<div class="flow-node node-process z-10 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">CORE</div>
+<div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-2 text-purple-400">
+<i class="fas fa-file-audio"></i>
+</div>
+<h3 class="text-sm font-bold text-white">Decode</h3>
+<p class="text-[10px] text-gray-400 mt-1">CVSD / mSBC</p>
+</div>
+<!-- Arrow with animated packet -->
+<div class="relative w-16 h-4 z-10">
+<div class="packet-anim" style="animation-delay: 0.5s"></div>
+</div>
+<!-- Step 5: PCM Buffer -->
+<div class="flow-node node-process z-10">
+<div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-2 text-purple-400">
+<i class="fas fa-database"></i>
+</div>
+<h3 class="text-sm font-bold text-white">PCM Buffer</h3>
+<p class="text-[10px] text-gray-400 mt-1">16kHz / 16-bit</p>
+</div>
+<!-- Arrow with animated packet -->
+<div class="relative w-16 h-4 z-10">
+<div class="packet-anim" style="animation-delay: 1s"></div>
+</div>
+<!-- Step 6: Transport -->
+<div class="flow-node node-end z-10">
+<div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center mx-auto mb-2 text-pink-400">
+<i class="fas fa-wifi"></i>
+</div>
+<h3 class="text-sm font-bold text-white">Transport</h3>
+<p class="text-[10px] text-gray-400 mt-1">BLE / WiFi TCP</p>
+</div>
+</div>
+<!-- Bottom Section: Detailed Architecture Split -->
+<div class="h-64 grid grid-cols-12 gap-6">
+<!-- Left: Audio DSP Pipeline -->
+<div class="col-span-5 bg-gray-800/40 border border-gray-700 rounded-xl p-5 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-3 text-purple-500/20 text-6xl">
+<i class="fas fa-sliders-h"></i>
+</div>
+<h3 class="text-sm font-bold text-white mb-4 flex items-center">
+<i class="fas fa-microchip mr-2 text-purple-400"></i> DSP Audio Chain
+                </h3>
+<div class="flex items-center justify-between relative">
+<!-- Line -->
+<div class="absolute top-1/2 left-0 w-full h-[1px] bg-gray-600 -translate-y-1/2 z-0"></div>
+<!-- Block 1 -->
+<div class="dsp-block z-10 bg-[#0d1117] min-w-[80px]">
+<p>Jitter Buffer</p>
+<p class="text-[9px] text-gray-500">20-40ms</p>
+</div>
+<!-- Block 2 -->
+<div class="dsp-block z-10 bg-[#0d1117] min-w-[80px] border-purple-500/50">
+<p>VAD / AGC</p>
+<p class="text-[9px] text-gray-500">Normalization</p>
+</div>
+<!-- Block 3 -->
+<div class="dsp-block z-10 bg-[#0d1117] min-w-[80px]">
+<p>Noise Supp.</p>
+<p class="text-[9px] text-gray-500">Optional</p>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between">
+<div>
+<p class="text-[10px] text-gray-500 font-mono uppercase">Sample Rate</p>
+<p class="text-sm text-white font-bold">16,000 Hz</p>
+</div>
+<div>
+<p class="text-[10px] text-gray-500 font-mono uppercase">Bit Depth</p>
+<p class="text-sm text-white font-bold">16-bit Signed</p>
+</div>
+<div>
+<p class="text-[10px] text-gray-500 font-mono uppercase">Channels</p>
+<p class="text-sm text-white font-bold">1 (Mono)</p>
+</div>
+</div>
+</div>
+<!-- Middle: Protocol Stack -->
+<div class="col-span-4 bg-gray-800/40 border border-gray-700 rounded-xl p-5">
+<h3 class="text-sm font-bold text-white mb-3 flex items-center">
+<i class="fas fa-layer-group mr-2 text-purple-400"></i> Protocol Stack
+                </h3>
+<div class="space-y-2">
+<div class="protocol-layer bg-purple-900/10 rounded-r">
+<p class="text-xs font-bold text-purple-300">Application Layer</p>
+<p class="text-[10px] text-gray-400">Call Control, Metadata Tagging</p>
+</div>
+<div class="protocol-layer bg-purple-900/10 rounded-r">
+<p class="text-xs font-bold text-purple-300">HFP Profile (1.7)</p>
+<p class="text-[10px] text-gray-400">AT Commands, SCO Management</p>
+</div>
+<div class="protocol-layer bg-purple-900/10 rounded-r border-blue-500">
+<p class="text-xs font-bold text-blue-300">Transport Layer</p>
+<p class="text-[10px] text-gray-400">RFCOMM, SCO/eSCO, L2CAP</p>
+</div>
+<div class="protocol-layer bg-purple-900/10 rounded-r border-gray-500">
+<p class="text-xs font-bold text-gray-300">Bluetooth Baseband</p>
+<p class="text-[10px] text-gray-500">Physical Radio (2.4GHz)</p>
+</div>
+</div>
+</div>
+<!-- Right: Metadata & Logic -->
+<div class="col-span-3 bg-gray-800/40 border border-gray-700 rounded-xl p-5 flex flex-col justify-between">
+<div>
+<h3 class="text-sm font-bold text-white mb-3 flex items-center">
+<i class="fas fa-tags mr-2 text-pink-400"></i> Metadata
+                    </h3>
+<ul class="space-y-2">
+<li class="flex items-center justify-between text-xs border-b border-gray-700 pb-1">
+<span class="text-gray-400">Caller ID</span>
+<span class="text-pink-300 font-mono">+1 (555)...</span>
+</li>
+<li class="flex items-center justify-between text-xs border-b border-gray-700 pb-1">
+<span class="text-gray-400">Direction</span>
+<span class="text-pink-300 font-mono">Incoming</span>
+</li>
+<li class="flex items-center justify-between text-xs border-b border-gray-700 pb-1">
+<span class="text-gray-400">Timestamp</span>
+<span class="text-pink-300 font-mono">UTC ISO8601</span>
+</li>
+</ul>
+</div>
+<div class="bg-pink-900/20 border border-pink-500/30 rounded p-2 mt-2">
+<p class="text-[9px] text-pink-400 font-bold uppercase mb-1">End Call Event</p>
+<p class="text-[10px] text-gray-300">Triggers file closure &amp; final sync packet to app.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="absolute bottom-0 w-full px-12 py-4 border-t border-gray-800 bg-[#050508]/90 flex justify-between items-center z-20">
+<div class="flex items-center space-x-6">
+<div class="flex items-center space-x-2">
+<div class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></div>
+<span class="text-xs text-gray-400 font-mono">STATE: ACTIVE</span>
+</div>
+<div class="flex items-center space-x-2">
+<i class="fas fa-memory text-xs text-gray-500"></i>
+<span class="text-xs text-gray-400 font-mono">RAM USAGE: ~120KB</span>
+</div>
+</div>
+<div class="flex items-center space-x-2 opacity-50">
+<span class="text-[10px] text-gray-500 font-mono">FW_REV_3.4.1</span>
+</div>
+</footer>
+</body>
+</html>

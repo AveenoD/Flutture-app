@@ -1,0 +1,13 @@
+# Compiled Go binary
+core-api
+*.exe
+*.test
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Build artifacts
+/bin/
+/dist/

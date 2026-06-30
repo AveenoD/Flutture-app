@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: crownco-core-api
+  namespace: crownco-production
+spec:
+  type: ClusterIP
+  selector:
+    app: crownco-core-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crownco-core-api
+  namespace: crownco-production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: crownco-core-api
+  template:
+    metadata:
+      labels:
+        app: crownco-core-api
+    spec:
+      imagePullSecrets:
+        - name: acr-pull-secret
+      containers:
+        - name: core-api
+          image: crownco/core-api:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: crownco-core-api-config
+            - secretRef:
+                name: crownco-core-api-secrets
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: crownco-core-api-secrets
+                  key: POSTGRES_PASSWORD
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: crownco-core-api-secrets
+                  key: REDIS_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi

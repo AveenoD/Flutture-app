@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=1280, height=720, initial-scale=1.0" name="viewport"/>
+<title>Future Vision Roadmap</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            width: 1280px;
+            height: 720px;
+            background-color: #050508;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Grid Background - using SVG to avoid gradients */
+        .bg-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 0L1 40' stroke='%23334155' stroke-opacity='0.2' stroke-width='1'/%3E%3Cpath d='M0 1L40 1' stroke='%23334155' stroke-opacity='0.2' stroke-width='1'/%3E%3C/svg%3E");
+            z-index: 0;
+            opacity: 0.5;
+        }
+
+        /* Roadmap Container */
+        .roadmap-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            padding-top: 40px;
+            z-index: 10;
+        }
+
+        /* Connecting Line */
+        .timeline-line {
+            position: absolute;
+            top: 20px;
+            left: 50px;
+            right: 50px;
+            height: 2px;
+            background-color: #334155;
+            z-index: 0;
+        }
+
+        /* Phase Card */
+        .phase-card {
+            width: 280px;
+            background-color: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 20px;
+        }
+
+        .phase-card:hover {
+            transform: translateY(-10px);
+            background-color: rgba(30, 41, 59, 0.7);
+        }
+
+        /* Phase Colors & Glows (No Gradients) */
+        .phase-1 { border-top: 4px solid #3b82f6; }
+        .phase-1:hover { box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.3); border-color: #3b82f6; }
+        
+        .phase-2 { border-top: 4px solid #10b981; }
+        .phase-2:hover { box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.3); border-color: #10b981; }
+        
+        .phase-3 { border-top: 4px solid #f59e0b; }
+        .phase-3:hover { box-shadow: 0 10px 30px -10px rgba(245, 158, 11, 0.3); border-color: #f59e0b; }
+        
+        .phase-4 { border-top: 4px solid #ec4899; }
+        .phase-4:hover { box-shadow: 0 10px 30px -10px rgba(236, 72, 153, 0.3); border-color: #ec4899; }
+
+        /* Timeline Dot */
+        .timeline-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #0f172a;
+            border: 3px solid;
+            position: absolute;
+            top: -28px; 
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            box-shadow: 0 0 0 4px rgba(15, 23, 42, 1);
+        }
+
+        .dot-1 { border-color: #3b82f6; }
+        .dot-2 { border-color: #10b981; }
+        .dot-3 { border-color: #f59e0b; }
+        .dot-4 { border-color: #ec4899; }
+
+        /* Feature List */
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .feature-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .feature-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 14px;
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .anim-delay-1 { animation: slideUp 0.6s ease-out forwards 0.1s; opacity: 0; }
+        .anim-delay-2 { animation: slideUp 0.6s ease-out forwards 0.3s; opacity: 0; }
+        .anim-delay-3 { animation: slideUp 0.6s ease-out forwards 0.5s; opacity: 0; }
+        .anim-delay-4 { animation: slideUp 0.6s ease-out forwards 0.7s; opacity: 0; }
+
+        /* Status Badge */
+        .status-badge {
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.05);
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<!-- Header -->
+<header class="w-full p-8 flex justify-between items-start z-20 relative">
+<div>
+<div class="flex items-center space-x-3 mb-2">
+<div class="w-2 h-2 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
+<p class="text-gray-400 text-sm font-semibold tracking-widest uppercase font-mono">Strategic Growth</p>
+</div>
+<h1 class="text-4xl font-bold text-white font-display">Future Vision Roadmap</h1>
+</div>
+<div class="flex items-center space-x-4">
+<div class="bg-gray-900 border border-gray-700 px-4 py-2 rounded-lg flex items-center gap-3">
+<i class="fas fa-rocket text-purple-400"></i>
+<div>
+<p class="text-[10px] text-gray-400 font-mono uppercase">Horizon</p>
+<p class="text-lg font-bold text-white font-display">2026 - 2028</p>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Roadmap Content -->
+<main class="flex-1 px-12 pb-8 relative z-10">
+<div class="roadmap-container h-full">
+<div class="timeline-line"></div>
+<!-- Phase 1: AI Intelligence -->
+<div class="phase-card phase-1 anim-delay-1">
+<div class="timeline-dot dot-1"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<span class="text-blue-400 font-mono text-xs font-bold uppercase mb-1 block">Phase 1</span>
+<h3 class="text-xl font-bold text-white font-display">AI Intelligence</h3>
+</div>
+<span class="status-badge text-blue-300 border border-blue-500/30">Q3 2026</span>
+</div>
+<div class="space-y-1">
+<div class="feature-item">
+<div class="feature-icon text-blue-400"><i class="fas fa-microphone-lines"></i></div>
+<div>
+<p class="text-sm font-bold text-gray-200">Real-time Transcription</p>
+<p class="text-xs text-gray-500">Sub-200ms latency stream</p>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-icon text-blue-400"><i class="fas fa-brain"></i></div>
+<div>
+<p class="text-sm font-bold text-gray-200">Sentiment Analysis</p>
+<p class="text-xs text-gray-500">Tone &amp; emotion scoring</p>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-icon text-blue-400"><i class="fas fa-check-double"></i></div>
+<div>
+<p class="text-sm font-bold text-gray-200">QA Auto-Scoring</p>
+<p class="text-xs text-gray-500">Script adherence checks</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Phase 2: Compliance -->
+<div class="phase-card phase-2 anim-delay-2">
+<div class="timeline-dot dot-2"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<span class="text-emerald-400 font-mono text-xs font-bold uppercase mb-1 block">Phase 2</span>
+<h3 class="text-xl font-bold text-white font-display">Compliance</h3>
+</div>
+<span class="status-badge text-emerald-300 border border-emerald-500/30">Q4 2026</span>
+</div>
+<div class="space-y-1">
+<div class="feature-item">
+<div class="feature-icon text-emerald-400"><i class="fas fa-user-shield"></i></div>
+<div>
+<p class="text-sm font-bold text-gray-200">PII Redaction</p>
+<p class="text-xs text-gray-500">Auto-masking credit cards</p>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-icon text-emerald-400"><i class="fas fa-file-contract"></i></div>
+<div>
+<p class="text-sm font-bold text-gray-200">Consent Workflows</p>
+<p class="text-xs text-gray-500">Dynamic audio injection</p>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-icon text-emerald-400"><i class="fas fa-vault"></i></div>
+<div>
+<p class="text-sm font-bold text-gray-200">Secure Vault</p>
+<p class="text-xs text-gray-500">Immutable audit trails</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Phase 3: Analytics Dashboard -->
+<div class="phase-card phase-3 anim-delay-3">
+<div class="timeline-dot dot-3"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<span class="text-amber-400 font-mono text-xs font-bold uppercase mb-1 block">Phase 3</span>
+<h3 class="text-xl font-bold text-white font-display">Dashboards</h3>
+</div>
+<span class="status-badge text-amber-300 border border-amber-500/30">Q1 2027</span>
+</div>
+<div class="space-y-1">
+<div class="feature-item">
+<div class="feature-icon text-amber-400"><i class="fas fa-chart-line"></i></div>
+<div>
+<p class="text-sm font-bold text-gray-200">Team Monitoring</p>
+<p class="text-xs text-gray-500">Live agent performance</p>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-icon text-amber-400"><i class="fas fa-bell"></i></div>
+<div>
+<p class="text-sm font-bold text-gray-200">Smart Alerts</p>
+<p class="text-xs text-gray-500">Keyword triggers</p>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-icon text-amber-400"><i class="fas fa-stopwatch"></i></div>
+<div>
+<p class="text-sm font-bold text-gray-200">SLA Tracking</p>
+<p class="text-xs text-gray-500">Uptime &amp; resolution time</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Phase 4: Next-Gen Tech -->
+<div class="phase-card phase-4 anim-delay-4">
+<div class="timeline-dot dot-4"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<span class="text-pink-400 font-mono text-xs font-bold uppercase mb-1 block">Phase 4</span>
+<h3 class="text-xl font-bold text-white font-display">Next-Gen Core</h3>
+</div>
+<span class="status-badge text-pink-300 border border-pink-500/30">2027+</span>
+</div>
+<div class="space-y-1">
+<div class="feature-item">
+<div class="feature-icon text-pink-400"><i class="fas fa-wifi"></i></div>
+<div>
+<p class="text-sm font-bold text-gray-200">LE Audio (LC3)</p>
+<p class="text-xs text-gray-500">High fidelity, low energy</p>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-icon text-pink-400"><i class="fas fa-microchip"></i></div>
+<div>
+<p class="text-sm font-bold text-gray-200">On-Device AI</p>
+<p class="text-xs text-gray-500">Offline keywording (TinyML)</p>
+</div>
+</div>
+<div class="feature-item">
+<div class="feature-icon text-pink-400"><i class="fas fa-globe"></i></div>
+<div>
+<p class="text-sm font-bold text-gray-200">Multi-lingual</p>
+<p class="text-xs text-gray-500">Real-time translation API</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="absolute bottom-0 w-full px-12 py-4 border-t border-gray-800 bg-gray-900 bg-opacity-90 flex justify-between items-center z-20">
+<div class="flex items-center space-x-6">
+<div class="flex items-center space-x-2">
+<div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+<span class="text-xs text-gray-400 font-mono">STATUS: PLANNING</span>
+</div>
+<div class="flex items-center space-x-2">
+<i class="fas fa-map-marked-alt text-xs text-gray-500"></i>
+<span class="text-xs text-gray-400 font-mono">MILESTONES: 4/12</span>
+</div>
+</div>
+<div class="flex items-center space-x-2 opacity-50">
+<span class="text-[10px] text-gray-500 font-mono">CONFIDENTIAL ROADMAP</span>
+</div>
+</footer>
+</body>
+</html>

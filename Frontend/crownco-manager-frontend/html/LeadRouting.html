@@ -1,0 +1,2468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Route Dashboard - Tplanzo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --bg-light: #f8f9fa;
+            --border-color: #eaecf0;
+            --text-main: #344054;
+            --text-muted: #667085;
+            --white: #ffffff;
+            --primary-dark: #0056b3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Placeholder */
+        .sidebar-placeholder {
+            width: 260px;
+            background: #fff;
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Topbar Placeholder */
+        .topbar-placeholder {
+            height: 70px;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        /* Scrollable Content Container */
+        .content-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            scroll-behavior: smooth;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header Section */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .user-greeting h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #101828;
+        }
+
+        .user-greeting p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* Metrics Grid */
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #101828;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .metric-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .trend {
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .trend.up { color: var(--success); }
+        .trend.down { color: var(--danger); }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #101828;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Table Section */
+        .table-container {
+            background: var(--white);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .table-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #101828;
+            margin: 0 0 16px 0;
+        }
+        
+        .table-header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            width: 250px;
+            position: relative;
+        }
+        
+        .table-controls {
+            position: relative;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            background: #f9fafb;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #F9FAFB;
+            padding: 12px 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        th i {
+            margin-left: 4px;
+            font-size: 10px;
+            opacity: 0.6;
+        }
+
+        td {
+            padding: 16px 20px;
+            font-size: 14px;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-high { background: #FEE4E2; color: #D92D20; }
+        .badge-medium { background: #FEF0C7; color: #B54708; }
+        .badge-low { background: #F2F4F7; color: #344054; }
+        .badge-active { background: #ECFDF3; color: #027A48; }
+        .badge-deleted { background: #F2F4F7; color: #667085; }
+        .badge-paused { background: #F2F4F7; color: #667085; }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .btn-update { background: var(--primary); color: white; border: none; }
+        .btn-play { 
+            background: #F2F4F7; 
+            color: var(--primary); 
+            border: none; 
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
+        /* Pagination Styles */
+        .table-pagination {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .pagination-info {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .rows-per-page {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        
+        .rows-per-page select {
+            padding: 6px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .pagination-arrows {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .pagination-arrow {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        
+        .pagination-arrow:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .pagination-arrow:hover:not(:disabled) {
+            background: #f9fafb;
+        }
+
+        /* Charts Row */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .chart-card {
+            background: var(--white);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .tab-group {
+            display: flex;
+            background: #F2F4F7;
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .tab {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Bar Chart UI Mockup */
+        .chart-content {
+            position: relative;
+            padding: 20px 0 40px 40px;
+            height: 280px;
+        }
+        
+        .y-axis {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 40px;
+            width: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-right: 8px;
+        }
+        
+        .y-axis-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .grid-lines {
+            position: absolute;
+            left: 40px;
+            right: 0;
+            top: 0;
+            bottom: 40px;
+        }
+        
+        .grid-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #F2F4F7;
+        }
+        
+        .bar-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 40px;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .bar {
+            width: 100%;
+            background: #70b1ff;
+            border-radius: 4px 4px 0 0;
+            transition: height 0.3s;
+            min-height: 4px;
+        }
+
+        .bar-label { 
+            font-size: 12px; 
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+        
+        .chart-legend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .legend-square {
+            width: 12px;
+            height: 12px;
+            background: #70b1ff;
+            border-radius: 2px;
+        }
+
+        /* Smart Insight List */
+        .insight-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .insight-item {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid;
+            display: flex;
+            gap: 12px;
+            position: relative;
+            align-items: flex-start;
+        }
+
+        .insight-item.danger { 
+            border-color: #FEE4E2; 
+            background: #FEF3F2; 
+        }
+        .insight-item.warning { 
+            border-color: #FEDF89; 
+            background: #FFFAEB; 
+        }
+        .insight-item.success { 
+            border-color: #A6EFAC; 
+            background: #ECFDF3; 
+        }
+        .insight-item.info { 
+            border-color: #B2DDFF; 
+            background: #EFF8FF; 
+        }
+
+        .insight-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .insight-icon.danger { color: #D92D20; }
+        .insight-icon.warning { color: #B54708; }
+        .insight-icon.success { color: #027A48; }
+        .insight-icon.info { color: #175CD3; }
+
+        .insight-content {
+            flex: 1;
+        }
+
+        .insight-content h4 { 
+            font-size: 13px; 
+            margin-bottom: 4px; 
+            font-weight: 600;
+        }
+        .insight-content h4.danger { color: #D92D20; }
+        .insight-content h4.warning { color: #B54708; }
+        .insight-content h4.success { color: #027A48; }
+        .insight-content h4.info { color: #175CD3; }
+        .insight-content p { 
+            font-size: 12px; 
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .insight-timestamp {
+            font-size: 10px;
+            color: var(--text-muted);
+            position: absolute;
+            right: 32px;
+            top: 12px;
+        }
+
+        .insight-close {
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+        }
+
+        .insight-close:hover {
+            opacity: 1;
+        }
+
+        /* Efficiency Bars */
+        .efficiency-item {
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .efficiency-item.high {
+            background: #ECFDF3;
+        }
+        .efficiency-item.medium {
+            background: #FFFAEB;
+        }
+        .efficiency-item.low {
+            background: #FEF3F2;
+        }
+        
+        .eff-labels {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .eff-rule-name {
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .efficiency-item.high .eff-rule-name {
+            color: #027A48;
+        }
+        .efficiency-item.medium .eff-rule-name {
+            color: #B54708;
+        }
+        .efficiency-item.low .eff-rule-name {
+            color: #D92D20;
+        }
+        
+        .eff-stats {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        
+        .eff-percentage {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+        
+        .eff-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .efficiency-item.high .eff-dot {
+            background: #027A48;
+        }
+        .efficiency-item.medium .eff-dot {
+            background: #B54708;
+        }
+        .efficiency-item.low .eff-dot {
+            background: #D92D20;
+        }
+        
+        .eff-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        
+        .progress-bg {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .efficiency-item.high .progress-fill {
+            background: #027A48;
+        }
+        .efficiency-item.medium .progress-fill {
+            background: #B54708;
+        }
+        .efficiency-item.low .progress-fill {
+            background: #D92D20;
+        }
+        
+        .efficiency-legend {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .legend-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        .legend-items {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-main);
+        }
+        
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .legend-dot.high {
+            background: #027A48;
+        }
+        .legend-dot.medium {
+            background: #B54708;
+        }
+        .legend-dot.low {
+            background: #D92D20;
+        }
+
+        /* Donut Chart Mockup */
+        .donut-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        .donut-mock {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #2e90fa 0% 25%, 
+                #f79009 25% 45%, 
+                #12b76a 45% 65%, 
+                #ee46bc 65% 85%, 
+                #6172f3 85% 100%
+            );
+            position: relative;
+        }
+        .donut-mock::after {
+            content: "";
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* =========================================
+           MODAL & POPUP STYLES
+        ========================================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-container {
+            background: #fff;
+            width: 100%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+        
+        /* Mobile Side Drawer Styles */
+        @media (max-width: 768px) {
+            .modal-overlay {
+                justify-content: flex-end;
+                align-items: stretch;
+                padding: 0;
+                background: rgba(0, 0, 0, 0.5);
+            }
+            
+            .modal-container {
+                width: 100%;
+                max-width: 100%;
+                height: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+                box-shadow: -4px 0 12px rgba(0,0,0,0.15);
+                animation: slideInRight 0.3s ease-out;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                }
+                to {
+                    transform: translateX(0);
+                }
+            }
+            
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                }
+                to {
+                    transform: translateX(100%);
+                }
+            }
+            
+            .modal-header {
+                padding: 16px 20px;
+                border-bottom: 1px solid var(--border-color);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-shrink: 0;
+                background: #fff;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+            }
+            
+            .modal-title {
+                font-size: 18px;
+                font-weight: 600;
+                flex: 1;
+                text-align: center;
+                margin: 0;
+                padding: 0 40px;
+            }
+            
+            .back-modal-btn {
+                display: flex;
+                position: absolute;
+                left: 20px;
+                font-size: 20px;
+                width: 32px;
+                height: 32px;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .save-modal-btn {
+                display: flex;
+                position: absolute;
+                right: 20px;
+                font-size: 20px;
+                width: 32px;
+                height: 32px;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .close-modal-btn {
+                display: none;
+            }
+            
+            .modal-body {
+                padding: 20px;
+                overflow-y: auto;
+                flex: 1;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .modal-footer {
+                padding: 16px 20px;
+                border-top: 1px solid var(--border-color);
+                display: flex;
+                gap: 12px;
+                flex-shrink: 0;
+                background: #fff;
+                position: sticky;
+                bottom: 0;
+                z-index: 10;
+                box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+            }
+            
+            .modal-footer .btn {
+                flex: 1;
+                padding: 14px 16px;
+                font-size: 16px;
+                font-weight: 600;
+                border-radius: 8px;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #101828;
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        
+        .back-modal-btn,
+        .save-modal-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #344054;
+        }
+
+        .form-input, .form-select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-main);
+            outline: none;
+        }
+        
+        .form-input::placeholder {
+            color: #98A2B3;
+        }
+
+        /* Input with Tags Styling */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+            min-height: 32px;
+        }
+        
+        .input-with-tags {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #fff;
+            position: relative;
+        }
+        
+        .input-with-tags input {
+            border: none;
+            outline: none;
+            flex-grow: 1;
+            padding: 4px 0;
+            font-size: 14px;
+        }
+
+        .tag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .tag-blue { background: #EFF8FF; color: #175CD3; }
+        .tag-purple { background: #F9F5FF; color: #6941C6; }
+        .tag-orange { background: #FFFAEB; color: #B54708; }
+        .tag-grey { background: #F2F4F7; color: #344054; }
+
+        .tag-close {
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .ai-suggestion-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .suggestion-chip {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            background: #F2F4F7;
+            color: #344054;
+            cursor: pointer;
+        }
+        
+        .suggestion-chip.blue { background: #EFF8FF; color: #175CD3; }
+        .suggestion-chip.green { background: #ECFDF3; color: #027A48; }
+        .suggestion-chip.orange { background: #FFFAEB; color: #B54708; }
+        .suggestion-chip.red { background: #FEF3F2; color: #B42318; }
+        .suggestion-chip.purple { background: #F9F5FF; color: #6941C6; }
+
+        .radio-group {
+            display: flex;
+            gap: 24px;
+            margin-top: 8px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .radio-option input[type="radio"] {
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+        }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-footer .btn {
+            flex: 1;
+            justify-content: center;
+            padding: 10px 16px;
+            font-weight: 600;
+        }
+
+        /* Mobile Card Container */
+        .mobile-cards-container {
+            display: none;
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        
+        /* Mobile Smart Insight Section */
+        .mobile-smart-insight {
+            display: none;
+            margin-bottom: 24px;
+        }
+
+        /* Mobile Card Styles */
+        .table-cards {
+            display: none;
+        }
+
+        .table-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .mobile-cards-container .table-card {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+        
+        .mobile-cards-container .table-card:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 0;
+            border-bottom: none;
+            gap: 12px;
+            flex-wrap: nowrap;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #101828;
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-checkbox {
+            display: none;
+        }
+
+        .card-actions-top {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        .card-action-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .card-action-icon.delete {
+            background: #FEE4E2;
+            color: var(--danger);
+        }
+
+        .card-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .card-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .card-detail-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .card-detail-value {
+            font-size: 14px;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        .card-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .card-footer {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-footer .btn-update {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Mobile Section Header */
+        .mobile-section-header {
+            display: none;
+            margin-bottom: 16px;
+        }
+
+        .mobile-section-header .section-title {
+            margin: 0;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .mobile-create-rule-btn {
+            align-self: flex-end;
+            white-space: nowrap;
+        }
+
+        .mobile-see-all-btn {
+            display: none;
+            width: 100%;
+            margin-top: 16px;
+            justify-content: center;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1100px) {
+            .charts-row { grid-template-columns: 1fr; }
+            .sidebar-placeholder { width: 80px; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-placeholder { display: none; }
+            .metrics-grid { grid-template-columns: 1fr 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+            .modal-footer { flex-direction: column-reverse; }
+            
+            .content-area {
+                padding: 16px;
+            }
+            
+            .header-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            /* Show mobile section header */
+            .mobile-section-header {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0;
+            }
+            
+            .mobile-section-header .mobile-create-rule-btn {
+                align-self: flex-end;
+                margin-bottom: 0;
+            }
+            
+            /* Hide desktop table header on mobile */
+            .table-header {
+                display: none;
+            }
+            
+            /* Hide desktop create rule button on mobile */
+            .desktop-create-rule-btn {
+                display: none;
+            }
+            
+            /* Remove border and padding from table-container on mobile since header is outside */
+            .table-container {
+                border: none;
+                padding: 0;
+                background: transparent;
+            }
+            
+            /* Hide table on mobile */
+            .table-container table,
+            .table-container thead,
+            .table-container tbody,
+            .table-container th,
+            .table-container td,
+            .table-container tr {
+                display: none;
+            }
+            
+            /* Show cards container on mobile */
+            .mobile-cards-container {
+                display: block;
+            }
+            
+            /* Show cards on mobile */
+            .table-cards {
+                display: block;
+            }
+            
+            /* Ensure card header keeps heading and buttons on same line */
+            .card-header {
+                flex-wrap: nowrap;
+                gap: 8px;
+            }
+            
+            .card-title {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                min-width: 0;
+            }
+            
+            .card-actions-top {
+                flex-shrink: 0;
+            }
+            
+            /* Show See All Rules button on mobile */
+            .mobile-see-all-btn {
+                display: flex;
+            }
+            
+            /* Show mobile Smart Insight section */
+            .mobile-smart-insight {
+                display: block;
+            }
+            
+            /* Hide Smart Insight in first charts-row on mobile */
+            .charts-row:first-of-type .chart-card:last-child {
+                display: none;
+            }
+            
+            /* Fix charts-row spacing on mobile */
+            .charts-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                margin-bottom: 24px;
+            }
+            
+            .chart-card {
+                width: 100%;
+                margin-bottom: 0;
+                padding: 16px;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .chart-card:last-child {
+                margin-bottom: 0;
+            }
+            
+            .chart-header {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 16px;
+                width: 100%;
+            }
+            
+            .chart-header > div:first-child {
+                width: 100%;
+            }
+            
+            .chart-header h4 {
+                font-size: 15px;
+                margin: 0;
+            }
+            
+            .chart-header p {
+                font-size: 11px;
+                margin: 4px 0 0 0;
+            }
+            
+            .tab-group {
+                width: 100%;
+                display: flex;
+                justify-content: flex-start;
+            }
+            
+            /* Fix bar-container for Average Response Time */
+            .bar-container {
+                width: 100%;
+                overflow-x: auto;
+                padding: 10px 0;
+                display: flex;
+                gap: 8px;
+                justify-content: space-around;
+            }
+            
+            .bar-wrapper {
+                min-width: 50px;
+                flex-shrink: 0;
+            }
+            
+            /* Fix efficiency items spacing */
+            .efficiency-item {
+                margin-bottom: 12px;
+            }
+            
+            .efficiency-item:last-child {
+                margin-bottom: 0;
+            }
+            
+            /* Hide pagination on mobile */
+            .table-pagination {
+                display: none;
+            }
+            
+            .pagination-controls {
+                justify-content: space-between;
+            }
+            
+            .card-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+            
+            .card-label {
+                min-width: auto;
+            }
+            
+            .card-value {
+                text-align: left;
+            }
+            
+            .card-badges {
+                justify-content: flex-start;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .metrics-grid { grid-template-columns: 1fr; }
+            .card-header {
+                flex-wrap: nowrap;
+                gap: 6px;
+            }
+            .card-title {
+                font-size: 14px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .card-actions-top {
+                flex-shrink: 0;
+                width: auto;
+                margin-top: 0;
+            }
+            .card-action-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+            
+            /* Fix chart cards on small screens */
+            .charts-row {
+                gap: 16px;
+                margin-bottom: 20px;
+            }
+            
+            .chart-card {
+                padding: 12px;
+            }
+            
+            .chart-header {
+                gap: 10px;
+                margin-bottom: 12px;
+            }
+            
+            .chart-header h4 {
+                font-size: 14px;
+            }
+            
+            .chart-header p {
+                font-size: 10px;
+            }
+            
+            .bar-container {
+                gap: 6px;
+                padding: 8px 0;
+            }
+            
+            .bar-wrapper {
+                min-width: 40px;
+            }
+            
+            .bar-label {
+                font-size: 9px;
+            }
+            
+            .efficiency-item {
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .eff-rule-name {
+                font-size: 11px;
+            }
+            
+            .eff-percentage {
+                font-size: 11px;
+            }
+            
+            .eff-number {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-placeholder"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-placeholder"></div>
+
+        <div class="content-area">
+            <div class="dashboard-container">
+                
+                <div class="header-section">
+                    <div class="user-greeting">
+                        <h1>Welcome Sarah 👋</h1>
+                        <p>23/6/2025</p>
+                    </div>
+                    <div class="header-actions">
+                        <i class="fa-regular fa-bell" style="font-size: 20px; color: var(--text-muted);"></i>
+                    </div>
+                </div>
+
+                <h3 class="section-title">Metrics Breakdown</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: #F9F5FF; color: #7F56D9;"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                            <span class="trend up">+6.5%</span>
+                        </div>
+                        <div class="metric-value">164</div>
+                        <div class="metric-label">Auto-Routed Leads</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: #FFFAEB; color: #B54708;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <span class="trend up">+1.3%</span>
+                        </div>
+                        <div class="metric-value">10</div>
+                        <div class="metric-label">Unmatched Rules Triggered</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: #EFF8FF; color: #2E90FA;"><i class="fa-solid fa-hand"></i></div>
+                            <span class="trend down">-2.1%</span>
+                        </div>
+                        <div class="metric-value">36</div>
+                        <div class="metric-label">Manual Assignments Done</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: #ECFDF3; color: #027A48;"><i class="fa-regular fa-clock"></i></div>
+                            <span class="trend up">+0.4s</span>
+                        </div>
+                        <div class="metric-value">1.2s</div>
+                        <div class="metric-label">Avg Rule Match Time</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: #F9F5FF; color: #7F56D9;"><i class="fa-solid fa-trophy"></i></div>
+                            <span class="trend up">+4.6%</span>
+                        </div>
+                        <div class="metric-value">73%</div>
+                        <div class="metric-label">Top Rule Success Rate</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: #FEF3F2; color: #B42318;"><i class="fa-solid fa-scale-balanced"></i></div>
+                            <span class="trend up">+2.2%</span>
+                        </div>
+                        <div class="metric-value">89%</div>
+                        <div class="metric-label">Load-Balanced Assignments</div>
+                    </div>
+                </div>
+
+                <!-- Mobile View: Title and Create Rule Button (outside container) -->
+                <div class="mobile-section-header">
+                    <button class="btn btn-primary mobile-create-rule-btn" id="createRuleBtnMobile"><i class="fa-solid fa-plus"></i> Create Rule</button>
+                    <h3 class="section-title">Active Routing Rules</h3>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3 class="table-title">Active Routing Rules</h3>
+                        <div class="table-header-controls">
+                            <div class="table-controls" style="position: relative;">
+                                <button class="btn"><i class="fa-solid fa-table-columns"></i> Column</button>
+                                <div style="position: relative; display: inline-block;">
+                                    <input type="text" class="search-input" placeholder="Search">
+                                    <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-muted); pointer-events: none;">⌘ F</span>
+                                </div>
+                            </div>
+                            <div class="table-controls">
+                                <button class="btn"><i class="fa-solid fa-file-export"></i> Export</button>
+                                <button class="btn" style="color: var(--danger);"><i class="fa-regular fa-trash-can"></i> Delete</button>
+                                <button class="btn btn-primary desktop-create-rule-btn" id="createRuleBtn"><i class="fa-solid fa-plus"></i> Create Rule</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox"></th>
+                                    <th>Rule Name <i class="fa-solid fa-arrows-up-down"></i></th>
+                                    <th>Filter Applied <i class="fa-solid fa-arrows-up-down"></i></th>
+                                    <th>Assigned To <i class="fa-solid fa-arrows-up-down"></i></th>
+                                    <th>Leads Routed <i class="fa-solid fa-arrows-up-down"></i></th>
+                                    <th>Priority <i class="fa-solid fa-arrows-up-down"></i></th>
+                                    <th>Status <i class="fa-solid fa-arrows-up-down"></i></th>
+                                    <th>Action <i class="fa-solid fa-arrows-up-down"></i></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>premium Leads thane</td>
+                                    <td>Source: Website, Budget: 50L+, Area: Thane</td>
+                                    <td>Team A</td>
+                                    <td>127</td>
+                                    <td><span class="badge badge-high">High</span></td>
+                                    <td><span class="badge badge-active">Active</span></td>
+                                    <td class="action-btns">
+                                        <button class="action-btn btn-update">Update</button>
+                                        <button class="action-btn btn-play"><i class="fa-solid fa-play"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>Walk-in Customers</td>
+                                    <td>Source: Walk-in, Budget: Any, Language: Hindi</td>
+                                    <td>Sarah johnson</td>
+                                    <td>127</td>
+                                    <td><span class="badge badge-medium">Medium</span></td>
+                                    <td><span class="badge badge-active">Active</span></td>
+                                    <td class="action-btns">
+                                        <button class="action-btn btn-update">Update</button>
+                                        <button class="action-btn btn-play"><i class="fa-solid fa-play"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>Housing Leads - Andheri</td>
+                                    <td>Source: Housing, Status: Hot, Area: Andheri</td>
+                                    <td>Team B</td>
+                                    <td>127</td>
+                                    <td><span class="badge badge-low">Low</span></td>
+                                    <td><span class="badge badge-paused">paused</span></td>
+                                    <td class="action-btns">
+                                        <button class="action-btn btn-update">Update</button>
+                                        <button class="action-btn btn-play"><i class="fa-solid fa-pause"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox"></td>
+                                    <td>Budget Range 20-50L</td>
+                                    <td>Source: Website, Budget: 50L+, Area: Thane</td>
+                                    <td>Mike Chen</td>
+                                    <td>127</td>
+                                    <td><span class="badge badge-medium">Medium</span></td>
+                                    <td><span class="badge badge-active">Active</span></td>
+                                    <td class="action-btns">
+                                        <button class="action-btn btn-update">Update</button>
+                                        <button class="action-btn btn-play"><i class="fa-solid fa-play"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Mobile Card View -->
+                    <div class="mobile-cards-container">
+                        <div class="table-cards">
+                            <div class="table-card">
+                                <div class="card-header">
+                                    <div class="card-title">Premium leads-Thane</div>
+                                    <div class="card-actions-top">
+                                        <button class="card-action-icon"><i class="fa-solid fa-play"></i></button>
+                                        <button class="card-action-icon delete"><i class="fa-regular fa-trash-can"></i></button>
+                                    </div>
+                                </div>
+                                <div class="card-details">
+                                    <div class="card-detail-item">
+                                        <span class="card-detail-label">Filter Applied:</span>
+                                        <span class="card-detail-value">Source: Website, Budget: 50L+, Area: Thane</span>
+                                    </div>
+                                    <div class="card-detail-item">
+                                        <span class="card-detail-label">Assigned To:</span>
+                                        <span class="card-detail-value">Sarah Johnson</span>
+                                    </div>
+                                    <div class="card-detail-item">
+                                        <span class="card-detail-label">Lead Routed:</span>
+                                        <span class="card-detail-value">176</span>
+                                    </div>
+                                </div>
+                                <div class="card-badges">
+                                    <span class="badge badge-active">Active</span>
+                                    <span class="badge badge-high">High</span>
+                                </div>
+                                <div class="card-footer">
+                                    <button class="action-btn btn-update">Update</button>
+                                </div>
+                            </div>
+                            
+                            <div class="table-card">
+                                <div class="card-header">
+                                    <div class="card-title">Budget Range 20-50L</div>
+                                    <div class="card-actions-top">
+                                        <button class="card-action-icon"><i class="fa-solid fa-pause"></i></button>
+                                        <button class="card-action-icon delete"><i class="fa-regular fa-trash-can"></i></button>
+                                    </div>
+                                </div>
+                                <div class="card-details">
+                                    <div class="card-detail-item">
+                                        <span class="card-detail-label">Filter Applied:</span>
+                                        <span class="card-detail-value">Source: Website, Budget: 50L+, Area: Thane</span>
+                                    </div>
+                                    <div class="card-detail-item">
+                                        <span class="card-detail-label">Assigned To:</span>
+                                        <span class="card-detail-value">Sarah Johnson</span>
+                                    </div>
+                                    <div class="card-detail-item">
+                                        <span class="card-detail-label">Lead Routed:</span>
+                                        <span class="card-detail-value">176</span>
+                                    </div>
+                                </div>
+                                <div class="card-badges">
+                                    <span class="badge badge-paused">Paused</span>
+                                    <span class="badge badge-high">High</span>
+                                </div>
+                                <div class="card-footer">
+                                    <button class="action-btn btn-update">Update</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary mobile-see-all-btn">See All Rules</button>
+                    </div>
+                    
+                    <div class="table-pagination">
+                        <div class="rows-per-page">
+                            <span>Row Per Page</span>
+                            <select>
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <div class="pagination-controls">
+                            <span class="pagination-info">1 - 4 of 4</span>
+                            <div class="pagination-arrows">
+                                <button class="pagination-arrow" disabled>
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <button class="pagination-arrow" disabled>
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mobile Smart Insight Section -->
+                <div class="mobile-smart-insight">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h4 style="font-size: 16px;">Smart Insight</h4>
+                                <p style="font-size: 12px; color: var(--text-muted);">Emphasizes decision support</p>
+                            </div>
+                            <span class="badge badge-high">2 Critical</span>
+                        </div>
+                        <div class="insight-list">
+                            <div class="insight-item danger">
+                                <div class="insight-icon danger">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4 class="danger">Rule Not Routing Leads</h4>
+                                    <p>Rule "Weekend Leads" has only routed 8 leads this month with 6% conversion.</p>
+                                </div>
+                                <span class="insight-timestamp">2 hour ago</span>
+                                <button class="insight-close"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <div class="insight-item warning">
+                                <div class="insight-icon warning">
+                                    <i class="fa-solid fa-fire"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4 class="warning">Team B Overloaded</h4>
+                                    <p>Team B is handling 35% above capacity. Response time increased to 42 minutes.</p>
+                                </div>
+                                <span class="insight-timestamp">4 hour ago</span>
+                                <button class="insight-close"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <div class="insight-item success">
+                                <div class="insight-icon success">
+                                    <i class="fa-regular fa-clock"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4 class="success">High Conversion Opportunity</h4>
+                                    <p>Premium Leads - Thane rule shows 34% conversion rate. Consider expanding criteria.</p>
+                                </div>
+                                <span class="insight-timestamp">6 hour ago</span>
+                                <button class="insight-close"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <div class="insight-item info">
+                                <div class="insight-icon info">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4 class="info">Unmatched Corporate Leads</h4>
+                                    <p>23 corporate inquiries unassigned this week. Missing dedicated routing rule.</p>
+                                </div>
+                                <span class="insight-timestamp">2 hour ago</span>
+                                <button class="insight-close"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%; margin-top: 20px; justify-content: center;">View All Insights</button>
+                    </div>
+                </div>
+
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h4 style="font-size: 16px;">Top Performing Teams</h4>
+                                <p style="font-size: 12px; color: var(--text-muted);">Teams by leads routed volume</p>
+                            </div>
+                            <div class="tab-group">
+                                <span class="tab active">Week</span>
+                                <span class="tab">Month</span>
+                                <span class="tab">Custom</span>
+                            </div>
+                        </div>
+                        <div class="chart-content">
+                            <div class="y-axis">
+                                <span class="y-axis-label">100</span>
+                                <span class="y-axis-label">80</span>
+                                <span class="y-axis-label">60</span>
+                                <span class="y-axis-label">40</span>
+                                <span class="y-axis-label">20</span>
+                            </div>
+                            <div class="grid-lines">
+                                <div class="grid-line" style="top: 0%;"></div>
+                                <div class="grid-line" style="top: 25%;"></div>
+                                <div class="grid-line" style="top: 50%;"></div>
+                                <div class="grid-line" style="top: 75%;"></div>
+                                <div class="grid-line" style="top: 100%;"></div>
+                            </div>
+                            <div class="bar-container">
+                                <div class="bar-wrapper">
+                                    <div class="bar" style="height: 95%;"></div>
+                                    <span class="bar-label">Team A</span>
+                                </div>
+                                <div class="bar-wrapper">
+                                    <div class="bar" style="height: 80%;"></div>
+                                    <span class="bar-label">Team B</span>
+                                </div>
+                                <div class="bar-wrapper">
+                                    <div class="bar" style="height: 70%;"></div>
+                                    <span class="bar-label">Team C</span>
+                                </div>
+                                <div class="bar-wrapper">
+                                    <div class="bar" style="height: 60%;"></div>
+                                    <span class="bar-label">Team D</span>
+                                </div>
+                                <div class="bar-wrapper">
+                                    <div class="bar" style="height: 40%;"></div>
+                                    <span class="bar-label">Team E</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-square"></div>
+                            <span>Leads Routed</span>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h4 style="font-size: 16px;">Smart Insight</h4>
+                                <p style="font-size: 12px; color: var(--text-muted);">Emphasizes decision support</p>
+                            </div>
+                            <span class="badge badge-high">1 Critical</span>
+                        </div>
+                        <div class="insight-list">
+                            <div class="insight-item danger">
+                                <div class="insight-icon danger">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4 class="danger">Rule Not Routing Leads</h4>
+                                    <p>Rule "Weekend Leads" has only routed 8 leads this month with 6% conversion.</p>
+                                </div>
+                                <span class="insight-timestamp">2 hour ago</span>
+                                <button class="insight-close"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <div class="insight-item warning">
+                                <div class="insight-icon warning">
+                                    <i class="fa-solid fa-fire"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4 class="warning">Team B Overloaded</h4>
+                                    <p>Team B is handling 35% above capacity. Response time increased to 42 minutes.</p>
+                                </div>
+                                <span class="insight-timestamp">4 hour ago</span>
+                                <button class="insight-close"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <div class="insight-item success">
+                                <div class="insight-icon success">
+                                    <i class="fa-regular fa-clock"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4 class="success">High Conversion Opportunity</h4>
+                                    <p>Premium Leads - Thane rule shows 34% conversion rate. Consider expanding criteria.</p>
+                                </div>
+                                <span class="insight-timestamp">6 hour ago</span>
+                                <button class="insight-close"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <div class="insight-item info">
+                                <div class="insight-icon info">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                                <div class="insight-content">
+                                    <h4 class="info">Unmatched Corporate Leads</h4>
+                                    <p>23 corporate inquiries unassigned this week. Missing dedicated routing rule.</p>
+                                </div>
+                                <span class="insight-timestamp">2 hour ago</span>
+                                <button class="insight-close"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%; margin-top: 20px; justify-content: center;">View All Insights</button>
+                    </div>
+                </div>
+
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h4 style="font-size: 16px;">Average Response Time</h4>
+                                <p style="font-size: 12px; color: var(--text-muted);">Team response speed comparison</p>
+                            </div>
+                            <div class="tab-group">
+                                <span class="tab active">Week</span>
+                                <span class="tab">Month</span>
+                                <span class="tab">Custom</span>
+                            </div>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar-wrapper"><div class="bar" style="height: 60px; background: #12B76A;"></div><span class="bar-label">Team A</span></div>
+                            <div class="bar-wrapper"><div class="bar" style="height: 90px; background: #A6EFAC;"></div><span class="bar-label">Team B</span></div>
+                            <div class="bar-wrapper"><div class="bar" style="height: 120px; background: #FDB022;"></div><span class="bar-label">Team C</span></div>
+                            <div class="bar-wrapper"><div class="bar" style="height: 150px; background: #F79009;"></div><span class="bar-label">Team D</span></div>
+                            <div class="bar-wrapper"><div class="bar" style="height: 180px; background: #F04438;"></div><span class="bar-label">Team E</span></div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <h4 style="font-size: 16px;">Rule Efficiency</h4>
+                                <p style="font-size: 12px; color: var(--text-muted);">Performance by routing rules</p>
+                            </div>
+                            <span class="badge badge-high">2 Critical</span>
+                        </div>
+                        <div class="efficiency-item high">
+                            <div class="eff-labels">
+                                <span class="eff-rule-name">Premium Leads-Thane</span>
+                                <div class="eff-stats">
+                                    <div class="eff-percentage">
+                                        34%
+                                        <span class="eff-dot"></span>
+                                    </div>
+                                    <div class="eff-number">45</div>
+                                </div>
+                            </div>
+                            <div class="progress-bg"><div class="progress-fill" style="width: 34%;"></div></div>
+                        </div>
+                        <div class="efficiency-item medium">
+                            <div class="eff-labels">
+                                <span class="eff-rule-name">Budget Range 50L+</span>
+                                <div class="eff-stats">
+                                    <div class="eff-percentage">
+                                        22%
+                                        <span class="eff-dot"></span>
+                                    </div>
+                                    <div class="eff-number">45</div>
+                                </div>
+                            </div>
+                            <div class="progress-bg"><div class="progress-fill" style="width: 22%;"></div></div>
+                        </div>
+                        <div class="efficiency-item high">
+                            <div class="eff-labels">
+                                <span class="eff-rule-name">Walking Customer</span>
+                                <div class="eff-stats">
+                                    <div class="eff-percentage">
+                                        28%
+                                        <span class="eff-dot"></span>
+                                    </div>
+                                    <div class="eff-number">45</div>
+                                </div>
+                            </div>
+                            <div class="progress-bg"><div class="progress-fill" style="width: 28%;"></div></div>
+                        </div>
+                        <div class="efficiency-item low">
+                            <div class="eff-labels">
+                                <span class="eff-rule-name">Corporate inquiries</span>
+                                <div class="eff-stats">
+                                    <div class="eff-percentage">
+                                        12%
+                                        <span class="eff-dot"></span>
+                                    </div>
+                                    <div class="eff-number">45</div>
+                                </div>
+                            </div>
+                            <div class="progress-bg"><div class="progress-fill" style="width: 12%;"></div></div>
+                        </div>
+                        <div class="efficiency-item medium">
+                            <div class="eff-labels">
+                                <span class="eff-rule-name">Housing Referrals</span>
+                                <div class="eff-stats">
+                                    <div class="eff-percentage">
+                                        18%
+                                        <span class="eff-dot"></span>
+                                    </div>
+                                    <div class="eff-number">45</div>
+                                </div>
+                            </div>
+                            <div class="progress-bg"><div class="progress-fill" style="width: 18%;"></div></div>
+                        </div>
+                        <div class="efficiency-item low">
+                            <div class="eff-labels">
+                                <span class="eff-rule-name">weekend Leads</span>
+                                <div class="eff-stats">
+                                    <div class="eff-percentage">
+                                        6%
+                                        <span class="eff-dot"></span>
+                                    </div>
+                                    <div class="eff-number">45</div>
+                                </div>
+                            </div>
+                            <div class="progress-bg"><div class="progress-fill" style="width: 6%;"></div></div>
+                        </div>
+                        <div class="efficiency-legend">
+                            <span class="legend-title">Conversion Rate:</span>
+                            <div class="legend-items">
+                                <div class="legend-item">
+                                    <span class="legend-dot high"></span>
+                                    <span>High</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot medium"></span>
+                                    <span>Medium</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot low"></span>
+                                    <span>Low</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card" style="max-width: 500px;">
+                    <div class="chart-header">
+                        <h4 style="font-size: 16px;">Lead Sources</h4>
+                    </div>
+                    <div class="donut-container">
+                        <div class="donut-mock"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                        <div style="font-size: 12px;"><i class="fa-solid fa-circle" style="color: #2e90fa; margin-right: 5px;"></i> Booking.com (25%)</div>
+                        <div style="font-size: 12px;"><i class="fa-solid fa-circle" style="color: #ee46bc; margin-right: 5px;"></i> 99acres.com (20%)</div>
+                        <div style="font-size: 12px;"><i class="fa-solid fa-circle" style="color: #12b76a; margin-right: 5px;"></i> Magicbricks.com (10%)</div>
+                        <div style="font-size: 12px;"><i class="fa-solid fa-circle" style="color: #6172f3; margin-right: 5px;"></i> Nobroker.com (20%)</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="createRuleModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <button class="back-modal-btn" id="backModalBtn"><i class="fa-solid fa-arrow-left"></i></button>
+                <h2 class="modal-title">Create Rule</h2>
+                <button class="save-modal-btn" id="saveModalBtn"><i class="fa-solid fa-floppy-disk"></i></button>
+                <button class="close-modal-btn" id="closeModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Rule Name</label>
+                        <input type="text" class="form-input" placeholder="Enter rule name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select class="form-select">
+                            <option>Medium</option>
+                            <option>High</option>
+                            <option>Low</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Add Lead Sources</label>
+                        <div class="input-with-tags">
+                            <input type="text" id="leadSourcesInput" placeholder="Type and press enter to add sources">
+                            <i class="fa-solid fa-plus" style="color: var(--text-muted); cursor: pointer;" id="addLeadSourceBtn"></i>
+                        </div>
+                        <div class="tags-container" id="leadSourcesTags">
+                            <span class="tag-chip tag-blue">Booking.com <i class="fa-solid fa-xmark tag-close"></i></span>
+                            <span class="tag-chip tag-purple">Nobroker.com <i class="fa-solid fa-xmark tag-close"></i></span>
+                            <span class="tag-chip tag-grey">Walking <i class="fa-solid fa-xmark tag-close"></i></span>
+                        </div>
+                    </div>
+                     <div class="form-group">
+                        <label class="form-label">Add Areas</label>
+                        <div class="input-with-tags">
+                            <input type="text" id="areasInput" placeholder="Type and press enter to add areas">
+                            <i class="fa-solid fa-plus" style="color: var(--text-muted); cursor: pointer;" id="addAreaBtn"></i>
+                        </div>
+                        <div class="tags-container" id="areasTags">
+                            <span class="tag-chip tag-blue">Thane <i class="fa-solid fa-xmark tag-close"></i></span>
+                            <span class="tag-chip tag-purple">Goregaon <i class="fa-solid fa-xmark tag-close"></i></span>
+                            <span class="tag-chip tag-grey">Kurla <i class="fa-solid fa-xmark tag-close"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <span class="ai-suggestion-label">Ai Suggestion</span>
+                        <div class="suggestion-chips">
+                            <span class="suggestion-chip blue">Booking.com</span>
+                            <span class="suggestion-chip red">99acres.com</span>
+                            <span class="suggestion-chip green">Magicbrick.com</span>
+                            <span class="suggestion-chip purple">Nobroker.com</span>
+                            <span class="suggestion-chip orange">Housing.com</span>
+                            <span class="suggestion-chip">Walking</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                         <span class="ai-suggestion-label">Ai Suggestion</span>
+                        <div class="suggestion-chips">
+                            <span class="suggestion-chip blue">Thane</span>
+                            <span class="suggestion-chip red">Nalasopara</span>
+                            <span class="suggestion-chip green">Vasai</span>
+                            <span class="suggestion-chip purple">Goregaon</span>
+                            <span class="suggestion-chip">Nashik</span>
+                            <span class="suggestion-chip orange">Govandi</span>
+                            <span class="suggestion-chip">Kurla</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Add Languages</label>
+                        <div class="input-with-tags">
+                            <input type="text" id="languagesInput" placeholder="Type and press enter to add Language">
+                            <i class="fa-solid fa-plus" style="color: var(--text-muted); cursor: pointer;" id="addLanguageBtn"></i>
+                        </div>
+                        <div class="tags-container" id="languagesTags">
+                            <span class="tag-chip tag-blue">Hindi <i class="fa-solid fa-xmark tag-close"></i></span>
+                            <span class="tag-chip tag-purple">English <i class="fa-solid fa-xmark tag-close"></i></span>
+                            <span class="tag-chip tag-grey">Urdu <i class="fa-solid fa-xmark tag-close"></i></span>
+                        </div>
+                    </div>
+                     <div class="form-group">
+                        <label class="form-label">Add Budgets Range</label>
+                        <div class="input-with-tags">
+                            <input type="text" id="budgetsInput" placeholder="Type and press enter to add Budgets">
+                            <i class="fa-solid fa-plus" style="color: var(--text-muted); cursor: pointer;" id="addBudgetBtn"></i>
+                        </div>
+                        <div class="tags-container" id="budgetsTags">
+                            <span class="tag-chip tag-blue">50-60L <i class="fa-solid fa-xmark tag-close"></i></span>
+                            <span class="tag-chip tag-purple">80-90L <i class="fa-solid fa-xmark tag-close"></i></span>
+                            <span class="tag-chip tag-grey">40-60L <i class="fa-solid fa-xmark tag-close"></i></span>
+                        </div>
+                    </div>
+
+                     <div class="form-group">
+                        <span class="ai-suggestion-label">Ai Suggestion</span>
+                        <div class="suggestion-chips">
+                            <span class="suggestion-chip red">Marathi</span>
+                            <span class="suggestion-chip blue">Hindi</span>
+                            <span class="suggestion-chip">Urdu</span>
+                            <span class="suggestion-chip purple">English</span>
+                            <span class="suggestion-chip green">Gujrati</span>
+                            <span class="suggestion-chip">Rajisthani</span>
+                            <span class="suggestion-chip orange">Punjabi</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                         <span class="ai-suggestion-label">Ai Suggestion</span>
+                        <div class="suggestion-chips">
+                            <span class="suggestion-chip blue">50-60L</span>
+                            <span class="suggestion-chip red">1-3CR</span>
+                            <span class="suggestion-chip green">Any Budget</span>
+                            <span class="suggestion-chip purple">80-90L</span>
+                            <span class="suggestion-chip">30-50L</span>
+                            <span class="suggestion-chip orange">1-1.5CR</span>
+                            <span class="suggestion-chip">40-60L</span>
+                        </div>
+                    </div>
+
+                     <div class="form-group">
+                        <label class="form-label">Add Lead Status</label>
+                        <div class="input-with-tags">
+                            <input type="text" id="leadStatusInput" placeholder="Type and press enter to add Lead Status">
+                            <i class="fa-solid fa-plus" style="color: var(--text-muted); cursor: pointer;" id="addLeadStatusBtn"></i>
+                        </div>
+                        <div class="tags-container" id="leadStatusTags">
+                             <span class="tag-chip tag-blue">Cold <i class="fa-solid fa-xmark tag-close"></i></span>
+                            <span class="tag-chip tag-grey">Warm <i class="fa-solid fa-xmark tag-close"></i></span>
+                            <span class="tag-chip tag-grey">Hot <i class="fa-solid fa-xmark tag-close"></i></span>
+                            <span class="tag-chip tag-grey">Very Hot <i class="fa-solid fa-xmark tag-close"></i></span>
+                        </div>
+                    </div>
+                     <div class="form-group">
+                        <label class="form-label">Add Campaigns</label>
+                        <div class="input-with-tags">
+                            <input type="text" id="campaignsInput" placeholder="Type and press enter to add Campaign">
+                            <i class="fa-solid fa-plus" style="color: var(--text-muted); cursor: pointer;" id="addCampaignBtn"></i>
+                        </div>
+                        <div class="tags-container" id="campaignsTags">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width" style="margin-top: -10px;">
+                         <span class="ai-suggestion-label">All Campaigns</span>
+                        <div class="suggestion-chips">
+                            <span class="suggestion-chip blue">Luxury Hunt</span>
+                            <span class="suggestion-chip red">First Home Drive</span>
+                            <span class="suggestion-chip">Any Campaign</span>
+                            <span class="suggestion-chip">Area Focus: East Zone</span>
+                            <span class="suggestion-chip">Weekend Blitz</span>
+                            <span class="suggestion-chip orange">Referral Power</span>
+                            <span class="suggestion-chip">Revisit Revival</span>
+                            <span class="suggestion-chip">Festive Rush</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width" style="margin-top: 16px;">
+                         <h3 style="font-size: 16px; font-weight: 600; color: #101828;">Assigment Settings</h3>
+                         <div class="radio-group">
+                             <label class="radio-option">
+                                 <input type="radio" name="assignType" checked> Assign to Team
+                             </label>
+                             <label class="radio-option">
+                                 <input type="radio" name="assignType"> Assign to Employee
+                             </label>
+                         </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Select Team</label>
+                        <select class="form-select">
+                            <option>Team A</option>
+                            <option>Team B</option>
+                            <option>Team C</option>
+                        </select>
+                    </div>
+
+                </div> </div> <div class="modal-footer">
+                <button class="btn" id="cancelBtn" style="border: 1px solid var(--border-color);">Cancel</button>
+                <button class="btn btn-primary">Create Lead</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Simple Interaction logic for tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                this.parentElement.querySelector('.active').classList.remove('active');
+                this.classList.add('active');
+            });
+        });
+
+        // =========================================
+        // MODAL POPUP LOGIC
+        // =========================================
+        const modal = document.getElementById('createRuleModal');
+        const createRuleBtn = document.getElementById('createRuleBtn');
+        const createRuleBtnMobile = document.getElementById('createRuleBtnMobile');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const backModalBtn = document.getElementById('backModalBtn');
+        const saveModalBtn = document.getElementById('saveModalBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        // Function to open modal
+        function openModal() {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        // Function to close modal
+        function closeModal() {
+            const modalContainer = modal.querySelector('.modal-container');
+            if (window.innerWidth <= 768) {
+                // Add slide-out animation for mobile
+                modalContainer.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    modalContainer.style.animation = '';
+                }, 300);
+            } else {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Event Listeners
+        if (createRuleBtn) {
+            createRuleBtn.addEventListener('click', openModal);
+        }
+        if (createRuleBtnMobile) {
+            createRuleBtnMobile.addEventListener('click', openModal);
+        }
+        closeModalBtn.addEventListener('click', closeModal);
+        if (backModalBtn) {
+            backModalBtn.addEventListener('click', closeModal);
+        }
+        if (saveModalBtn) {
+            saveModalBtn.addEventListener('click', function() {
+                // Add save functionality here
+                alert('Rule saved!');
+                closeModal();
+            });
+        }
+        cancelBtn.addEventListener('click', closeModal);
+
+        // Close modal when clicking outside the modal container
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // =========================================
+        // TAG INPUT FUNCTIONALITY
+        // =========================================
+        
+        // Tag color classes array for random assignment
+        const tagColors = ['tag-blue', 'tag-purple', 'tag-grey'];
+        
+        // Function to get random tag color
+        function getRandomTagColor() {
+            return tagColors[Math.floor(Math.random() * tagColors.length)];
+        }
+        
+        // Function to create a tag element
+        function createTag(text, container) {
+            const tag = document.createElement('span');
+            tag.className = `tag-chip ${getRandomTagColor()}`;
+            tag.innerHTML = `${text} <i class="fa-solid fa-xmark tag-close"></i>`;
+            
+            // Add remove functionality
+            const closeBtn = tag.querySelector('.tag-close');
+            closeBtn.addEventListener('click', function() {
+                tag.remove();
+            });
+            
+            container.appendChild(tag);
+        }
+        
+        // Function to add tag from input
+        function addTagFromInput(inputId, containerId, addBtnId) {
+            const input = document.getElementById(inputId);
+            const container = document.getElementById(containerId);
+            const addBtn = document.getElementById(addBtnId);
+            
+            function addTag() {
+                const value = input.value.trim();
+                if (value) {
+                    // Check if tag already exists
+                    const existingTags = Array.from(container.querySelectorAll('.tag-chip'));
+                    const tagTexts = existingTags.map(tag => tag.textContent.trim().replace('×', '').trim());
+                    
+                    if (!tagTexts.includes(value)) {
+                        createTag(value, container);
+                        input.value = '';
+                    }
+                }
+            }
+            
+            // Add on Enter key press
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag();
+                }
+            });
+            
+            // Add on plus button click
+            if (addBtn) {
+                addBtn.addEventListener('click', addTag);
+            }
+        }
+        
+        // Initialize tag functionality for all input fields
+        addTagFromInput('leadSourcesInput', 'leadSourcesTags', 'addLeadSourceBtn');
+        addTagFromInput('areasInput', 'areasTags', 'addAreaBtn');
+        addTagFromInput('languagesInput', 'languagesTags', 'addLanguageBtn');
+        addTagFromInput('budgetsInput', 'budgetsTags', 'addBudgetBtn');
+        addTagFromInput('leadStatusInput', 'leadStatusTags', 'addLeadStatusBtn');
+        addTagFromInput('campaignsInput', 'campaignsTags', 'addCampaignBtn');
+        
+        // Add remove functionality to existing tags
+        document.querySelectorAll('.tag-close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', function() {
+                this.parentElement.remove();
+            });
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Team Management Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #0085FF;
+            --bg-body: #F9FAFB;
+            --border: #E5E7EB;
+            --text-dark: #111827;
+            --text-gray: #6B7280;
+            --white: #ffffff;
+            --sidebar-width: 240px;
+            --topbar-height: 64px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            display: flex;
+            height: 100vh;
+            overflow: hidden; /* Main body fixed */
+        }
+
+        /* --- Sidebar Placeholder --- */
+        .sidebar-space {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            background: #fff;
+            border-right: 1px solid var(--border);
+        }
+
+        /* --- Main Content Container --- */
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Topbar Placeholder --- */
+        .topbar-space {
+            height: var(--topbar-height);
+            min-height: var(--topbar-height);
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* --- Scrollable Content Area --- */
+        .page-content {
+            padding: 24px;
+            overflow-y: auto;
+            height: 100%;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        /* --- Responsive Metrics Grid --- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .metric-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .m-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* Icon Colors */
+        .ic-1 { background: #E0F2FE; color: #0EA5E9; }
+        .ic-2 { background: #F3E8FF; color: #A855F7; }
+        .ic-3 { background: #E0E7FF; color: #6366F1; }
+        .ic-4 { background: #D1FAE5; color: #10B981; }
+        .ic-5 { background: #FEE2E2; color: #EF4444; }
+        .ic-6 { background: #FFEDD5; color: #F97316; }
+
+        .trend { font-size: 13px; font-weight: 600; }
+        .up { color: #10B981; }
+        .down { color: #EF4444; }
+
+        .m-value { font-size: 24px; font-weight: 700; color: var(--text-dark); }
+        .m-label { font-size: 13px; color: var(--text-gray); margin-top: 4px; }
+
+        /* --- Tabs --- */
+        .tab-group {
+            display: flex;
+            gap: 30px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+            background: transparent;
+        }
+
+        .tab {
+            padding: 10px 5px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-gray);
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s ease;
+            background: transparent;
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--text-dark);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            background: transparent;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        /* --- Header Card Wrapper (for mobile) --- */
+        .header-card-wrapper {
+            display: none;
+        }
+
+        /* --- Table Section --- */
+        .data-wrapper {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .table-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .table-title { font-size: 18px; font-weight: 600; }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .search-box {
+            position: relative;
+            flex-grow: 1;
+            max-width: 320px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 9px 12px 9px 36px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-gray);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 9px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-blue { background: var(--primary); color: #fff; border: none; }
+        .btn-red { color: #EF4444; border-color: #FEE2E2; }
+
+        .column-search-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+        }
+
+        .mobile-action-buttons {
+            display: none;
+            padding: 16px 20px;
+            gap: 12px;
+            border-top: 1px solid var(--border);
+            background: var(--white);
+        }
+
+        .mobile-action-buttons .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* --- Mobile Card Layout --- */
+        .mobile-cards-container {
+            display: none;
+            padding: 16px;
+            gap: 16px;
+        }
+
+        .employee-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .card-checkbox {
+            margin-top: 4px;
+        }
+
+        .card-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+        }
+
+        .card-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .card-user-details {
+            flex-grow: 1;
+        }
+
+        .card-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .card-phone {
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-label {
+            font-size: 12px;
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+
+        .card-value {
+            font-size: 14px;
+            color: var(--text-dark);
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .card-email {
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .card-actions .btn-view {
+            flex-grow: 1;
+        }
+
+        /* --- Data Table --- */
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px; /* Ensures table doesn't squish too much */
+        }
+
+        th {
+            background: #F9FAFB;
+            padding: 12px 20px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-gray);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .user-cell { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        
+        .main-text { display: block; font-size: 14px; font-weight: 500; color: var(--text-dark); }
+        .sub-text { display: block; font-size: 12px; color: var(--text-gray); }
+
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .high { background: #DCFCE7; color: #166534; }
+        .medium { background: #FEF3C7; color: #92400E; }
+        .low { background: #FEE2E2; color: #991B1B; }
+        .active { background: #DCFCE7; color: #166534; }
+        .break { background: #F3F4F6; color: #4B5563; }
+
+        .btn-view {
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+        /* --- Footer --- */
+        .table-footer {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
+        /* --- Mobile Responsive Rules --- */
+        @media (max-width: 1024px) {
+            .sidebar-space { width: 70px; min-width: 70px; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-space { display: none; }
+            .topbar-space { height: 50px; min-height: 50px; }
+            .page-content { padding: 15px; }
+            
+            /* Show header as separate card in mobile */
+            .header-card-wrapper {
+                display: block;
+                background: var(--white);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                margin-bottom: 16px;
+                overflow: hidden;
+            }
+            
+            .header-card-wrapper .table-header {
+                padding: 20px;
+            }
+            
+            /* Hide desktop header inside data-wrapper in mobile */
+            .data-wrapper .desktop-header {
+                display: none;
+            }
+            
+            /* Controls layout for mobile */
+            .controls {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .column-search-wrapper {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            
+            .btn-column {
+                flex-shrink: 0;
+            }
+            
+            .search-box {
+                flex-grow: 1;
+                max-width: none;
+            }
+            
+            /* Hide Export and Delete from btn-group in mobile */
+            .btn-group {
+                width: 100%;
+            }
+            
+            .btn-group .btn-export,
+            .btn-group .btn-delete {
+                display: none;
+            }
+            
+            .btn-group .btn-blue {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            /* Hide mobile action buttons (Export, Delete) */
+            .mobile-action-buttons {
+                display: none;
+            }
+            
+            /* Hide table and show cards in mobile */
+            .table-responsive {
+                display: none;
+            }
+            
+            .mobile-cards-container {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            /* Hide checkbox in mobile cards */
+            .employee-card .card-checkbox {
+                display: none;
+            }
+            
+            /* Table footer responsive */
+            .table-footer {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            
+            /* Horizontal scrollable KPIs on mobile */
+            .metrics-grid {
+                display: flex;
+                overflow-x: auto;
+                overflow-y: hidden;
+                gap: 16px;
+                padding-bottom: 8px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                scrollbar-color: var(--border) transparent;
+            }
+            
+            .metrics-grid::-webkit-scrollbar {
+                height: 6px;
+            }
+            
+            .metrics-grid::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            
+            .metrics-grid::-webkit-scrollbar-thumb {
+                background-color: var(--border);
+                border-radius: 3px;
+            }
+            
+            .metric-card {
+                min-width: 200px;
+                flex-shrink: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-space"></div>
+
+    <div class="main-container">
+        <div class="topbar-space"></div>
+
+        <div class="page-content">
+            <h1 class="section-title">Metrices Breakdown</h1>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-top">
+                        <div class="m-icon ic-1"><i class="fas fa-users"></i></div>
+                        <span class="trend up">+6.5%</span>
+                    </div>
+                    <div class="m-value">145</div>
+                    <p class="m-label">Total Employees</p>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-top">
+                        <div class="m-icon ic-2"><i class="fas fa-folder"></i></div>
+                        <span class="trend up">+1.3%</span>
+                    </div>
+                    <div class="m-value">12</div>
+                    <p class="m-label">Total Teams</p>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-top">
+                        <div class="m-icon ic-3"><i class="fas fa-user-slash"></i></div>
+                        <span class="trend down">-2.1%</span>
+                    </div>
+                    <div class="m-value">8</div>
+                    <p class="m-label">Employees without a Team</p>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-top">
+                        <div class="m-icon ic-4"><i class="fas fa-chart-line"></i></div>
+                        <span class="trend up">+0.4s</span>
+                    </div>
+                    <div class="m-value">12.1</div>
+                    <p class="m-label">Avg. Team Size</p>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-top">
+                        <div class="m-icon ic-5"><i class="fas fa-tasks"></i></div>
+                        <span class="trend up">+4.6%</span>
+                    </div>
+                    <div class="m-value">24</div>
+                    <p class="m-label">Active Projects Assigned</p>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-top">
+                        <div class="m-icon ic-6"><i class="far fa-clock"></i></div>
+                        <span class="trend up">+2.2%</span>
+                    </div>
+                    <div class="m-value">05</div>
+                    <p class="m-label">Pending Onboarding</p>
+                </div>
+            </div>
+
+            <div class="tab-group">
+                <div class="tab active">Employees</div>
+                <div class="tab">Teams</div>
+            </div>
+
+            <!-- Header Card (separate in mobile) -->
+            <div class="header-card-wrapper">
+                <div class="table-header">
+                    <div class="table-title">All Employees List</div>
+                    <div class="controls">
+                        <div class="column-search-wrapper">
+                            <button class="btn btn-column"><i class="fas fa-columns"></i> Column</button>
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Search">
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-export"><i class="fas fa-upload"></i> Export</button>
+                            <button class="btn btn-red btn-delete"><i class="fas fa-trash"></i> Delete</button>
+                            <button class="btn btn-blue"><i class="fas fa-plus"></i> Add Employee</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Card (separate in mobile) -->
+            <div class="data-wrapper">
+                <!-- Desktop header (hidden in mobile) -->
+                <div class="table-header desktop-header">
+                    <div class="table-title">All Employees List</div>
+                    <div class="controls">
+                        <div class="column-search-wrapper">
+                            <button class="btn btn-column"><i class="fas fa-columns"></i> Column</button>
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Search">
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-export"><i class="fas fa-upload"></i> Export</button>
+                            <button class="btn btn-red btn-delete"><i class="fas fa-trash"></i> Delete</button>
+                            <button class="btn btn-blue"><i class="fas fa-plus"></i> Add Employee</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox"></th>
+                                <th>Name & Phone <i class="fas fa-sort"></i></th>
+                                <th>Joined & Email <i class="fas fa-sort"></i></th>
+                                <th>Job Function <i class="fas fa-sort"></i></th>
+                                <th>Team Assigned <i class="fas fa-sort"></i></th>
+                                <th>Performance <i class="fas fa-sort"></i></th>
+                                <th>Status <i class="fas fa-sort"></i></th>
+                                <th>Action <i class="fas fa-sort"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-cell">
+                                        <img src="https://i.pravatar.cc/100?u=1" class="avatar">
+                                        <div>
+                                            <span class="main-text">Zishan Shaikh</span>
+                                            <span class="sub-text">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="main-text">12 Jun 2024</span>
+                                    <span class="sub-text">Zishan@gmail.com</span>
+                                </td>
+                                <td><span class="main-text">Sale Executive</span></td>
+                                <td><span class="main-text">North Zone Sales</span></td>
+                                <td><span class="status-pill high">High</span></td>
+                                <td><span class="status-pill active">Active</span></td>
+                                <td>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <button class="btn-view">View Detail</button>
+                                        <i class="fas fa-edit" style="color:#9CA3AF; cursor:pointer;"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-cell">
+                                        <img src="https://i.pravatar.cc/100?u=2" class="avatar">
+                                        <div>
+                                            <span class="main-text">Mustakim Sayyed</span>
+                                            <span class="sub-text">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="main-text">30 Jul 2023</span>
+                                    <span class="sub-text">Mustakim@gmail.com</span>
+                                </td>
+                                <td><span class="main-text">Sale Executive</span></td>
+                                <td><span class="main-text">South Zone Sales</span></td>
+                                <td><span class="status-pill medium">Medium</span></td>
+                                <td><span class="status-pill active">Active</span></td>
+                                <td>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <button class="btn-view">View Detail</button>
+                                        <i class="fas fa-edit" style="color:#9CA3AF; cursor:pointer;"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-cell">
+                                        <img src="https://i.pravatar.cc/100?u=3" class="avatar">
+                                        <div>
+                                            <span class="main-text">Maaz Khan</span>
+                                            <span class="sub-text">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="main-text">7 Aug 2024</span>
+                                    <span class="sub-text">Maaz@gmail.com</span>
+                                </td>
+                                <td><span class="main-text">Sale Executive</span></td>
+                                <td><span class="main-text">Team A</span></td>
+                                <td><span class="status-pill low">Low</span></td>
+                                <td><span class="status-pill break">Break</span></td>
+                                <td>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <button class="btn-view">View Detail</button>
+                                        <i class="fas fa-edit" style="color:#9CA3AF; cursor:pointer;"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Cards View -->
+                <div class="mobile-cards-container">
+                    <!-- Employee Card 1 -->
+                    <div class="employee-card">
+                        <div class="card-header">
+                            <input type="checkbox" class="card-checkbox">
+                            <div class="card-user-info">
+                                <img src="https://i.pravatar.cc/100?u=1" class="card-avatar">
+                                <div class="card-user-details">
+                                    <span class="card-name">Zishan Shaikh</span>
+                                    <span class="card-phone">(808) 555-0111</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-row">
+                                <span class="card-label">Joined Date</span>
+                                <span class="card-value">12 Jun 2024</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Email</span>
+                                <span class="card-email">Zishan@gmail.com</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Job Function</span>
+                                <span class="card-value">Sale Executive</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Team Assigned</span>
+                                <span class="card-value">North Zone Sales</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Performance</span>
+                                <span class="status-pill high">High</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Status</span>
+                                <span class="status-pill active">Active</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-view">View Detail</button>
+                            <i class="fas fa-edit" style="color:#9CA3AF; cursor:pointer; font-size: 18px;"></i>
+                        </div>
+                    </div>
+
+                    <!-- Employee Card 2 -->
+                    <div class="employee-card">
+                        <div class="card-header">
+                            <input type="checkbox" class="card-checkbox">
+                            <div class="card-user-info">
+                                <img src="https://i.pravatar.cc/100?u=2" class="card-avatar">
+                                <div class="card-user-details">
+                                    <span class="card-name">Mustakim Sayyed</span>
+                                    <span class="card-phone">(808) 555-0111</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-row">
+                                <span class="card-label">Joined Date</span>
+                                <span class="card-value">30 Jul 2023</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Email</span>
+                                <span class="card-email">Mustakim@gmail.com</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Job Function</span>
+                                <span class="card-value">Sale Executive</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Team Assigned</span>
+                                <span class="card-value">South Zone Sales</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Performance</span>
+                                <span class="status-pill medium">Medium</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Status</span>
+                                <span class="status-pill active">Active</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-view">View Detail</button>
+                            <i class="fas fa-edit" style="color:#9CA3AF; cursor:pointer; font-size: 18px;"></i>
+                        </div>
+                    </div>
+
+                    <!-- Employee Card 3 -->
+                    <div class="employee-card">
+                        <div class="card-header">
+                            <input type="checkbox" class="card-checkbox">
+                            <div class="card-user-info">
+                                <img src="https://i.pravatar.cc/100?u=3" class="card-avatar">
+                                <div class="card-user-details">
+                                    <span class="card-name">Maaz Khan</span>
+                                    <span class="card-phone">(808) 555-0111</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-row">
+                                <span class="card-label">Joined Date</span>
+                                <span class="card-value">7 Aug 2024</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Email</span>
+                                <span class="card-email">Maaz@gmail.com</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Job Function</span>
+                                <span class="card-value">Sale Executive</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Team Assigned</span>
+                                <span class="card-value">Team A</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Performance</span>
+                                <span class="status-pill low">Low</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">Status</span>
+                                <span class="status-pill break">Break</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-view">View Detail</button>
+                            <i class="fas fa-edit" style="color:#9CA3AF; cursor:pointer; font-size: 18px;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mobile-action-buttons">
+                    <button class="btn btn-export"><i class="fas fa-upload"></i> Export</button>
+                    <button class="btn btn-red btn-delete"><i class="fas fa-trash"></i> Delete</button>
+                </div>
+
+                <div class="table-footer">
+                    <div>
+                        Rows Per Page 
+                        <select style="padding: 2px 5px; border-radius: 4px; border: 1px solid var(--border);">
+                            <option>10</option>
+                            <option>20</option>
+                        </select>
+                    </div>
+                    <div>
+                        1 - 4 of 4
+                        <span style="margin-left: 15px; cursor: pointer;">
+                            <i class="fas fa-chevron-left"></i> &nbsp; <i class="fas fa-chevron-right"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple JS for tab switching
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Detail - Crownco</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #0084FF;
+            --bg-gray: #F8F9FC;
+            --border-color: #E3E6F0;
+            --text-main: #2D3748;
+            --text-muted: #718096;
+            --success-green: #1CC88A;
+            --very-hot: #FFF1F1;
+            --hot-text: #FF4D4D;
+            --purple: #9333EA;
+            --orange: #F97316;
+            --green: #10B981;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Layout Placeholders */
+        .sidebar-space {
+            width: 260px;
+            flex-shrink: 0;
+            background: #fff;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar-space {
+            height: 70px;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        /* Scrollable Content Area */
+        .content-area {
+            padding: 30px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        /* Back Header */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .page-header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .back-btn:hover {
+            background: var(--bg-gray);
+            border-color: var(--primary-blue);
+            transform: translateX(-2px);
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+
+        .notification-icon:hover {
+            background: var(--bg-gray);
+            color: var(--primary-blue);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background: #FF4D4D;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+
+        /* Progress Stepper */
+        .stepper-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: relative;
+            margin: 0 auto 40px;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .step {
+            text-align: center;
+            z-index: 2;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            flex: 1;
+            position: relative;
+        }
+
+        .step-icon {
+            width: 48px;
+            height: 48px;
+            background: #fff;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .step.active .step-icon {
+            background: var(--primary-blue);
+            color: #fff;
+            border-color: var(--primary-blue);
+            box-shadow: 0 4px 12px rgba(0, 132, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .step.active { 
+            color: var(--text-main); 
+            font-weight: 600; 
+        }
+
+        .step p {
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 24px;
+            left: 12%;
+            right: 12%;
+            height: 3px;
+            background: var(--border-color);
+            z-index: 1;
+            border-radius: 2px;
+        }
+
+        .progress-line-active {
+            position: absolute;
+            top: 24px;
+            left: 12%;
+            width: 0%;
+            height: 3px;
+            background: var(--primary-blue);
+            z-index: 2;
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-line-active.active-1 { width: 0%; }
+        .progress-line-active.active-2 { width: 33.33%; }
+        .progress-line-active.active-3 { width: 66.66%; }
+        .progress-line-active.active-4 { width: 100%; }
+
+        /* Stats Row */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: #fff;
+            padding: 24px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon-bg {
+            width: 40px;
+            height: 40px;
+            background: #F0F7FF;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-blue);
+            font-size: 1.1rem;
+        }
+
+        .stat-icon-bg.purple {
+            background: #F3E8FF;
+            color: var(--purple);
+        }
+
+        .stat-icon-bg.orange {
+            background: #FFF4E6;
+            color: var(--orange);
+        }
+
+        .stat-icon-bg.green {
+            background: #E6F7F0;
+            color: var(--green);
+        }
+
+        .trend { 
+            color: var(--success-green); 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+            background: rgba(28, 200, 138, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .stat-val { 
+            font-size: 1.75rem; 
+            font-weight: 700; 
+            color: var(--text-main); 
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+
+        .stat-label { 
+            color: var(--text-muted); 
+            font-size: 0.875rem; 
+            margin-top: 4px; 
+            font-weight: 500;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: -2px;
+            position: relative;
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+        }
+
+        .tab.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        /* Main Content Grid */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .white-panel {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s;
+        }
+
+        .white-panel:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Profile Card */
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .profile-main { 
+            display: flex; 
+            gap: 14px; 
+            align-items: center;
+        }
+
+        .profile-pic { 
+            width: 56px; 
+            height: 56px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 2px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .profile-name h3 { 
+            font-size: 1.125rem; 
+            color: var(--text-main); 
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .profile-name p { 
+            font-size: 0.875rem; 
+            color: var(--text-muted); 
+            margin: 0;
+        }
+
+        .hot-badge {
+            background: var(--very-hot);
+            color: var(--hot-text);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            height: fit-content;
+            white-space: nowrap;
+        }
+
+        .contact-info { 
+            font-size: 0.9rem; 
+            color: var(--text-muted); 
+            margin-bottom: 16px; 
+        }
+
+        .contact-info div { 
+            margin-bottom: 10px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+
+        .contact-info i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .source-tag {
+            background: #F1F5F9;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--primary-blue);
+            display: inline-block;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .profile-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .time-ago {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Remarks */
+        .remarks-list { list-style: none; }
+        .remarks-list li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+        .remarks-list li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 7px;
+            width: 8px;
+            height: 8px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+        }
+
+        /* Activity Cards */
+        .activity-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 18px 0;
+            border-bottom: 1px solid #F1F5F9;
+            transition: all 0.2s;
+        }
+
+        .activity-card:last-child { 
+            border: none; 
+        }
+
+        .activity-card:hover {
+            background: rgba(0, 132, 255, 0.02);
+            margin: 0 -24px;
+            padding: 18px 24px;
+            border-radius: 8px;
+        }
+        
+        .act-left { 
+            display: flex; 
+            gap: 14px; 
+            flex: 1;
+        }
+
+        .act-icon { 
+            font-size: 1.3rem; 
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .act-text { 
+            flex: 1;
+        }
+
+        .act-text h4 { 
+            font-size: 0.9rem; 
+            color: var(--text-main); 
+            font-weight: 600; 
+            margin-bottom: 6px;
+        }
+
+        .act-text p { 
+            font-size: 0.875rem; 
+            color: var(--text-muted); 
+            margin: 4px 0;
+            line-height: 1.5;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 6px;
+        }
+
+        .status-badge.answered {
+            color: var(--success-green);
+        }
+
+        .status-badge.awaiting {
+            color: var(--orange);
+        }
+        
+        .act-right { 
+            color: var(--text-muted); 
+            font-size: 0.875rem; 
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .act-right .play-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--primary-blue);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .act-right .play-btn:hover {
+            color: var(--primary-blue);
+            transform: scale(1.05);
+        }
+
+        .act-right .forward-btn {
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            padding: 4px;
+        }
+
+        .act-right .forward-btn:hover {
+            color: var(--primary-blue);
+            transform: translateX(2px);
+        }
+
+        .message-count {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Actions Footer */
+        .action-footer {
+            margin-top: 40px;
+            padding-bottom: 50px;
+        }
+
+        .btn-approve {
+            width: 100%;
+            background: var(--primary-blue);
+            color: #fff;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 132, 255, 0.3);
+        }
+
+        .btn-approve:hover { 
+            opacity: 0.95;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 132, 255, 0.4);
+        }
+
+        .btn-approve:active {
+            transform: translateY(0);
+        }
+
+        .btn-approve.approved {
+            background: var(--success-green);
+            box-shadow: 0 4px 12px rgba(28, 200, 138, 0.3);
+        }
+
+        /* Tablet Styles (768px - 1024px) */
+        @media (max-width: 1024px) {
+            .sidebar-space {
+                display: none;
+            }
+
+            .content-area {
+                padding: 24px;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+
+            .stepper-container {
+                padding: 0 10px;
+            }
+
+            .step-icon {
+                width: 42px;
+                height: 42px;
+                font-size: 1rem;
+            }
+
+            .step p {
+                font-size: 0.8rem;
+            }
+
+            .progress-line,
+            .progress-line-active {
+                top: 21px;
+            }
+        }
+
+        /* Mobile Styles (< 768px) */
+        @media (max-width: 768px) {
+            body {
+                overflow-x: hidden;
+            }
+
+            .sidebar-space {
+                display: none;
+            }
+
+            .topbar-space {
+                height: 60px;
+            }
+
+            .content-area {
+                padding: 16px;
+            }
+
+            .page-header {
+                margin-bottom: 20px;
+                gap: 10px;
+            }
+
+            .page-header-left {
+                gap: 10px;
+            }
+
+            .page-header h1 {
+                font-size: 1.25rem !important;
+            }
+
+            .back-btn,
+            .notification-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+            }
+
+            /* Stepper - Mobile */
+            .stepper-container {
+                margin-bottom: 24px;
+                padding: 0 5px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .step {
+                min-width: 70px;
+                flex-shrink: 0;
+            }
+
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
+                margin-bottom: 8px;
+            }
+
+            .step p {
+                font-size: 0.7rem;
+                line-height: 1.2;
+            }
+
+            .progress-line,
+            .progress-line-active {
+                top: 18px;
+                left: 8%;
+                right: 8%;
+            }
+
+            /* Stats Grid - Mobile */
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+
+            .stat-card {
+                padding: 18px;
+            }
+
+            .stat-icon-bg {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+
+            .stat-val {
+                font-size: 1.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.8rem;
+            }
+
+            .trend {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+            }
+
+            /* Tabs - Mobile */
+            .tabs-container {
+                margin-bottom: 20px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .tabs-container::-webkit-scrollbar {
+                display: none;
+            }
+
+            .tab {
+                padding: 10px 16px;
+                font-size: 0.875rem;
+                white-space: nowrap;
+            }
+
+            /* Detail Grid - Mobile */
+            .detail-grid {
+                gap: 20px;
+            }
+
+            .section-title {
+                font-size: 1.1rem;
+                margin-bottom: 16px;
+            }
+
+            .white-panel {
+                padding: 18px;
+                margin-bottom: 20px;
+            }
+
+            /* Profile - Mobile */
+            .profile-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .profile-main {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .profile-pic {
+                width: 48px;
+                height: 48px;
+            }
+
+            .profile-name h3 {
+                font-size: 1rem;
+            }
+
+            .profile-name p {
+                font-size: 0.8rem;
+            }
+
+            .hot-badge {
+                align-self: flex-start;
+            }
+
+            .contact-info {
+                font-size: 0.85rem;
+            }
+
+            .contact-info div {
+                margin-bottom: 8px;
+            }
+
+            .source-tag {
+                font-size: 0.7rem;
+                padding: 5px 10px;
+            }
+
+            .profile-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .time-ago {
+                font-size: 0.7rem;
+            }
+
+            /* Activity Cards - Mobile */
+            .activity-card {
+                padding: 14px 0;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .activity-card:hover {
+                margin: 0 -18px;
+                padding: 14px 18px;
+            }
+
+            .act-left {
+                width: 100%;
+            }
+
+            .act-icon {
+                font-size: 1.1rem;
+            }
+
+            .act-text h4 {
+                font-size: 0.85rem;
+            }
+
+            .act-text p {
+                font-size: 0.8rem;
+            }
+
+            .act-right {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                text-align: left;
+            }
+
+            .status-badge {
+                font-size: 0.75rem;
+            }
+
+            /* Remarks - Mobile */
+            .remarks-list li {
+                font-size: 0.85rem;
+                margin-bottom: 10px;
+                padding-left: 18px;
+            }
+
+            /* Button - Mobile */
+            .action-footer {
+                margin-top: 24px;
+                padding-bottom: 30px;
+            }
+
+            .btn-approve {
+                padding: 14px 20px;
+                font-size: 0.95rem;
+            }
+        }
+
+        /* Small Mobile (< 480px) */
+        @media (max-width: 480px) {
+            .content-area {
+                padding: 12px;
+            }
+
+            .page-header h1 {
+                font-size: 1.1rem !important;
+            }
+
+            .step {
+                min-width: 60px;
+            }
+
+            .step-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+
+            .step p {
+                font-size: 0.65rem;
+            }
+
+            .progress-line,
+            .progress-line-active {
+                top: 16px;
+            }
+
+            .stat-card {
+                padding: 16px;
+            }
+
+            .white-panel {
+                padding: 16px;
+            }
+
+            .profile-pic {
+                width: 44px;
+                height: 44px;
+            }
+
+            .profile-name h3 {
+                font-size: 0.95rem;
+            }
+
+            .section-title {
+                font-size: 1rem;
+            }
+        }
+
+        /* Large Desktop (> 1440px) */
+        @media (min-width: 1440px) {
+            .content-area {
+                padding: 40px;
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .stepper-container {
+                max-width: 1000px;
+            }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .back-btn:hover,
+            .notification-icon:hover,
+            .tab:hover,
+            .stat-card:hover,
+            .white-panel:hover,
+            .activity-card:hover,
+            .act-right .play-btn:hover,
+            .act-right .forward-btn:hover,
+            .btn-approve:hover {
+                transform: none;
+            }
+
+            .btn-approve:active {
+                transform: scale(0.98);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-space"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-space"></div>
+
+        <div class="content-area">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <button class="back-btn" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);">Lead Detail</h1>
+                </div>
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge"></span>
+                </div>
+            </div>
+
+            <div class="stepper-container">
+                <div class="progress-line"></div>
+                <div class="progress-line-active active-1"></div>
+                <div class="step active">
+                    <div class="step-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <p>Summary</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <p>Property Visit</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <p>Negotiation</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <p>Booking</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon-bg">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <span class="trend">+0.8%</span>
+                    </div>
+                    <div class="stat-val">178</div>
+                    <div class="stat-label">Total Calls Made</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon-bg purple">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                        <span class="trend">+0.8%</span>
+                    </div>
+                    <div class="stat-val">445</div>
+                    <div class="stat-label">Message Sent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon-bg orange">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <span class="trend">+0.8%</span>
+                    </div>
+                    <div class="stat-val">65</div>
+                    <div class="stat-label">Site Visit Done</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon-bg green">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <span class="trend">+0.8%</span>
+                    </div>
+                    <div class="stat-val">3:45 hrs</div>
+                    <div class="stat-label">Calling hour</div>
+                </div>
+            </div>
+
+            <div class="tabs-container">
+                <button class="tab active" onclick="switchTab(event, 'overview')">Overview</button>
+                <button class="tab" onclick="switchTab(event, 'followups')">Follow Ups</button>
+            </div>
+
+            <div class="detail-grid" id="overviewContent">
+                <div class="left-section">
+                    <h2 class="section-title">Lead Profile</h2>
+                    <div class="white-panel">
+                        <div class="profile-header">
+                            <div class="profile-main">
+                                <img src="https://i.pravatar.cc/150?u=shaikh" alt="Profile" class="profile-pic">
+                                <div class="profile-name">
+                                    <h3>Shaikh Maaz</h3>
+                                    <p>Crown Heights</p>
+                                </div>
+                            </div>
+                            <span class="hot-badge">Very Hot</span>
+                        </div>
+                        <div class="contact-info">
+                            <div>
+                                <i class="fas fa-phone"></i>
+                                <span>(808) 555-0111</span>
+                            </div>
+                            <div>
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Pembroke Pines</span>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.875rem; margin-bottom: 12px; color: var(--text-main);">
+                            Badge - <span style="color: var(--primary-blue); font-weight: 600;">₹40L - ₹50L</span>
+                        </p>
+                        <div class="profile-footer">
+                            <span class="source-tag">Assigned By Anuj</span>
+                            <span class="time-ago">2 Hour ago</span>
+                        </div>
+                    </div>
+
+                    <h2 class="section-title">Remarks</h2>
+                    <div class="white-panel">
+                        <ul class="remarks-list">
+                            <li>Client is interested in 2BHK, corner-facing unit.</li>
+                            <li>Shared pricing PDF via WhatsApp.</li>
+                            <li>Next follow-up scheduled for Thursday, 11 AM.</li>
+                            <li>Next follow-up scheduled for Thursday, 11 AM.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="right-section">
+                    <h2 class="section-title">Recent Calls</h2>
+                    <div class="white-panel">
+                        <div class="activity-card">
+                            <div class="act-left">
+                                <span class="act-icon">
+                                    <i class="fas fa-clock"></i>
+                                </span>
+                                <div class="act-text">
+                                    <h4>Today, 2:30 PM</h4>
+                                    <p>Interested in 2BHK units, looking for corner apartment</p>
+                                    <span class="status-badge answered">
+                                        <i class="fas fa-check-circle"></i>
+                                        Answered
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="act-right">
+                                <div class="play-btn">
+                                    <i class="fas fa-play-circle"></i>
+                                    <span>5:45</span>
+                                </div>
+                                <div class="forward-btn">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="section-title">Recent Chats</h2>
+                    <div class="white-panel">
+                        <div class="activity-card">
+                            <div class="act-left">
+                                <span class="act-icon">
+                                    <i class="fas fa-clock"></i>
+                                </span>
+                                <div class="act-text">
+                                    <h4>Today, 2:30 PM</h4>
+                                    <p>Client is looking for a 2BHK corner unit, preferably on the 7th floor.</p>
+                                    <span class="status-badge awaiting">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        Awaiting Response
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="act-right">
+                                <div class="message-count">
+                                    <i class="fas fa-comment"></i>
+                                    <span>5 Message</span>
+                                </div>
+                                <div class="forward-btn">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-footer">
+                <button class="btn-approve" id="approveBtn">
+                    Approved <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Switching Functionality
+        function switchTab(event, tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            
+            // Here you would typically show/hide different content sections
+            // For now, we'll just log the action
+            console.log('Switched to:', tabName);
+        }
+
+        // UI Logic for Button Click
+        document.getElementById('approveBtn').addEventListener('click', function() {
+            this.classList.add('approved');
+            this.innerHTML = '<i class="fas fa-check"></i> Lead Approved';
+            console.log('Lead Status Updated: Approved');
+        });
+
+        // Smooth scroll behavior
+        document.querySelector('.content-area').style.scrollBehavior = 'smooth';
+    </script>
+</body>
+</html>

@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Dashboard - Modern UI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-body: #f0f2f5;
+            --bg-card: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #6b7280;
+            --primary-blue: #3b82f6;
+            --primary-blue-dark: #2563eb;
+            --accent-green: #10b981;
+            --accent-green-light: #d1fae5;
+            --accent-red: #ef4444;
+            --accent-red-light: #fee2e2;
+            --accent-orange: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f2f5 0%, #e8ebf0 100%);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Layout Structure */
+        .sidebar-spacer {
+            width: 260px;
+            background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+            border-right: 1px solid var(--border);
+            flex-shrink: 0;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar-spacer {
+            height: 70px;
+            background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Scrollable Content Area */
+        .content-scroll {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 30px;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+
+        .content-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .content-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .content-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .content-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.8fr 1fr;
+            gap: 28px;
+        }
+
+        /* Common Card Style */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-purple));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        /* Performance Summary Grid (KPI cards) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .stat-box {
+            padding: 16px 18px;
+            border-radius: 10px;
+            background: #ffffff;
+            border: 0.5px solid #d8d8d8; /* matches Figma */
+            box-shadow: 0 4px 4px rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .stat-box:hover {
+            box-shadow: 0 10px 18px rgba(15, 23, 42, 0.12);
+            border-color: #c3d4ff;
+            transform: translateY(-2px);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .stat-header span:first-child {
+            font-size: 1.5rem;
+        }
+
+        .stat-val { 
+            font-size: 1.5rem; /* ~24px like Figma H5/H4 */
+            font-weight: 600; 
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+            margin-bottom: 2px;
+        }
+        .stat-label { 
+            font-size: 0.875rem; 
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+        .trend { 
+            font-size: 0.8rem; 
+            font-weight: 500;
+        }
+        .trend.up { 
+            color: #00a63e; /* Figma green */
+        }
+        .trend.down { 
+            color: #e7000b; /* Figma red */
+        }
+
+        /* Today's Priorities List */
+        .priority-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .priority-item:last-child {
+            border-bottom: none;
+        }
+
+        .priority-item:hover {
+            padding-left: 8px;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
+            margin: 0 -24px;
+            padding-left: 32px;
+            padding-right: 24px;
+            border-radius: 8px;
+        }
+
+        .badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            box-shadow: var(--shadow-sm);
+        }
+        .bg-red { 
+            background: linear-gradient(135deg, var(--accent-red-light) 0%, #fee2e2 100%); 
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        .bg-green { 
+            background: linear-gradient(135deg, var(--accent-green-light) 0%, #d1fae5 100%); 
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* Pipeline Chart Mockup */
+        .pipeline-row { 
+            margin-bottom: 18px; 
+        }
+        .pipeline-row:last-child {
+            margin-bottom: 0;
+        }
+        .bar-container {
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin-top: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+        .bar-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+            border-radius: 8px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        }
+        .bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Projects Section */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+        }
+        .project-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .project-card:hover {
+            transform: translateY(-4px);
+        }
+        .project-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+        .project-card:hover img {
+            box-shadow: var(--shadow-lg);
+            transform: scale(1.02);
+        }
+        .project-card h4 { 
+            margin-top: 12px; 
+            font-size: 1rem; 
+            font-weight: 600;
+            color: var(--primary-blue);
+            letter-spacing: -0.01em;
+        }
+        .project-card p { 
+            margin: 6px 0; 
+            line-height: 1.5;
+        }
+
+        /* Right Column Specific: Leaderboard */
+        .leader-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+        .leader-item:hover {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
+            transform: translateX(4px);
+        }
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: var(--shadow-md);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        .leader-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+        }
+        .leader-stat-card {
+            padding: 12px 8px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.75rem;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+        .leader-stat-card:hover {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+        .leader-stat-card div:first-child {
+            font-size: 1.25rem;
+            margin-bottom: 6px;
+        }
+        .leader-stat-card .stat-label {
+            font-size: 0.688rem;
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+
+        /* Lead Sources Cards */
+        .lead-sources-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .lead-source-card {
+            padding: 16px 12px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-align: center;
+            background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .lead-source-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-purple));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        .lead-source-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-3px);
+            border-color: var(--primary-blue);
+        }
+        .lead-source-card:hover::before {
+            transform: scaleX(1);
+        }
+        .lead-source-card div:first-child {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+        .lead-source-card .stat-val {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin: 6px 0;
+            color: var(--text-main);
+        }
+        .lead-source-card .stat-label {
+            font-size: 0.75rem;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* View More Link */
+        .view-more {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--primary-blue);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+        }
+        .view-more:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            transform: translateY(-1px);
+        }
+
+        /* Priority Icon */
+        .priority-icon {
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        /* Donut Chart Animation */
+        .donut-chart {
+            animation: rotate 20s linear infinite;
+            animation-play-state: running;
+        }
+        .donut-chart:hover {
+            animation-play-state: paused;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Enhanced HR styling */
+        hr {
+            margin: 20px 0;
+            border: 0;
+            border-top: 1px solid var(--border);
+            opacity: 0.5;
+        }
+
+        /* --- RESPONSIVE BREAKPOINTS --- */
+
+        /* Tablet (Matches 2nd Image) */
+        @media (max-width: 1024px) {
+            .sidebar-spacer { display: none; } /* Sidebar hidden in tablet/mobile */
+            .dashboard-container {
+                grid-template-columns: 1fr; /* Stack into single column */
+            }
+        }
+
+        /* Mobile (Matches 3rd Image) */
+        @media (max-width: 600px) {
+            .content-scroll { padding: 15px; }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 columns for stats on mobile */
+            }
+            .stat-val { font-size: 1.1rem; }
+            .projects-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-spacer"></div>
+
+        <div class="content-scroll">
+            <div class="dashboard-container">
+                
+                <div class="left-col">
+                    
+                    <section class="card">
+                        <h2>Performance Summary</h2>
+                        <div class="stats-grid">
+                            <div class="stat-box" style="border-left: 4px solid #3b82f6;">
+                                <div class="stat-header"><span style="color:#3b82f6; font-size: 1.75rem;">👤</span> <span class="trend up">+3.2%</span></div>
+                                <div class="stat-val">128</div>
+                                <div class="stat-label">Leads Assigned</div>
+                            </div>
+                            <div class="stat-box" style="border-left: 4px solid #8b5cf6;">
+                                <div class="stat-header"><span style="color:#8b5cf6; font-size: 1.75rem;">🏠</span> <span class="trend up">+1.8%</span></div>
+                                <div class="stat-val">64</div>
+                                <div class="stat-label">Visits Completed</div>
+                            </div>
+                            <div class="stat-box" style="border-left: 4px solid #f59e0b;">
+                                <div class="stat-header"><span style="color:#f59e0b; font-size: 1.75rem;">💬</span> <span class="trend down">-0.5%</span></div>
+                                <div class="stat-val">27</div>
+                                <div class="stat-label">In Negotiation</div>
+                            </div>
+                            <div class="stat-box" style="border-left: 4px solid #ef4444;">
+                                <div class="stat-header"><span style="color:#ef4444; font-size: 1.75rem;">✋</span> <span class="trend down">-0.8%</span></div>
+                                <div class="stat-val">116</div>
+                                <div class="stat-label">Rejected</div>
+                            </div>
+                            <div class="stat-box" style="border-left: 4px solid #f59e0b;">
+                                <div class="stat-header"><span style="color:#f59e0b; font-size: 1.75rem;">📅</span> <span class="trend up">+2.0%</span></div>
+                                <div class="stat-val">12</div>
+                                <div class="stat-label">Booked</div>
+                            </div>
+                            <div class="stat-box" style="border-left: 4px solid #10b981;">
+                                <div class="stat-header"><span style="color:#10b981; font-size: 1.75rem;">📈</span> <span class="trend up">+0.7%</span></div>
+                                <div class="stat-val">9.4%</div>
+                                <div class="stat-label">Conversion Rate</div>
+                            </div>
+                        </div>
+                        <div class="view-more">View More ↓</div>
+                    </section>
+
+                    <section class="card">
+                        <h2>Today's Priorities</h2>
+                        <div class="priority-item">
+                            <span><span class="priority-icon">🔄</span>Missed Follow-Ups - (5)</span>
+                            <span class="badge bg-red">Needs Action</span>
+                        </div>
+                        <div class="priority-item">
+                            <span><span class="priority-icon">🔄</span>Follow Ups - (12)</span>
+                            <span class="badge bg-green">5 Completed</span>
+                        </div>
+                        <div class="priority-item">
+                            <span><span class="priority-icon">🔄</span>Site Visits - (3)</span>
+                            <span class="badge bg-green">1 Completed</span>
+                        </div>
+                        <div class="priority-item">
+                            <span><span class="priority-icon">🔄</span>Revisits - (5)</span>
+                            <span class="badge bg-green">3 Completed</span>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <h2>Lead Pipeline</h2>
+                        <div class="pipeline-row">
+                            <div class="stat-label">Contacted <span style="float:right">286</span></div>
+                            <div class="bar-container"><div class="bar-fill" style="width: 90%;"></div></div>
+                        </div>
+                        <div class="pipeline-row">
+                            <div class="stat-label">Site Visits <span style="float:right">200</span></div>
+                            <div class="bar-container"><div class="bar-fill" style="width: 70%;"></div></div>
+                        </div>
+                        <div class="pipeline-row">
+                            <div class="stat-label">Negotiation <span style="float:right">100</span></div>
+                            <div class="bar-container"><div class="bar-fill" style="width: 45%;"></div></div>
+                        </div>
+                        <div class="pipeline-row">
+                            <div class="stat-label">Booked <span style="float:right">40</span></div>
+                            <div class="bar-container"><div class="bar-fill" style="width: 20%;"></div></div>
+                        </div>
+                        <div class="pipeline-row">
+                            <div class="stat-label">Lost <span style="float:right">246</span></div>
+                            <div class="bar-container"><div class="bar-fill" style="width: 75%;"></div></div>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <h2>Top Performing Project</h2>
+                        <div class="projects-grid">
+                            <div class="project-card">
+                                <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=400&q=80" alt="House">
+                                <h4>Maaz Palace</h4>
+                                <p class="stat-label">45 Site Visits | 25 Revisits | 12 Bookings</p>
+                                <p class="stat-label" style="color: var(--accent-green); font-weight: bold;">5.60% Conversion</p>
+                            </div>
+                            <div class="project-card">
+                                <img src="https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=400&q=80" alt="House">
+                                <h4>GreenVille Orchid</h4>
+                                <p class="stat-label">22 Site Visits | 10 Revisits | 2 Bookings</p>
+                                <p class="stat-label" style="color: var(--accent-red); font-weight: bold;">0.80% Conversion</p>
+                            </div>
+                            <div class="project-card">
+                                <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=400&q=80" alt="Apartment">
+                                <h4>Zara Palace</h4>
+                                <p class="stat-label">45 Site Visits | 25 Revisits | 12 Bookings</p>
+                                <p class="stat-label" style="color: var(--accent-green); font-weight: bold;">8.60% Conversion</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="right-col">
+                    <section class="card">
+                        <h2>Leaderboard</h2>
+                        <div class="leader-item">
+                            <div class="avatar"></div>
+                            <div style="flex-grow:1">
+                                <div style="font-weight:bold">#8 Zishan Shaikh</div>
+                                <div class="stat-label">578 pts</div>
+                            </div>
+                        </div>
+                        <div class="leader-stats">
+                            <div class="leader-stat-card">
+                                <div>🕐</div>
+                                <div class="stat-label">56 Min Avg. Call Time</div>
+                            </div>
+                            <div class="leader-stat-card">
+                                <div>📞</div>
+                                <div class="stat-label">38 Sec Response Time</div>
+                            </div>
+                            <div class="leader-stat-card">
+                                <div>📊</div>
+                                <div class="stat-label">25% Connect Ratio</div>
+                            </div>
+                        </div>
+                        <hr style="margin: 15px 0; border:0; border-top:1px solid #eee;">
+                        <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; color: var(--text-main);">Top Performers This Month</div>
+                        <div class="leader-item">
+                            <div class="avatar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                            <div style="flex-grow:1">
+                                <div style="font-weight:bold">#1 Cristiano Ronaldo</div>
+                            </div>
+                            <div class="stat-label">940 pts</div>
+                        </div>
+                        <div class="leader-item">
+                            <div class="avatar" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                            <div style="flex-grow:1">
+                                <div style="font-weight:bold">#2 Messi</div>
+                            </div>
+                            <div class="stat-label">790 pts</div>
+                        </div>
+                        <div class="leader-item">
+                            <div class="avatar" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                            <div style="flex-grow:1">
+                                <div style="font-weight:bold">#3 Virat Kholi</div>
+                            </div>
+                            <div class="stat-label">660 pts</div>
+                        </div>
+                        <div class="leader-item">
+                            <div class="avatar" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
+                            <div style="flex-grow:1">
+                                <div style="font-weight:bold">#4 Rohit Sharma</div>
+                            </div>
+                            <div class="stat-label">655 pts</div>
+                        </div>
+                        <div class="leader-item">
+                            <div class="avatar" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"></div>
+                            <div style="flex-grow:1">
+                                <div style="font-weight:bold">#5 Jaiswal</div>
+                            </div>
+                            <div class="stat-label">600 pts</div>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <h2>Lead Sources</h2>
+                        <div class="lead-sources-grid">
+                            <div class="lead-source-card">
+                                <div>📄</div>
+                                <div class="stat-val">25 leads</div>
+                                <div class="stat-label" style="color: var(--primary-blue); font-weight: bold;">300 pts</div>
+                                <div class="trend up" style="font-size: 0.7rem;">+0.8%</div>
+                            </div>
+                            <div class="lead-source-card">
+                                <div>📞</div>
+                                <div class="stat-val">6 calls</div>
+                                <div class="stat-label" style="color: var(--primary-blue); font-weight: bold;">78 pts</div>
+                                <div class="trend up" style="font-size: 0.7rem;">+0.8%</div>
+                            </div>
+                            <div class="lead-source-card">
+                                <div>📊</div>
+                                <div class="stat-val">25%</div>
+                                <div class="stat-label" style="color: var(--primary-blue); font-weight: bold;">200 pts</div>
+                                <div class="trend up" style="font-size: 0.7rem;">+0.8%</div>
+                            </div>
+                        </div>
+                        <div style="text-align:center; padding: 20px;">
+                            <div style="width: 160px; height: 160px; border-radius: 50%; border: 18px solid var(--primary-blue); border-right-color: #cbd5e1; border-bottom-color: #cbd5e1; margin: 0 auto; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2); transition: transform 0.3s ease;" class="donut-chart"></div>
+                            <div style="margin-top:24px; font-size: 0.813rem; font-weight: 500;">
+                                <span style="color:var(--primary-blue); display: inline-flex; align-items: center; gap: 6px; margin-right: 12px;"><span style="width: 10px; height: 10px; border-radius: 50%; background: var(--primary-blue); display: inline-block;"></span>Booking.com (25%)</span>
+                                <span style="color:var(--text-sub); display: inline-flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #cbd5e1; display: inline-block;"></span>Manual (10%)</span>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced card interactions
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Animate stat boxes on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Animate pipeline bars on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const bars = document.querySelectorAll('.bar-fill');
+            bars.forEach((bar, index) => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, index * 100);
+            });
+
+            // Animate stat boxes
+            document.querySelectorAll('.stat-box, .project-card, .lead-source-card').forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'all 0.5s ease';
+                setTimeout(() => {
+                    observer.observe(el);
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
+        });
+
+        // Auto-scroll to top on load
+        window.onload = () => {
+            document.querySelector('.content-scroll').scrollTop = 0;
+        };
+
+        // Donut chart hover effect
+        const donutChart = document.querySelector('.donut-chart');
+        if (donutChart) {
+            donutChart.addEventListener('mouseenter', function() {
+                this.style.boxShadow = '0 8px 20px rgba(59, 130, 246, 0.3)';
+            });
+            donutChart.addEventListener('mouseleave', function() {
+                this.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.2)';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+﻿name :- truelink
+login-server :- truelink.azurecr.io
+username :- truelink
+password :- [REDACTED]
+password2 :- [REDACTED]
+
+note :- always build linux amd64 image to push
+always use incrementalimage tags while building and pushing like 1.0.1 , 1.0.2 1.0.11 etc not latest

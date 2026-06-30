@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=1280, height=720, initial-scale=1.0" name="viewport"/>
+<title>Production Hardware - Exploded View</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #050508;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3, .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Exploded View Container */
+        .exploded-view-container {
+            position: relative;
+            perspective: 1200px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .exploded-stack {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            transform-style: preserve-3d;
+            transform: rotateX(15deg) rotateY(-25deg);
+        }
+
+        /* Component Layers */
+        .component-layer {
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            border-radius: 12px;
+            background: rgba(18, 18, 28, 0.7);
+            border: 1px solid rgba(6, 182, 212, 0.3); /* Cyan border */
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.5s ease;
+            transform-style: preserve-3d;
+        }
+
+        .layer-pcb {
+            background: rgba(6, 78, 59, 0.8); /* Greenish PCB */
+            border: 1px solid rgba(52, 211, 153, 0.5);
+        }
+
+        .layer-battery {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            height: 180px;
+        }
+
+        .layer-chip {
+            width: 80px;
+            height: 80px;
+            background: #111;
+            border: 1px solid #ccc;
+            transform: translateZ(20px);
+        }
+
+        /* Connecting Lines */
+        .guide-line {
+            position: absolute;
+            background: rgba(6, 182, 212, 0.3);
+            height: 1px;
+            width: 100px;
+            transform-origin: left center;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: rgba(22, 78, 99, 0.3);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            backdrop-filter: blur(8px);
+            border-radius: 8px;
+            padding: 12px;
+            width: 200px;
+            position: absolute;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            background: rgba(22, 78, 99, 0.5);
+            border-color: rgba(6, 182, 212, 0.5);
+            transform: scale(1.05);
+        }
+
+        /* Tech Specs Grid */
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .spec-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 2px solid #06b6d4;
+        }
+
+        /* Alternative Chips Badge */
+        .alt-chip-badge {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body class="w-[1280px] h-[720px] p-0 relative">
+<!-- Header -->
+<header class="absolute top-0 left-0 w-full p-8 z-20 flex justify-between items-start">
+<div>
+<div class="flex items-center space-x-3 mb-2">
+<div class="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.8)]"></div>
+<p class="text-cyan-500 text-sm font-semibold tracking-widest uppercase font-mono">Production Hardware</p>
+</div>
+<h1 class="text-4xl font-bold text-white font-display">Mass Production Architecture</h1>
+</div>
+<div class="flex flex-col items-end">
+<div class="bg-cyan-900/20 border border-cyan-500/30 px-6 py-3 rounded-lg backdrop-blur-md">
+<p class="text-xs text-cyan-400 font-mono uppercase mb-1">Target BOM Cost</p>
+<p class="text-3xl font-bold text-white font-display">₹500 - ₹600</p>
+<p class="text-[10px] text-gray-400 mt-1 font-mono">Based on 10k+ Units</p>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="w-full h-full flex pt-20 pb-8 px-12 relative z-10">
+<!-- Left: Exploded View Visualization -->
+<div class="w-1/2 h-full exploded-view-container">
+<div class="exploded-stack">
+<!-- Layer 1: Top Enclosure -->
+<div class="component-layer" style="transform: translateZ(160px); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+<div class="text-gray-400 font-mono text-xs">Top Case (ABS)</div>
+</div>
+<!-- Label Line -->
+<div class="guide-line" style="top: 20%; left: 100%; width: 150px; transform: rotate(-10deg);"></div>
+<div class="info-card" style="top: 10%; left: 140%;">
+<h4 class="text-cyan-400 font-bold text-sm">Enclosure</h4>
+<p class="text-xs text-gray-300 mt-1">Injection Molded ABS/PC</p>
+</div>
+<!-- Layer 2: PCB & Chipset (Main) -->
+<div class="component-layer layer-pcb" style="transform: translateZ(80px);">
+<!-- Chip -->
+<div class="layer-chip flex flex-col items-center justify-center">
+<span class="text-[8px] text-gray-400 font-mono">JL</span>
+<span class="text-xs font-bold text-white">AC6965</span>
+</div>
+<!-- Mic -->
+<div class="absolute bottom-4 left-4 w-6 h-6 bg-yellow-500/20 border border-yellow-500 rounded-full flex items-center justify-center">
+<i class="fas fa-microphone text-[10px] text-yellow-500"></i>
+</div>
+<!-- Flash -->
+<div class="absolute top-4 right-4 w-8 h-6 bg-blue-500/20 border border-blue-500 rounded flex items-center justify-center">
+<span class="text-[8px] text-blue-400">4MB</span>
+</div>
+</div>
+<!-- Label Line PCB -->
+<div class="guide-line" style="top: 45%; left: 100%; width: 120px; transform: rotate(5deg);"></div>
+<div class="info-card" style="top: 40%; left: 130%; border-color: rgba(34, 197, 94, 0.4); background: rgba(20, 83, 45, 0.4);">
+<h4 class="text-green-400 font-bold text-sm">Core Logic (PCB)</h4>
+<p class="text-xs text-gray-300 mt-1">JL AC6965 SoC + MEMS Mic</p>
+<div class="mt-2 flex gap-1">
+<span class="text-[9px] bg-black/40 px-1 rounded text-gray-400">HFP 1.7</span>
+<span class="text-[9px] bg-black/40 px-1 rounded text-gray-400">DSP</span>
+</div>
+</div>
+<!-- Layer 3: Battery -->
+<div class="component-layer layer-battery" style="transform: translateZ(0px);">
+<div class="flex flex-col items-center">
+<i class="fas fa-bolt text-yellow-500 mb-2"></i>
+<span class="text-xs font-mono text-gray-300">Li-Ion 3.7V</span>
+</div>
+</div>
+<!-- Label Line Battery -->
+<div class="guide-line" style="top: 70%; left: 100%; width: 140px; transform: rotate(15deg);"></div>
+<div class="info-card" style="top: 65%; left: 135%;">
+<h4 class="text-yellow-400 font-bold text-sm">Power Source</h4>
+<p class="text-xs text-gray-300 mt-1">500mAh Li-Po Battery</p>
+<p class="text-[10px] text-gray-500 mt-1">Type-C Charging (TP4056)</p>
+</div>
+<!-- Layer 4: Bottom Case -->
+<div class="component-layer" style="transform: translateZ(-80px); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+<div class="text-gray-400 font-mono text-xs">Bottom Case</div>
+</div>
+</div>
+</div>
+<!-- Right: Specs & ODM Info -->
+<div class="w-1/2 h-full flex flex-col justify-center pl-16">
+<div class="mb-8">
+<h3 class="text-2xl font-bold text-white mb-4 flex items-center">
+<i class="fas fa-microchip mr-3 text-cyan-400"></i> Core Chipset
+                </h3>
+<div class="bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="text-xl font-bold text-cyan-300">JL AC6965 / AC6973</h4>
+<p class="text-sm text-gray-400">JieLi Technology (Zhuhai)</p>
+</div>
+<div class="text-right">
+<span class="bg-cyan-900/50 text-cyan-300 text-xs px-2 py-1 rounded font-mono border border-cyan-500/30">RISC-V 32bit</span>
+</div>
+</div>
+<div class="specs-grid mb-4">
+<div class="spec-item">
+<p class="text-[10px] text-cyan-500 uppercase font-mono">Connectivity</p>
+<p class="text-sm text-gray-200">BT 5.3 Dual Mode</p>
+</div>
+<div class="spec-item">
+<p class="text-[10px] text-cyan-500 uppercase font-mono">Audio DSP</p>
+<p class="text-sm text-gray-200">SBC / AAC / mSBC</p>
+</div>
+<div class="spec-item">
+<p class="text-[10px] text-cyan-500 uppercase font-mono">Interface</p>
+<p class="text-sm text-gray-200">I2S / UART / SDIO</p>
+</div>
+<div class="spec-item">
+<p class="text-[10px] text-cyan-500 uppercase font-mono">Power</p>
+<p class="text-sm text-gray-200">&lt;10mA Active</p>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-gray-700">
+<p class="text-xs text-gray-500 mb-2 font-mono uppercase">Alternative Chipsets</p>
+<div class="flex gap-2">
+<span class="alt-chip-badge">Beken BK3266</span>
+<span class="alt-chip-badge">Bestechnic BES2300</span>
+<span class="alt-chip-badge">Realtek RTL8763</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Manufacturing Info -->
+<div>
+<h3 class="text-xl font-bold text-white mb-3 flex items-center">
+<i class="fas fa-industry mr-3 text-gray-400"></i> Manufacturing Plan
+                </h3>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-gray-800/30 p-4 rounded-lg border border-gray-700 flex items-center">
+<div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center mr-3">
+<i class="fas fa-globe-asia text-blue-400"></i>
+</div>
+<div>
+<p class="text-xs text-gray-500 uppercase font-mono">Location</p>
+<p class="text-sm font-bold text-gray-200">Shenzhen ODM</p>
+</div>
+</div>
+<div class="bg-gray-800/30 p-4 rounded-lg border border-gray-700 flex items-center">
+<div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center mr-3">
+<i class="fas fa-boxes text-green-400"></i>
+</div>
+<div>
+<p class="text-xs text-gray-500 uppercase font-mono">MOQ Scale</p>
+<p class="text-sm font-bold text-gray-200">1k - 10k Units</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="absolute bottom-0 w-full px-12 py-4 border-t border-gray-800 bg-[#050508]/90 flex justify-between items-center z-20">
+<div class="flex items-center space-x-6">
+<div class="flex items-center space-x-2">
+<div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+<span class="text-xs text-gray-400 font-mono">PCB DESIGN READY</span>
+</div>
+<div class="flex items-center space-x-2">
+<div class="w-2 h-2 rounded-full bg-blue-500"></div>
+<span class="text-xs text-gray-400 font-mono">FIRMWARE V1.2</span>
+</div>
+</div>
+<div class="flex items-center space-x-2 opacity-50">
+<i class="fas fa-cube text-xs text-gray-500"></i>
+<span class="text-[10px] text-gray-500 font-mono">MODEL: REC-BT-PRO-2026</span>
+</div>
+</footer>
+</body>
+</html>

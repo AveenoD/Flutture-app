@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams Management Dashboard - Responsive</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #0085FF;
+            --bg: #F8F9FB;
+            --border: #E2E8F0;
+            --text: #1E293B;
+            --muted: #64748B;
+            --sidebar-w: 260px;
+            --topbar-h: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Layout Placeholders --- */
+        .sidebar-space {
+            width: var(--sidebar-w);
+            min-width: var(--sidebar-w);
+            background: #fff;
+            border-right: 1px solid var(--border);
+        }
+
+        .main-layout {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .topbar-space {
+            height: var(--topbar-h);
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* --- Scrollable Content --- */
+        .scroll-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 20px;
+        }
+
+        /* --- Responsive Metrics --- */
+        .metrics-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .m-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .m-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .m-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .ic-blue { background: #E0F2FE; color: #0EA5E9; }
+        .ic-purple { background: #F3E8FF; color: #9333EA; }
+        .ic-indigo { background: #E0E7FF; color: #4F46E5; }
+        .ic-teal { background: #CCFBF1; color: #0D9488; }
+        .ic-red { background: #FEE2E2; color: #DC2626; }
+        .ic-orange { background: #FFEDD5; color: #EA580C; }
+
+        .trend { font-size: 13px; font-weight: 600; }
+        .up { color: #22C55E; }
+        .down { color: #EF4444; }
+
+        .m-val { font-size: 22px; font-weight: 700; color: var(--text); }
+        .m-lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+        /* --- Tabs --- */
+        .tabs-row {
+            display: flex;
+            gap: 30px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+
+        .tab {
+            padding: 10px 5px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab.active { color: var(--primary); }
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        /* --- List Card --- */
+        .list-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .list-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+
+        /* --- Header Card Wrapper (for mobile) --- */
+        .header-card-wrapper {
+            display: none;
+        }
+
+        /* --- Mobile Card Layout --- */
+        .mobile-cards-container {
+            display: none;
+            padding: 16px;
+            gap: 16px;
+            flex-direction: column;
+        }
+
+        .team-mobile-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .team-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .team-card-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+        }
+
+        .team-card-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .team-card-user-details {
+            flex-grow: 1;
+        }
+
+        .team-card-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .team-card-lead {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .team-card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .team-card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .team-card-label {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .team-card-value {
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .team-card-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .team-card-actions .btn-view-all {
+            flex-grow: 1;
+            margin-top: 0;
+        }
+
+        /* --- Responsive Header Controls --- */
+        .header-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-area {
+            display: flex;
+            gap: 12px;
+            flex-grow: 1;
+            max-width: 400px;
+        }
+
+        .search-box {
+            position: relative;
+            flex-grow: 1;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 12px 10px 35px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-blue { background: var(--primary); color: #fff; border: none; }
+        .btn-red { color: #EF4444; border-color: #FEE2E2; }
+
+        /* --- Responsive Teams Grid --- */
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .team-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .lead-box { display: flex; align-items: center; gap: 10px; }
+        .lead-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        .t-name { font-size: 14px; font-weight: 600; color: var(--text); }
+        .l-name { font-size: 11px; color: var(--muted); }
+
+        .edit-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #F1F5F9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .t-info {
+            font-size: 13px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+        }
+
+        .t-info i { color: var(--primary); width: 14px; }
+
+        .tag-row { display: flex; gap: 6px; margin-top: 12px; }
+        .tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .tag-p { background: #F3E8FF; color: #7E22CE; }
+        .tag-g { background: #DCFCE7; color: #15803D; }
+
+        .btn-view-all {
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* --- Footer --- */
+        .pagination-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        /* --- Responsiveness Media Queries --- */
+        @media (max-width: 1200px) {
+            .teams-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar-space { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .scroll-container { padding: 15px; }
+            
+            /* Horizontal scrollable KPIs on mobile */
+            .metrics-container {
+                display: flex;
+                overflow-x: auto;
+                overflow-y: hidden;
+                gap: 16px;
+                padding-bottom: 8px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                scrollbar-color: var(--border) transparent;
+            }
+            
+            .metrics-container::-webkit-scrollbar {
+                height: 6px;
+            }
+            
+            .metrics-container::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            
+            .metrics-container::-webkit-scrollbar-thumb {
+                background-color: var(--border);
+                border-radius: 3px;
+            }
+            
+            .m-card {
+                min-width: 200px;
+                flex-shrink: 0;
+            }
+            
+            /* Show header as separate card in mobile */
+            .header-card-wrapper {
+                display: block;
+                background: #fff;
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                margin-bottom: 16px;
+                overflow: hidden;
+            }
+            
+            .header-card-wrapper .header-controls {
+                padding: 20px;
+                margin-bottom: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .header-card-wrapper .list-title {
+                margin-bottom: 0;
+            }
+            
+            /* Hide desktop header and title inside list-card in mobile */
+            .list-card .desktop-header {
+                display: none;
+            }
+            
+            .list-card .list-title {
+                display: none;
+            }
+            
+            /* Controls layout for mobile */
+            .header-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+            
+            .search-area {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .action-btns {
+                width: 100%;
+            }
+            
+            .action-btns .btn-export,
+            .action-btns .btn-delete {
+                display: none;
+            }
+            
+            .action-btns .btn-blue {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            /* Hide teams-grid and show mobile cards in mobile */
+            .teams-grid {
+                display: none;
+            }
+            
+            .mobile-cards-container {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-space"></div>
+
+    <div class="main-layout">
+        <div class="topbar-space"></div>
+
+        <div class="scroll-container">
+            <h1 class="page-title">Metrices Breakdown</h1>
+
+            <div class="metrics-container">
+                <div class="m-card">
+                    <div class="m-row">
+                        <div class="m-icon ic-blue"><i class="fas fa-users"></i></div>
+                        <span class="trend up">+6.5%</span>
+                    </div>
+                    <div class="m-val">145</div>
+                    <div class="m-lbl">Total Employees</div>
+                </div>
+                <div class="m-card">
+                    <div class="m-row">
+                        <div class="m-icon ic-purple"><i class="fas fa-folder"></i></div>
+                        <span class="trend up">+1.3%</span>
+                    </div>
+                    <div class="m-val">12</div>
+                    <div class="m-lbl">Total Teams</div>
+                </div>
+                <div class="m-card">
+                    <div class="m-row">
+                        <div class="m-icon ic-indigo"><i class="fas fa-user-slash"></i></div>
+                        <span class="trend down">-2.1%</span>
+                    </div>
+                    <div class="m-val">8</div>
+                    <div class="m-lbl">Employes without a Team</div>
+                </div>
+                <div class="m-card">
+                    <div class="m-row">
+                        <div class="m-icon ic-teal"><i class="fas fa-ruler-horizontal"></i></div>
+                        <span class="trend up">+0.4s</span>
+                    </div>
+                    <div class="m-val">12.1</div>
+                    <div class="m-lbl">Avg. Team Size</div>
+                </div>
+                <div class="m-card">
+                    <div class="m-row">
+                        <div class="m-icon ic-red"><i class="fas fa-calendar-check"></i></div>
+                        <span class="trend up">+4.6%</span>
+                    </div>
+                    <div class="m-val">24</div>
+                    <div class="m-lbl">Active Projects Assigned</div>
+                </div>
+                <div class="m-card">
+                    <div class="m-row">
+                        <div class="m-icon ic-orange"><i class="far fa-clock"></i></div>
+                        <span class="trend up">+2.2%</span>
+                    </div>
+                    <div class="m-val">05</div>
+                    <div class="m-lbl">Pending Onboarding</div>
+                </div>
+            </div>
+
+            <div class="tabs-row">
+                <div class="tab">Employees</div>
+                <div class="tab active">Teams</div>
+            </div>
+
+            <!-- Header Card (separate in mobile) -->
+            <div class="header-card-wrapper">
+                <div class="header-controls">
+                    <h2 class="list-title" style="margin-bottom: 0;">All Teams List</h2>
+                    <div class="search-area">
+                        <button class="btn"><i class="fas fa-columns"></i> Column</button>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search">
+                        </div>
+                    </div>
+                    <div class="action-btns">
+                        <button class="btn btn-export"><i class="fas fa-file-export"></i> Export</button>
+                        <button class="btn btn-red btn-delete"><i class="fas fa-trash-alt"></i> Delete</button>
+                        <button class="btn btn-blue"><i class="fas fa-plus"></i> Create Team</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="list-card">
+                <h2 class="list-title">All Teams List</h2>
+                
+                <!-- Desktop header (hidden in mobile) -->
+                <div class="header-controls desktop-header">
+                    <div class="search-area">
+                        <button class="btn"><i class="fas fa-columns"></i> Column</button>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search">
+                        </div>
+                    </div>
+                    <div class="action-btns">
+                        <button class="btn"><i class="fas fa-file-export"></i> Export</button>
+                        <button class="btn btn-red"><i class="fas fa-trash-alt"></i> Delete</button>
+                        <button class="btn btn-blue"><i class="fas fa-plus"></i> Create Team</button>
+                    </div>
+                </div>
+
+                <div class="teams-grid">
+                    <div class="team-card">
+                        <div class="card-top">
+                            <div class="lead-box">
+                                <img src="https://i.pravatar.cc/100?u=1" class="lead-img">
+                                <div>
+                                    <div class="t-name">North Zone</div>
+                                    <div class="l-name">Zishan Shaikh</div>
+                                </div>
+                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <div class="t-info"><i class="fas fa-users"></i> 8 Member</div>
+                        <div class="t-info"><i class="fas fa-briefcase"></i> 3 Project Assigned</div>
+                        <div class="tag-row">
+                            <span class="tag tag-p">Luxury Projects</span>
+                            <span class="tag tag-g">High Performer</span>
+                        </div>
+                        <button class="btn-view-all">View All Member</button>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="card-top">
+                            <div class="lead-box">
+                                <img src="https://i.pravatar.cc/100?u=2" class="lead-img">
+                                <div>
+                                    <div class="t-name">South Zone</div>
+                                    <div class="l-name">Maaz Khan</div>
+                                </div>
+                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <div class="t-info"><i class="fas fa-users"></i> 4 Member</div>
+                        <div class="t-info"><i class="fas fa-briefcase"></i> 3 Project Assigned</div>
+                        <div class="tag-row">
+                            <span class="tag tag-p">Luxury Projects</span>
+                            <span class="tag tag-g">High Performer</span>
+                        </div>
+                        <button class="btn-view-all">View All Member</button>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="card-top">
+                            <div class="lead-box">
+                                <img src="https://i.pravatar.cc/100?u=3" class="lead-img">
+                                <div>
+                                    <div class="t-name">Budget 50-80L</div>
+                                    <div class="l-name">Mustakim Sayyed</div>
+                                </div>
+                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <div class="t-info"><i class="fas fa-users"></i> 12 Member</div>
+                        <div class="t-info"><i class="fas fa-briefcase"></i> 3 Project Assigned</div>
+                        <div class="tag-row">
+                            <span class="tag tag-p">Luxury Projects</span>
+                            <span class="tag tag-g">High Performer</span>
+                        </div>
+                        <button class="btn-view-all">View All Member</button>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="card-top">
+                            <div class="lead-box">
+                                <img src="https://i.pravatar.cc/100?u=4" class="lead-img">
+                                <div>
+                                    <div class="t-name">Premium Leads Thane</div>
+                                    <div class="l-name">Tauquid Khatik</div>
+                                </div>
+                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <div class="t-info"><i class="fas fa-users"></i> 14 Member</div>
+                        <div class="t-info"><i class="fas fa-briefcase"></i> 3 Project Assigned</div>
+                        <div class="tag-row">
+                            <span class="tag tag-p">Luxury Projects</span>
+                            <span class="tag tag-g">High Performer</span>
+                        </div>
+                        <button class="btn-view-all">View All Member</button>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="card-top">
+                            <div class="lead-box">
+                                <img src="https://i.pravatar.cc/100?u=5" class="lead-img">
+                                <div>
+                                    <div class="t-name">Walk In Customer</div>
+                                    <div class="l-name">Virat Kohli</div>
+                                </div>
+                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <div class="t-info"><i class="fas fa-users"></i> 2 Member</div>
+                        <div class="t-info"><i class="fas fa-briefcase"></i> 3 Project Assigned</div>
+                        <div class="tag-row">
+                            <span class="tag tag-p">Luxury Projects</span>
+                            <span class="tag tag-g">High Performer</span>
+                        </div>
+                        <button class="btn-view-all">View All Member</button>
+                    </div>
+
+                    <div class="team-card">
+                        <div class="card-top">
+                            <div class="lead-box">
+                                <img src="https://i.pravatar.cc/100?u=6" class="lead-img">
+                                <div>
+                                    <div class="t-name">Housing Leads Thane</div>
+                                    <div class="l-name">Sarah Johnson</div>
+                                </div>
+                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <div class="t-info"><i class="fas fa-users"></i> 6 Member</div>
+                        <div class="t-info"><i class="fas fa-briefcase"></i> 3 Project Assigned</div>
+                        <div class="tag-row">
+                            <span class="tag tag-p">Luxury Projects</span>
+                            <span class="tag tag-g">High Performer</span>
+                        </div>
+                        <button class="btn-view-all">View All Member</button>
+                    </div>
+                </div>
+
+                <!-- Mobile Cards View -->
+                <div class="mobile-cards-container">
+                    <!-- Team Card 1 -->
+                    <div class="team-mobile-card">
+                        <div class="team-card-header">
+                            <div class="team-card-user-info">
+                                <img src="https://i.pravatar.cc/100?u=1" class="team-card-avatar">
+                                <div class="team-card-user-details">
+                                    <span class="team-card-name">North Zone</span>
+                                    <span class="team-card-lead">Zishan Shaikh</span>
+                                </div>
+                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <div class="team-card-body">
+                            <div class="team-card-row">
+                                <span class="team-card-label">Members</span>
+                                <span class="team-card-value">8 Member</span>
+                            </div>
+                            <div class="team-card-row">
+                                <span class="team-card-label">Projects Assigned</span>
+                                <span class="team-card-value">3 Project Assigned</span>
+                            </div>
+                            <div class="team-card-row">
+                                <span class="team-card-label">Tags</span>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <span class="tag tag-p">Luxury Projects</span>
+                                    <span class="tag tag-g">High Performer</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="team-card-actions">
+                            <button class="btn-view-all">View All Member</button>
+                        </div>
+                    </div>
+
+                    <!-- Team Card 2 -->
+                    <div class="team-mobile-card">
+                        <div class="team-card-header">
+                            <div class="team-card-user-info">
+                                <img src="https://i.pravatar.cc/100?u=2" class="team-card-avatar">
+                                <div class="team-card-user-details">
+                                    <span class="team-card-name">South Zone</span>
+                                    <span class="team-card-lead">Maaz Khan</span>
+                                </div>
+                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <div class="team-card-body">
+                            <div class="team-card-row">
+                                <span class="team-card-label">Members</span>
+                                <span class="team-card-value">4 Member</span>
+                            </div>
+                            <div class="team-card-row">
+                                <span class="team-card-label">Projects Assigned</span>
+                                <span class="team-card-value">3 Project Assigned</span>
+                            </div>
+                            <div class="team-card-row">
+                                <span class="team-card-label">Tags</span>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <span class="tag tag-p">Luxury Projects</span>
+                                    <span class="tag tag-g">High Performer</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="team-card-actions">
+                            <button class="btn-view-all">View All Member</button>
+                        </div>
+                    </div>
+
+                    <!-- Team Card 3 -->
+                    <div class="team-mobile-card">
+                        <div class="team-card-header">
+                            <div class="team-card-user-info">
+                                <img src="https://i.pravatar.cc/100?u=3" class="team-card-avatar">
+                                <div class="team-card-user-details">
+                                    <span class="team-card-name">Budget 50-80L</span>
+                                    <span class="team-card-lead">Mustakim Sayyed</span>
+                                </div>
+                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <div class="team-card-body">
+                            <div class="team-card-row">
+                                <span class="team-card-label">Members</span>
+                                <span class="team-card-value">12 Member</span>
+                            </div>
+                            <div class="team-card-row">
+                                <span class="team-card-label">Projects Assigned</span>
+                                <span class="team-card-value">3 Project Assigned</span>
+                            </div>
+                            <div class="team-card-row">
+                                <span class="team-card-label">Tags</span>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <span class="tag tag-p">Luxury Projects</span>
+                                    <span class="tag tag-g">High Performer</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="team-card-actions">
+                            <button class="btn-view-all">View All Member</button>
+                        </div>
+                    </div>
+
+                    <!-- Team Card 4 -->
+                    <div class="team-mobile-card">
+                        <div class="team-card-header">
+                            <div class="team-card-user-info">
+                                <img src="https://i.pravatar.cc/100?u=4" class="team-card-avatar">
+                                <div class="team-card-user-details">
+                                    <span class="team-card-name">Premium Leads Thane</span>
+                                    <span class="team-card-lead">Tauquid Khatik</span>
+                                </div>
+                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <div class="team-card-body">
+                            <div class="team-card-row">
+                                <span class="team-card-label">Members</span>
+                                <span class="team-card-value">14 Member</span>
+                            </div>
+                            <div class="team-card-row">
+                                <span class="team-card-label">Projects Assigned</span>
+                                <span class="team-card-value">3 Project Assigned</span>
+                            </div>
+                            <div class="team-card-row">
+                                <span class="team-card-label">Tags</span>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <span class="tag tag-p">Luxury Projects</span>
+                                    <span class="tag tag-g">High Performer</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="team-card-actions">
+                            <button class="btn-view-all">View All Member</button>
+                        </div>
+                    </div>
+
+                    <!-- Team Card 5 -->
+                    <div class="team-mobile-card">
+                        <div class="team-card-header">
+                            <div class="team-card-user-info">
+                                <img src="https://i.pravatar.cc/100?u=5" class="team-card-avatar">
+                                <div class="team-card-user-details">
+                                    <span class="team-card-name">Walk In Customer</span>
+                                    <span class="team-card-lead">Virat Kohli</span>
+                                </div>
+                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <div class="team-card-body">
+                            <div class="team-card-row">
+                                <span class="team-card-label">Members</span>
+                                <span class="team-card-value">2 Member</span>
+                            </div>
+                            <div class="team-card-row">
+                                <span class="team-card-label">Projects Assigned</span>
+                                <span class="team-card-value">3 Project Assigned</span>
+                            </div>
+                            <div class="team-card-row">
+                                <span class="team-card-label">Tags</span>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <span class="tag tag-p">Luxury Projects</span>
+                                    <span class="tag tag-g">High Performer</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="team-card-actions">
+                            <button class="btn-view-all">View All Member</button>
+                        </div>
+                    </div>
+
+                    <!-- Team Card 6 -->
+                    <div class="team-mobile-card">
+                        <div class="team-card-header">
+                            <div class="team-card-user-info">
+                                <img src="https://i.pravatar.cc/100?u=6" class="team-card-avatar">
+                                <div class="team-card-user-details">
+                                    <span class="team-card-name">Housing Leads Thane</span>
+                                    <span class="team-card-lead">Sarah Johnson</span>
+                                </div>
+                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                        </div>
+                        <div class="team-card-body">
+                            <div class="team-card-row">
+                                <span class="team-card-label">Members</span>
+                                <span class="team-card-value">6 Member</span>
+                            </div>
+                            <div class="team-card-row">
+                                <span class="team-card-label">Projects Assigned</span>
+                                <span class="team-card-value">3 Project Assigned</span>
+                            </div>
+                            <div class="team-card-row">
+                                <span class="team-card-label">Tags</span>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <span class="tag tag-p">Luxury Projects</span>
+                                    <span class="tag tag-g">High Performer</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="team-card-actions">
+                            <button class="btn-view-all">View All Member</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pagination-row">
+                    <div>
+                        Row Per Page
+                        <select style="border:1px solid var(--border); padding:2px 5px; border-radius:4px; margin-left:5px;">
+                            <option>10</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <span>1 - 4 of 4</span>
+                        <div style="cursor:pointer;">
+                            <i class="fas fa-chevron-left"></i> &nbsp; <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab selection logic
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(t => {
+            t.addEventListener('click', () => {
+                tabs.forEach(tab => tab.classList.remove('active'));
+                t.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+name,phone,email,city,state,budget_min,budget_max,lead_temperature
+Lead One,9876543210,lead1@test.com,Bangalore,Karnataka,50,100,warm
+Lead Two,9876543211,lead2@test.com,Mumbai,Maharashtra,80,150,hot
+Lead Three,9876543212,lead3@test.com,Delhi,Delhi,30,80,cold
+Lead Four,9876543213,lead4@test.com,Chennai,Tamil Nadu,100,200,warm
+Lead Five,9876543214,lead5@test.com,Hyderabad,Telangana,60,120,hot
+Lead Six,9876543215,lead6@test.com,Pune,Maharashtra,40,90,warm
+Lead Seven,9876543216,lead7@test.com,Kolkata,West Bengal,70,140,cold
+Lead Eight,9876543217,lead8@test.com,Ahmedabad,Gujarat,90,180,hot
+Lead Nine,9876543218,lead9@test.com,Jaipur,Rajasthan,55,110,warm
+Lead Ten,9876543219,lead10@test.com,Lucknow,Uttar Pradesh,45,95,warm
+Lead Eleven,9876543220,lead11@test.com,Chandigarh,Punjab,65,130,hot
+Lead Twelve,9876543221,lead12@test.com,Indore,Madhya Pradesh,75,155,warm
+Lead Thirteen,9876543222,lead13@test.com,Coimbatore,Tamil Nadu,85,170,cold
+Lead Fourteen,9876543223,lead14@test.com,Nagpur,Maharashtra,50,100,warm
+Lead Fifteen,9876543224,lead15@test.com,Kochi,Kerala,95,190,hot

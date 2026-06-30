@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Detail Dashboard</title>
+    <style>
+        :root {
+            --primary: #0061FF;
+            --primary-light: #E9F2FF;
+            --success: #34A853;
+            --success-light: #E6F4EA;
+            --warning: #FBBC04;
+            --warning-light: #FFF8E1;
+            --danger: #EA4335;
+            --danger-light: #FCE8E6;
+            --text-main: #202124;
+            --text-secondary: #5F6368;
+            --border: #DADCE0;
+            --bg-page: #FFFFFF;
+            --bg-card: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Placeholder */
+        .sidebar-space {
+            width: 250px;
+            flex-shrink: 0;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Topbar Placeholder */
+        .topbar-space {
+            height: 64px;
+            width: 100%;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+        }
+
+        /* Scrollable Content Area */
+        .content-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            scrollbar-width: thin;
+        }
+
+        /* Header Navigation */
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: #f1f3f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Stepper UX */
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 900px;
+            margin: 0 auto 40px auto;
+            position: relative;
+        }
+
+        .stepper::before {
+            content: "";
+            position: absolute;
+            top: 18px;
+            left: 50px;
+            right: 50px;
+            height: 2px;
+            background: var(--border);
+            z-index: 1;
+        }
+
+        .step {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .step-icon {
+            width: 36px;
+            height: 36px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .step.active .step-icon {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 97, 255, 0.3);
+        }
+
+        .step-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 40px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding-bottom: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--primary);
+        }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* Main Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 32px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Profile Section */
+        .profile-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .user-meta {
+            display: flex;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .badge-hot {
+            background: var(--danger-light);
+            color: var(--danger);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .budget-txt {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 14px;
+            margin: 12px 0;
+        }
+
+        /* Action Buttons */
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .btn {
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--text-main); color: var(--text-main); }
+        .btn:hover { opacity: 0.9; }
+
+        /* List Styling */
+        .remark-list {
+            list-style: none;
+        }
+
+        .remark-item {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            color: var(--text-main);
+        }
+
+        .remark-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        /* Timeline on Right Side */
+        .timeline {
+            border-left: 2px solid var(--border);
+            margin-left: 10px;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .timeline-node {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .node-dot {
+            position: absolute;
+            left: -31px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        .timeline-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: white;
+        }
+
+        .status-pill {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-completed { background: var(--success-light); color: var(--success); }
+        .status-pending { background: var(--warning-light); color: #B08500; }
+
+        /* Footer Input Bar */
+        .remark-input-container {
+            display: flex;
+            align-items: center;
+            background: #F1F3F4;
+            border-radius: 24px;
+            padding: 8px 16px;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .remark-input-container input {
+            background: transparent;
+            border: none;
+            outline: none;
+            flex-grow: 1;
+            font-size: 14px;
+        }
+
+        .input-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+
+        .voice-btn {
+            background: var(--primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .sidebar-space {
+                display: none;
+            }
+        }
+
+        /* Custom Scrollbar for UX */
+        .content-container::-webkit-scrollbar { width: 6px; }
+        .content-container::-webkit-scrollbar-track { background: transparent; }
+        .content-container::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-space"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-space"></div>
+
+        <div class="content-container">
+            <div class="header-nav">
+                <div class="header-title">
+                    <div class="back-btn">←</div>
+                    <h1 style="font-size: 20px;">Lead Detail</h1>
+                </div>
+                <div class="input-icon-btn">🔔</div>
+            </div>
+
+            <div class="stepper">
+                <div class="step">
+                    <div class="step-icon">📄</div>
+                    <span class="step-label">Summary</span>
+                </div>
+                <div class="step active">
+                    <div class="step-icon">🏠</div>
+                    <span class="step-label">Property Visit</span>
+                </div>
+                <div class="step">
+                    <div class="step-icon">💬</div>
+                    <span class="step-label">Negotiation</span>
+                </div>
+                <div class="step">
+                    <div class="step-icon">📋</div>
+                    <span class="step-label">Booking</span>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active">Overveiw</div>
+                <div class="tab">Follow Ups</div>
+            </div>
+
+            <h2>Lead Profile</h2>
+            <br>
+
+            <div class="dashboard-grid">
+                
+                <div class="left-col">
+                    <div class="card">
+                        <div class="profile-row">
+                            <div class="user-meta">
+                                <img src="https://i.pravatar.cc/150?u=maaz" alt="User" class="avatar">
+                                <div>
+                                    <h3 style="font-size: 16px;">Shaikh Maaz</h3>
+                                    <p style="font-size: 12px; color: var(--text-secondary);">Crown Heights</p>
+                                </div>
+                            </div>
+                            <span class="badge-hot">Very Hot</span>
+                        </div>
+                        
+                        <div class="info-item">📞 (808) 555-0111</div>
+                        <div class="info-item">📍 Pembroke Pines</div>
+                        
+                        <div class="budget-txt">Badge - ₹40L - ₹50L</div>
+                        
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-top: 12px;">
+                            <span style="background:#E9F2FF; color:var(--primary); padding:2px 8px; border-radius:4px;">Assigned By Anuj</span>
+                            <span>2 Hour ago</span>
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="btn btn-primary">📞 Call Now</button>
+                        <button class="btn btn-primary">💬 Chat Now</button>
+                    </div>
+
+                    <div class="card">
+                        <ul class="remark-list">
+                            <li class="remark-item"><span class="remark-dot"></span> Client is interested in 2BHK, corner-facing unit.</li>
+                            <li class="remark-item"><span class="remark-dot"></span> Shared pricing PDF via WhatsApp.</li>
+                            <li class="remark-item"><span class="remark-dot"></span> Next follow-up scheduled for Thursday, 11 AM.</li>
+                            <li class="remark-item"><span class="remark-dot"></span> Next follow-up scheduled for Thursday, 11 AM.</li>
+                        </ul>
+                    </div>
+
+                    <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                        <p style="font-size: 13px;">Send a follow-up reminder 1 day before the scheduled call on Thursday, 11 AM.</p>
+                        <button class="input-icon-btn" style="background:#f1f3f4; width:28px; height:28px; border-radius:50%;">+</button>
+                    </div>
+
+                    <div class="remark-input-container">
+                        <button class="input-icon-btn">😊</button>
+                        <input type="text" placeholder="Add a new remark...">
+                        <button class="input-icon-btn">📎</button>
+                        <button class="input-icon-btn">📷</button>
+                        <div class="voice-btn">🎤</div>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="btn btn-outline" style="border:1px solid #ddd">✕ Rejected</button>
+                        <button class="btn btn-primary">Approved ≫</button>
+                    </div>
+                </div>
+
+                <div class="right-col">
+                    <h2 style="margin-bottom: 20px;">Property Visit List</h2>
+                    <br>
+                    <div class="timeline">
+                        <div class="timeline-node">
+                            <div class="node-dot" style="background:var(--success)"></div>
+                            <div class="timeline-card">
+                                <div>
+                                    <h5 style="font-size: 14px;">First Visit</h5>
+                                    <p style="font-size: 12px; color: var(--text-secondary);">24/08/2025</p>
+                                </div>
+                                <span class="status-pill status-completed">● Completed</span>
+                                <span style="color:#ccc;">≫</span>
+                            </div>
+                        </div>
+                        <div class="timeline-node">
+                            <div class="node-dot" style="background:white; border:2px solid var(--primary)"></div>
+                            <div class="timeline-card" style="border-color: var(--primary);">
+                                <div>
+                                    <h5 style="font-size: 14px;">Revisit</h5>
+                                    <p style="font-size: 12px; color: var(--text-secondary);">24/08/2025</p>
+                                </div>
+                                <span class="status-pill status-pending">● Pending</span>
+                                <span style="color:#ccc;">≫</span>
+                            </div>
+                        </div>
+                        <div class="timeline-card" style="border-style: dashed; justify-content: center; background: #fafafa; cursor: pointer;">
+                            <span style="font-size: 14px; color: var(--text-secondary);">+ Add Revisit</span>
+                        </div>
+                    </div>
+
+                    <h2 style="margin: 32px 0 16px;">Recent Calls</h2>
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-size: 13px; color: var(--text-secondary);">🕒 Today , 2:30 PM</span>
+                            <span style="color:var(--primary); font-weight:bold;">▶ 5:45</span>
+                        </div>
+                        <p style="font-size: 14px; margin-bottom: 12px;">Interested in 2BHK units, looking for corner apartment</p>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="color:var(--success); font-size:12px; font-weight:600;">✓ Answered</span>
+                            <span style="color:#ccc;">≫</span>
+                        </div>
+                    </div>
+
+                    <h2 style="margin: 32px 0 16px;">Recent Chats</h2>
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-size: 13px; color: var(--text-secondary);">🕒 Today , 2:30 PM</span>
+                            <span style="color:var(--primary); font-size:13px; font-weight:bold;">💬 5 Message</span>
+                        </div>
+                        <p style="font-size: 14px; margin-bottom: 12px;">Client is looking for a 2BHK corner unit, preferably on the 7th floor.</p>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="color:var(--warning); font-size:12px; font-weight:600;">! Awaiting Response</span>
+                            <span style="color:#ccc;">≫</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // UX Interactions
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelector('.tab.active').classList.remove('active');
+                this.classList.add('active');
+            });
+        });
+
+        document.querySelector('.btn-primary.approved')?.addEventListener('click', () => {
+            alert('Lead Approved Successfully!');
+        });
+    </script>
+</body>
+</html>

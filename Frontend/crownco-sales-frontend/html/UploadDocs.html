@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Document - Professional UI</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-main: #334155;
+            --text-muted: #94a3b8;
+            --primary-blue: #3b82f6;
+            --danger: #ef4444;
+            --sidebar-width: 260px;
+            --topbar-height: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden; /* Prevent body scroll */
+        }
+
+        /* --- Layout Structure --- */
+        .sidebar-placeholder {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: #ffffff;
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .topbar-placeholder {
+            height: var(--topbar-height);
+            width: 100%;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* --- Center Content & Scroll Logic --- */
+        .content-area {
+            flex-grow: 1;
+            padding: 40px 20px;
+            overflow-y: auto; /* Scrollable only if content overflows */
+            display: flex;
+            justify-content: center;
+        }
+
+        .container-card {
+            width: 100%;
+            max-width: 700px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1e293b;
+        }
+
+        /* --- Upload Zone --- */
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            background-color: #fafafa;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary-blue);
+            background-color: #eff6ff;
+        }
+
+        .plus-icon {
+            background: #f1f5f9;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            color: #64748b;
+        }
+
+        .upload-text {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .max-size {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        /* --- Document List --- */
+        .doc-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .doc-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .doc-item:hover {
+            border-color: #cbd5e1;
+            background-color: #fcfcfc;
+        }
+
+        .doc-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+        }
+
+        /* Google Drive colors simulation */
+        .drive-color { color: #34A853; } 
+
+        .doc-name {
+            flex-grow: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .remove-btn {
+            cursor: pointer;
+            color: #64748b;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+        }
+
+        .remove-btn:hover {
+            color: var(--danger);
+        }
+
+        /* --- Remark Section --- */
+        .remark-section {
+            margin-top: 20px;
+        }
+
+        .label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #475569;
+        }
+
+        .textarea-wrapper {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            border-color: var(--primary-blue);
+        }
+
+        .char-count {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .sidebar-placeholder {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .content-area {
+                padding: 15px;
+            }
+            .container-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-placeholder"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-placeholder"></div>
+
+        <div class="content-area">
+            <div class="container-card">
+                <h1 class="page-title">Upload Document</h1>
+
+                <div class="upload-zone" id="dropZone">
+                    <div class="plus-icon">
+                        <i data-lucide="plus" size="24"></i>
+                    </div>
+                    <p class="upload-text">Drag and drop or click to choose file</p>
+                    <div class="max-size">
+                        <i data-lucide="info" size="14"></i>
+                        Max file size 10 MB
+                    </div>
+                    <input type="file" id="fileInput" hidden multiple>
+                </div>
+
+                <div class="doc-list" id="docList">
+                    <div class="doc-item">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" class="doc-icon" alt="Drive">
+                        <span class="doc-name">Pan Card</span>
+                        <button class="remove-btn"><i data-lucide="x" size="18"></i></button>
+                    </div>
+                    <div class="doc-item">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" class="doc-icon" alt="Drive">
+                        <span class="doc-name">Aadhar Card</span>
+                        <button class="remove-btn"><i data-lucide="x" size="18"></i></button>
+                    </div>
+                    <div class="doc-item">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" class="doc-icon" alt="Drive">
+                        <span class="doc-name">Booking Agreement</span>
+                        <button class="remove-btn"><i data-lucide="x" size="18"></i></button>
+                    </div>
+                    <div class="doc-item">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" class="doc-icon" alt="Drive">
+                        <span class="doc-name">Passport Size Photograph</span>
+                        <button class="remove-btn"><i data-lucide="x" size="18"></i></button>
+                    </div>
+                    <div class="doc-item">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" class="doc-icon" alt="Drive">
+                        <span class="doc-name">Electricity Bill</span>
+                        <button class="remove-btn"><i data-lucide="x" size="18"></i></button>
+                    </div>
+                </div>
+
+                <div class="remark-section">
+                    <label class="label">Remark</label>
+                    <div class="textarea-wrapper">
+                        <textarea id="remarkInput" placeholder="Add Remark For This Documents" maxlength="500"></textarea>
+                        <div class="char-count"><span id="currentChar">0</span>/500</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Character Counter Logic
+        const textarea = document.getElementById('remarkInput');
+        const currentCharDisplay = document.getElementById('currentChar');
+
+        textarea.addEventListener('input', () => {
+            const length = textarea.value.length;
+            currentCharDisplay.textContent = length;
+        });
+
+        // Simple Drag and Drop simulation
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#3b82f6';
+            dropZone.style.backgroundColor = '#eff6ff';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '#cbd5e1';
+            dropZone.style.backgroundColor = '#fafafa';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#cbd5e1';
+            dropZone.style.backgroundColor = '#fafafa';
+            alert('File dropped successfully!');
+        });
+
+        // Removal logic
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.parentElement.style.opacity = '0';
+                setTimeout(() => {
+                    this.parentElement.remove();
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Real Estate Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-page: #f8fafc;
+            --border: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-page);
+            display: flex;
+            height: 100vh;
+            overflow: hidden; /* Fix body for inner scroll */
+        }
+
+        /* --- Layout Structures --- */
+        .sidebar-space {
+            width: 240px;
+            background: #fff;
+            border-right: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .main-stage {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar-space {
+            height: 70px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        /* --- Scrollable Center Content --- */
+        .scroll-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            scroll-behavior: smooth;
+        }
+
+        /* --- Metrics Breakdown Grid --- */
+        .section-header { font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .icon-box {
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .trend { font-size: 0.85rem; font-weight: 600; }
+        .trend-up { color: var(--success); }
+        .trend-down { color: var(--danger); }
+
+        .metric-val { font-size: 1.6rem; font-weight: 700; }
+        .metric-lbl { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* --- Filter Bar --- */
+        .filter-bar {
+            background: #fff;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .filter-top {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .filter-dropdowns {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            flex-grow: 1;
+        }
+
+        .filter-dropdown {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: #fff;
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        .btn-clear {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Filter Summary Card --- */
+        .filter-summary-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 14px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .filter-summary-left {
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+
+        .filter-summary-left strong {
+            font-weight: 600;
+        }
+
+        .filter-summary-right {
+            font-size: 0.85rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        /* --- Tabs --- */
+        .tabs-container {
+            margin-bottom: 16px;
+        }
+
+        .main-tabs {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .main-tab {
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            position: relative;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .main-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .sub-tabs {
+            display: flex;
+            gap: 20px;
+        }
+
+        .sub-tab {
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            position: relative;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .sub-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            z-index: 1;
+        }
+
+        /* --- Employee/Lead List Table --- */
+        .table-container {
+            background: #fff;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-top: 24px;
+        }
+
+        .toolbar {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex-grow: 1;
+            max-width: 400px;
+        }
+
+        .search-wrapper input {
+            width: 100%;
+            padding: 10px 12px 10px 38px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            outline: none;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .btn-group { display: flex; gap: 8px; }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary { background: var(--primary); color: white; border: none; }
+
+        /* --- Actual Table --- */
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #f8fafc; padding: 12px 16px; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 0.85rem; vertical-align: middle; }
+
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: #ddd; object-fit: cover; }
+
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .pill-active { background: #dcfce7; color: #166534; }
+        .pill-very-hot { background: #fee2e2; color: #991b1b; }
+        .pill-cold { background: #dbeafe; color: #1e40af; }
+        .pill-warm { background: #fed7aa; color: #9a3412; }
+
+        .budget-text {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .prop-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .prop-name {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .time-ago {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .source-badge {
+            padding: 4px 8px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--text-main);
+        }
+
+        .source-badge-blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .source-badge-orange {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .source-badge-gray {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .source-badge-green {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .source-badge-purple {
+            background: #e9d5ff;
+            color: #7c3aed;
+        }
+
+        .source-badge.magicbricks { background: #dcfce7; color: #166534; }
+        .source-badge.housing { background: #ffedd5; color: #9a3412; }
+        .source-badge.booking { background: #dbeafe; color: #1e40af; }
+        .source-badge.nobroker { background: #e9d5ff; color: #6b21a8; }
+
+        .pill-hot {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .btn-view { color: var(--primary); border-color: var(--primary); background: #eff6ff; }
+        .btn-call { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .qualified-badge {
+            padding: 4px 10px;
+            background: #f1f5f9;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-main);
+            display: inline-block;
+        }
+
+        .action-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .table-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-q {
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            width: 200px;
+        }
+
+        /* --- Footer Pagination --- */
+        .pagination {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* --- AI Suggestion UI (From Image 1) --- */
+        .ai-section {
+            margin-top: 30px;
+            padding-bottom: 80px; /* Space for fixed bottom bar if needed */
+        }
+
+        .suggestion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .suggest-card {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .suggest-card h4 { color: var(--primary); font-size: 0.9rem; margin-bottom: 6px; }
+        .suggest-card p { font-size: 0.8rem; color: var(--text-muted); }
+
+        @media (max-width: 1024px) {
+            .sidebar-space { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-space"></div>
+
+    <div class="main-stage">
+        <div class="topbar-space"></div>
+
+        <div class="scroll-content">
+            
+            <!-- KPI Cards -->
+            <div class="metrics-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-user-plus icon-box" style="color: #10b981;"></i>
+                        <span class="trend trend-up">+0.8%</span>
+                    </div>
+                    <div class="metric-val">35</div>
+                    <div class="metric-lbl">New Leads Today</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-calendar-check icon-box" style="color: var(--primary);"></i>
+                        <span class="trend trend-up">+3.8%</span>
+                    </div>
+                    <div class="metric-val">375</div>
+                    <div class="metric-lbl">Lead This Month</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-bell icon-box" style="color: var(--warning);"></i>
+                        <span class="trend trend-up">+5.8%</span>
+                    </div>
+                    <div class="metric-val">48</div>
+                    <div class="metric-lbl">Missed Follow ups</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-heart icon-box" style="color: var(--danger);"></i>
+                        <span class="trend trend-up">+0.8%</span>
+                    </div>
+                    <div class="metric-val">156</div>
+                    <div class="metric-lbl">Very Hot Leads</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-users icon-box" style="color: var(--primary);"></i>
+                        <span class="trend trend-up">+0.8%</span>
+                    </div>
+                    <div class="metric-val">15</div>
+                    <div class="metric-lbl">Today Follow Ups</div>
+                </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <div class="filter-top">
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">New Leads</span>
+                    <div class="filter-dropdowns">
+                        <select class="filter-dropdown">
+                            <option>Date Range</option>
+                        </select>
+                        <select class="filter-dropdown">
+                            <option>Status</option>
+                        </select>
+                        <select class="filter-dropdown">
+                            <option>Sources</option>
+                        </select>
+                        <select class="filter-dropdown">
+                            <option>Stages</option>
+                        </select>
+                        <select class="filter-dropdown">
+                            <option>By Budget</option>
+                        </select>
+                        <select class="filter-dropdown">
+                            <option>By Project</option>
+                        </select>
+                    </div>
+                    <button class="btn-clear">Clear All</button>
+                </div>
+            </div>
+
+            <!-- Filter Summary Card -->
+            <div class="filter-summary-card">
+                <div class="filter-summary-left">
+                    Showing <strong>18 Leads</strong>
+                </div>
+                <div class="filter-summary-right">
+                    Filter: Sources = Magicbricks.com, Stages : Property Visit, Status : Very Hot
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="tabs-container">
+                <div class="main-tabs">
+                    <div class="main-tab active" data-tab="caller">Caller</div>
+                    <div class="main-tab" data-tab="sales">Sales</div>
+                </div>
+                <div class="sub-tabs">
+                    <div class="sub-tab active" data-subtab="qualified">Qualified</div>
+                    <div class="sub-tab" data-subtab="sources">Sources</div>
+                    <div class="sub-tab" data-subtab="bulk-data">Bulk Data</div>
+                </div>
+            </div>
+
+            <!-- Sales Tab Content - Leads Table -->
+            <div class="table-container" id="salesTable" style="display: none;">
+                <div class="toolbar">
+                    <div class="table-controls">
+                        <button class="btn-icon"><i class="fa-solid fa-table-columns"></i></button>
+                        <div class="search-wrapper" style="max-width: 200px;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="tableSearch" placeholder="Q Search" class="search-q">
+                        </div>
+                        <button class="btn-icon"><i class="fa-solid fa-filter"></i></button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn"><i class="fa-solid fa-download"></i> Export</button>
+                        <button class="btn" style="color: var(--danger);"><i class="fa-solid fa-trash"></i> Delete</button>
+                        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Lead</button>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox"></th>
+                                <th>Name & Phone <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Budget <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Prop name & Time <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Location <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Status <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Sources <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=1" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Zishan Shaikh</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">(800) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="budget-text">₹40L - ₹50L</span></td>
+                                <td>
+                                    <div class="prop-info">
+                                        <span class="prop-name">Crown Height</span>
+                                        <span class="time-ago">5 hours ago</span>
+                                    </div>
+                                </td>
+                                <td>Trimbakawwar</td>
+                                <td><span class="status-pill pill-very-hot">• Very Hot</span></td>
+                                <td><span class="source-badge source-badge-blue">Assigned By Anu</span></td>
+                                <td><button class="btn btn-view">Veiw Detail</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=2" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Maaz Khan</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="budget-text">₹40L - ₹50L</span></td>
+                                <td>
+                                    <div class="prop-info">
+                                        <span class="prop-name">Urban Nest</span>
+                                        <span class="time-ago">2 months ago</span>
+                                    </div>
+                                </td>
+                                <td>Malegaon</td>
+                                <td><span class="status-pill pill-cold">• Cold</span></td>
+                                <td><span class="source-badge source-badge-orange">Assigned By Mustakim</span></td>
+                                <td><button class="btn btn-view">Veiw Detail</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=3" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Mustakim Sayyed</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="budget-text">₹40L - ₹50L</span></td>
+                                <td>
+                                    <div class="prop-info">
+                                        <span class="prop-name">GreenWille Orchid</span>
+                                        <span class="time-ago">1 month ago</span>
+                                    </div>
+                                </td>
+                                <td>Kode Nagar</td>
+                                <td><span class="status-pill pill-hot">• Hot</span></td>
+                                <td><span class="source-badge source-badge-gray">Walking</span></td>
+                                <td><button class="btn btn-view">Veiw Detail</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=4" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Siddant Sir</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="budget-text">₹40L - ₹50L</span></td>
+                                <td>
+                                    <div class="prop-info">
+                                        <span class="prop-name">Skyline Towers</span>
+                                        <span class="time-ago">2 months ago</span>
+                                    </div>
+                                </td>
+                                <td>Ashoka</td>
+                                <td><span class="status-pill pill-warm">• Warm</span></td>
+                                <td><span class="source-badge source-badge-gray">Walking</span></td>
+                                <td><button class="btn btn-view">Veiw Detail</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <div>
+                        Rows Per Page 
+                        <select style="padding: 2px 5px; border-radius: 4px; border: 1px solid var(--border); margin-left: 5px;">
+                            <option>10</option>
+                            <option>20</option>
+                            <option>50</option>
+                            <option>100</option>
+                        </select>
+                    </div>
+                    <div>
+                        1 - 4 of 4
+                        <span style="margin-left: 15px; cursor: pointer;">
+                            <i class="fa-solid fa-chevron-left"></i> &nbsp; <i class="fa-solid fa-chevron-right"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caller Tab Content - Qualified Sub-tab (Visible by default) -->
+            <div class="table-container" id="qualifiedTable" style="display: block;">
+                <div class="toolbar">
+                    <div class="table-controls">
+                        <button class="btn-icon"><i class="fa-solid fa-table-columns"></i></button>
+                        <div class="search-wrapper" style="max-width: 200px;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="qualifiedTableSearch" placeholder="Search" class="search-q">
+                        </div>
+                        <button class="btn-icon"><i class="fa-solid fa-filter"></i></button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn"><i class="fa-solid fa-download"></i> Export</button>
+                        <button class="btn" style="color: var(--danger);"><i class="fa-solid fa-trash"></i> Delete</button>
+                        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Lead</button>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table id="qualifiedDataTable">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox"></th>
+                                <th>Name & Phone <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Budget <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Prop name & Time <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Location <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Status <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Sources <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=1" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Zishan Shaikh</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">88888 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="budget-text">₹40L - ₹50L</span></td>
+                                <td>
+                                    <div class="prop-info">
+                                        <span class="prop-name">Crown Height</span>
+                                        <span class="time-ago">5 hours ago</span>
+                                    </div>
+                                </td>
+                                <td>Trimbakeswar</td>
+                                <td><span class="status-pill pill-very-hot">• Very Hot</span></td>
+                                <td><span class="source-badge source-badge-green">Magicbricks.com</span></td>
+                                <td><button class="btn btn-view">View Detail</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=2" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Maaz Khan</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">88888 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="budget-text">₹40L - ₹50L</span></td>
+                                <td>
+                                    <div class="prop-info">
+                                        <span class="prop-name">Urban Nest</span>
+                                        <span class="time-ago">2 months ago</span>
+                                    </div>
+                                </td>
+                                <td>Malegaon</td>
+                                <td><span class="status-pill pill-cold">• Cold</span></td>
+                                <td><span class="source-badge source-badge-orange">Housing.com</span></td>
+                                <td><button class="btn btn-view">View Detail</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=3" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Mustakim Sayyed</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">88888 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="budget-text">₹40L - ₹50L</span></td>
+                                <td>
+                                    <div class="prop-info">
+                                        <span class="prop-name">GreenVille Orchid</span>
+                                        <span class="time-ago">1 month ago</span>
+                                    </div>
+                                </td>
+                                <td>Kode Nagar</td>
+                                <td><span class="status-pill pill-hot">• Hot</span></td>
+                                <td><span class="source-badge source-badge-blue">Booking.com</span></td>
+                                <td><button class="btn btn-view">View Detail</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=4" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Siddant Sir</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">88888 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="budget-text">₹40L - ₹50L</span></td>
+                                <td>
+                                    <div class="prop-info">
+                                        <span class="prop-name">Skyline Towers</span>
+                                        <span class="time-ago">2 months ago</span>
+                                    </div>
+                                </td>
+                                <td>Ashoka</td>
+                                <td><span class="status-pill pill-warm">• Warm</span></td>
+                                <td><span class="source-badge source-badge-purple">Nobroker.com</span></td>
+                                <td><button class="btn btn-view">View Detail</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <div>
+                        Rows Per Page 
+                        <select style="padding: 2px 5px; border-radius: 4px; border: 1px solid var(--border); margin-left: 5px;">
+                            <option>10</option>
+                            <option>20</option>
+                            <option>50</option>
+                            <option>100</option>
+                        </select>
+                    </div>
+                    <div>
+                        1 - 4 of 4
+                        <span style="margin-left: 15px; cursor: pointer;">
+                            <i class="fa-solid fa-chevron-left"></i> &nbsp; <i class="fa-solid fa-chevron-right"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sources Sub-tab Content (Hidden by default) -->
+            <div class="table-container" id="sourcesTable" style="display: none;">
+                <div class="toolbar">
+                    <div class="table-controls">
+                        <button class="btn-icon"><i class="fa-solid fa-table-columns"></i></button>
+                        <div class="search-wrapper" style="max-width: 200px;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="sourcesTableSearch" placeholder="Search" class="search-q">
+                        </div>
+                        <button class="btn-icon"><i class="fa-solid fa-filter"></i></button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn"><i class="fa-solid fa-download"></i> Export</button>
+                        <button class="btn" style="color: var(--danger);"><i class="fa-solid fa-trash"></i> Delete</button>
+                        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Lead</button>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table id="sourcesDataTable">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox"></th>
+                                <th>Name & Phone <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Property Name <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Time <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Location <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Status <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Sources <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=1" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Zishan Shaikh</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="prop-name">Crown Height</span></td>
+                                <td><span class="time-ago">15 minutes ago</span></td>
+                                <td>Trimbakeswar</td>
+                                <td><span class="status-pill pill-very-hot">• Very Hot</span></td>
+                                <td><span class="source-badge magicbricks">Magicbricks.com</span></td>
+                                <td><button class="btn btn-call">Call Now</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=2" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Maaz Khan</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="prop-name">Urban Nest</span></td>
+                                <td><span class="time-ago">5 months ago</span></td>
+                                <td>Malegaon</td>
+                                <td><span class="status-pill pill-cold">• Cold</span></td>
+                                <td><span class="source-badge housing">Housing.com</span></td>
+                                <td><button class="btn btn-call">Call Now</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=3" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Mustakim Sayyed</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="prop-name">Greenville Orchid</span></td>
+                                <td><span class="time-ago">2 week ago</span></td>
+                                <td>Kode Nagar</td>
+                                <td><span class="status-pill pill-hot">• Hot</span></td>
+                                <td><span class="source-badge booking">Booking.com</span></td>
+                                <td><button class="btn btn-call">Call Now</button></td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=4" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Siddant Sir</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="prop-name">Skyline Towers</span></td>
+                                <td><span class="time-ago">2 week ago</span></td>
+                                <td>Ashoka</td>
+                                <td><span class="status-pill pill-warm">• Warm</span></td>
+                                <td><span class="source-badge nobroker">Nobroker.com</span></td>
+                                <td><button class="btn btn-call">Call Now</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <div>
+                        Rows Per Page 
+                        <select style="padding: 2px 5px; border-radius: 4px; border: 1px solid var(--border); margin-left: 5px;">
+                            <option>10</option>
+                            <option>20</option>
+                            <option>50</option>
+                            <option>100</option>
+                        </select>
+                    </div>
+                    <div>
+                        1 - 4 of 4
+                        <span style="margin-left: 15px; cursor: pointer;">
+                            <i class="fa-solid fa-chevron-left"></i> &nbsp; <i class="fa-solid fa-chevron-right"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Data Sub-tab Content (Hidden by default) -->
+            <div class="table-container" id="bulkDataTable" style="display: none;">
+                <div class="toolbar">
+                    <div class="table-controls">
+                        <button class="btn-icon"><i class="fa-solid fa-table-columns"></i></button>
+                        <div class="search-wrapper" style="max-width: 200px;">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="bulkDataTableSearch" placeholder="Search" class="search-q">
+                        </div>
+                        <button class="btn-icon"><i class="fa-solid fa-filter"></i></button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn"><i class="fa-solid fa-download"></i> Export</button>
+                        <button class="btn" style="color: var(--danger);"><i class="fa-solid fa-trash"></i> Delete</button>
+                        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Lead</button>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table id="bulkDataDataTable">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox"></th>
+                                <th>Name & Phone <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                                <th>Action <i class="fa-solid fa-arrows-up-down" style="margin-left: 4px; font-size: 0.7rem;"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=1" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Zishan Shaikh</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-cell">
+                                        <span class="qualified-badge">Qualified</span>
+                                        <button class="btn btn-call">Call Now</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=2" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Maaz Khan</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-cell">
+                                        <span class="qualified-badge">Qualified</span>
+                                        <button class="btn btn-call">Call Now</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=3" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Mustakim Sayyed</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-cell">
+                                        <span class="qualified-badge">Qualified</span>
+                                        <button class="btn btn-call">Call Now</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>
+                                    <div class="user-info">
+                                        <img src="https://i.pravatar.cc/150?u=4" class="avatar" alt="User">
+                                        <div>
+                                            <strong>Siddant Sir</strong><br>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">(808) 555-0111</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="action-cell">
+                                        <span class="qualified-badge">Qualified</span>
+                                        <button class="btn btn-call">Call Now</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <div>
+                        Rows Per Page 
+                        <select style="padding: 2px 5px; border-radius: 4px; border: 1px solid var(--border); margin-left: 5px;">
+                            <option>10</option>
+                            <option>20</option>
+                            <option>50</option>
+                            <option>100</option>
+                        </select>
+                    </div>
+                    <div>
+                        1 - 4 of 4
+                        <span style="margin-left: 15px; cursor: pointer;">
+                            <i class="fa-solid fa-chevron-left"></i> &nbsp; <i class="fa-solid fa-chevron-right"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Simple Real-time Search Logic for Sales Table
+        const tableSearchInput = document.getElementById('tableSearch');
+        if (tableSearchInput) {
+            tableSearchInput.addEventListener('keyup', function() {
+                let filter = this.value.toLowerCase();
+                let rows = document.querySelectorAll('#dataTable tbody tr');
+
+                rows.forEach(row => {
+                    let text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                });
+            });
+        }
+
+        // Search Logic for Qualified Table
+        const qualifiedTableSearchInput = document.getElementById('qualifiedTableSearch');
+        if (qualifiedTableSearchInput) {
+            qualifiedTableSearchInput.addEventListener('keyup', function() {
+                let filter = this.value.toLowerCase();
+                let rows = document.querySelectorAll('#qualifiedDataTable tbody tr');
+
+                rows.forEach(row => {
+                    let text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                });
+            });
+        }
+
+        // Search Logic for Sources Table
+        const sourcesTableSearchInput = document.getElementById('sourcesTableSearch');
+        if (sourcesTableSearchInput) {
+            sourcesTableSearchInput.addEventListener('keyup', function() {
+                let filter = this.value.toLowerCase();
+                let rows = document.querySelectorAll('#sourcesDataTable tbody tr');
+
+                rows.forEach(row => {
+                    let text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                });
+            });
+        }
+
+        // Search Logic for Bulk Data Table
+        const bulkDataTableSearchInput = document.getElementById('bulkDataTableSearch');
+        if (bulkDataTableSearchInput) {
+            bulkDataTableSearchInput.addEventListener('keyup', function() {
+                let filter = this.value.toLowerCase();
+                let rows = document.querySelectorAll('#bulkDataDataTable tbody tr');
+
+                rows.forEach(row => {
+                    let text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                });
+            });
+        }
+
+        // Toggle Selection for Sales Table
+        const salesMasterCheck = document.querySelector('#dataTable thead input[type="checkbox"]');
+        if (salesMasterCheck) {
+            salesMasterCheck.addEventListener('change', function() {
+                const checks = document.querySelectorAll('#dataTable tbody input[type="checkbox"]');
+                checks.forEach(c => c.checked = this.checked);
+            });
+        }
+
+        // Toggle Selection for Qualified Table
+        const qualifiedMasterCheck = document.querySelector('#qualifiedDataTable thead input[type="checkbox"]');
+        if (qualifiedMasterCheck) {
+            qualifiedMasterCheck.addEventListener('change', function() {
+                const checks = document.querySelectorAll('#qualifiedDataTable tbody input[type="checkbox"]');
+                checks.forEach(c => c.checked = this.checked);
+            });
+        }
+
+        // Toggle Selection for Sources Table
+        const sourcesMasterCheck = document.querySelector('#sourcesDataTable thead input[type="checkbox"]');
+        if (sourcesMasterCheck) {
+            sourcesMasterCheck.addEventListener('change', function() {
+                const checks = document.querySelectorAll('#sourcesDataTable tbody input[type="checkbox"]');
+                checks.forEach(c => c.checked = this.checked);
+            });
+        }
+
+        // Toggle Selection for Bulk Data Table
+        const bulkDataMasterCheck = document.querySelector('#bulkDataDataTable thead input[type="checkbox"]');
+        if (bulkDataMasterCheck) {
+            bulkDataMasterCheck.addEventListener('change', function() {
+                const checks = document.querySelectorAll('#bulkDataDataTable tbody input[type="checkbox"]');
+                checks.forEach(c => c.checked = this.checked);
+            });
+        }
+
+        // Tab Navigation Logic
+        const mainTabs = document.querySelectorAll('.main-tab');
+        const subTabs = document.querySelectorAll('.sub-tab');
+        const salesTable = document.getElementById('salesTable');
+        const qualifiedTable = document.getElementById('qualifiedTable');
+        const sourcesTable = document.getElementById('sourcesTable');
+        const bulkDataTable = document.getElementById('bulkDataTable');
+
+        // Function to show/hide sub-tab tables
+        function showSubTabTable(subTabName) {
+            // Hide all sub-tab tables
+            qualifiedTable.style.display = 'none';
+            sourcesTable.style.display = 'none';
+            bulkDataTable.style.display = 'none';
+
+            // Show the selected sub-tab table
+            if (subTabName === 'qualified') {
+                qualifiedTable.style.display = 'block';
+            } else if (subTabName === 'sources') {
+                sourcesTable.style.display = 'block';
+            } else if (subTabName === 'bulk-data') {
+                bulkDataTable.style.display = 'block';
+            }
+        }
+
+        // Function to show/hide tables based on active main tab
+        function showTableForTab(tabName) {
+            if (tabName === 'sales') {
+                salesTable.style.display = 'block';
+                // Hide all caller sub-tab tables
+                qualifiedTable.style.display = 'none';
+                sourcesTable.style.display = 'none';
+                bulkDataTable.style.display = 'none';
+            } else if (tabName === 'caller') {
+                salesTable.style.display = 'none';
+                // Show the active sub-tab table (default: qualified)
+                const activeSubTab = document.querySelector('.sub-tab.active');
+                if (activeSubTab) {
+                    const subTabName = activeSubTab.getAttribute('data-subtab');
+                    showSubTabTable(subTabName);
+                } else {
+                    qualifiedTable.style.display = 'block';
+                }
+            }
+        }
+
+        mainTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all main tabs
+                mainTabs.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Get the tab name from data attribute
+                const tabName = this.getAttribute('data-tab');
+                // Show/hide appropriate table
+                showTableForTab(tabName);
+            });
+        });
+
+        subTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all sub tabs
+                subTabs.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Only show sub-tab table if caller tab is active
+                const activeMainTab = document.querySelector('.main-tab.active');
+                if (activeMainTab && activeMainTab.getAttribute('data-tab') === 'caller') {
+                    const subTabName = this.getAttribute('data-subtab');
+                    showSubTabTable(subTabName);
+                }
+            });
+        });
+
+        // Initialize: Show caller table with qualified sub-tab by default
+        showTableForTab('caller');
+        showSubTabTable('qualified');
+    </script>
+</body>
+</html>

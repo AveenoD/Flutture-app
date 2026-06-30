@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Follow Ups Detail - CRM</title>
+    <style>
+        :root {
+            --primary-blue: #007bff;
+            --bg-light: #f8f9fa;
+            --text-dark: #333;
+            --text-muted: #6c757d;
+            --border-color: #e0e0e0;
+            --hot-color: #dc3545;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: white;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Layout Structure */
+        .sidebar-placeholder {
+            width: 260px;
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+        }
+
+        .topbar-placeholder {
+            height: 70px;
+            width: 100%;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        /* Scrollable Content Area */
+        .content-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background-color: white;
+        }
+
+        /* Header Section */
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: #f1f1f1;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        /* Main Grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            background: white;
+        }
+
+        /* Lead Info Card */
+        .lead-profile {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .lead-identity {
+            display: flex;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ddd;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hot-badge {
+            background: #fee2e2;
+            color: var(--hot-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .contact-info {
+            margin-top: 20px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .tag-blue {
+            display: inline-block;
+            color: var(--primary-blue);
+            background: #eef6ff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin: 10px 0;
+        }
+
+        .assigned-tag {
+            background: #f0f4ff;
+            color: #5c7cfa;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+
+        /* Audio Player Styling */
+        .audio-card h3 {
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .audio-player {
+            background: #f8f9fa;
+            border-radius: 50px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .play-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .waveform {
+            flex-grow: 1;
+            height: 20px;
+            background-image: repeating-linear-gradient(90deg, #ccc 0, #ccc 2px, transparent 2px, transparent 4px);
+            opacity: 0.5;
+        }
+
+        /* Remarks Section */
+        .remarks-list {
+            list-style: none;
+        }
+
+        .remark-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        .remark-item::before {
+            content: "•";
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .suggestion-box {
+            background: #f0f7ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            border: 1px dashed #cfe2ff;
+        }
+
+        .add-btn {
+            background: #e1e8f0;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Input Field */
+        .remark-input-container {
+            position: relative;
+            margin-top: 20px;
+        }
+
+        .remark-input {
+            width: 100%;
+            padding: 15px 100px 15px 45px;
+            background: #f8f9fa;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            outline: none;
+        }
+
+        .input-icons-left {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        .input-icons-right {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .mic-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Action Buttons Footer */
+        .action-footer {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .btn-large {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-rejected {
+            background: white;
+            border: 1px solid var(--text-dark);
+            color: var(--text-dark);
+        }
+
+        .btn-qualified {
+            background: var(--primary-blue);
+            border: none;
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+            .sidebar-placeholder {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-placeholder"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-placeholder"></div>
+
+        <div class="content-container">
+            <div class="header-row">
+                <div class="header-title">
+                    <button class="back-btn">←</button>
+                    <h2>Follow Ups Detail</h2>
+                </div>
+                <div style="font-size: 24px; cursor: pointer;">🔔</div>
+            </div>
+
+            <div class="details-grid">
+                <div class="left-col">
+                    <div class="card lead-card">
+                        <div class="lead-profile">
+                            <div class="lead-identity">
+                                <div class="avatar">
+                                    <img src="data:image/jpeg;base64,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" alt="Shaikh Maaz">
+                                </div>
+                                <div>
+                                    <h3 style="font-size: 1.1rem;">Shaikh Maaz</h3>
+                                    <p style="color: gray; font-size: 0.85rem;"># Prop8967</p>
+                                </div>
+                            </div>
+                            <span class="hot-badge">Very Hot</span>
+                        </div>
+
+                        <div class="contact-info">
+                            <div>📞 (808) 555-0111</div>
+                            <div>📍 Pembroke Pines</div>
+                            <div class="tag-blue">Badge - ₹40L - ₹50L</div>
+                            <br>
+                            <span class="assigned-tag">Assigned By Anuj</span>
+                            <span style="float: right; color: #ccc;">1-3 months</span>
+                        </div>
+                    </div>
+
+                    <div class="card audio-card">
+                        <h3>Calls Recording</h3>
+                        <p style="color: gray; margin-bottom: 15px; font-size: 0.9rem;">
+                            🕒 Today, 2:30 PM <span style="float: right;">📥 5:45</span>
+                        </p>
+                        <div class="audio-player">
+                            <button class="play-btn">▶</button>
+                            <div class="waveform"></div>
+                            <span style="font-size: 0.8rem;">0:05</span>
+                            <span>🔊</span>
+                        </div>
+                        <p style="margin-top: 15px; color: var(--primary-blue); cursor: pointer; font-size: 0.9rem;">
+                            Transcribe ∨
+                        </p>
+                    </div>
+
+                    <div class="action-footer">
+                        <button class="btn-large btn-rejected" onclick="handleAction('Rejected')">✕ Rejected</button>
+                        <button class="btn-large btn-qualified" onclick="handleAction('Qualified')">Qualified ≫</button>
+                    </div>
+                </div>
+
+                <div class="right-col">
+                    <h3 style="margin-bottom: 20px;">Remarks</h3>
+                    <div class="card">
+                        <ul class="remarks-list">
+                            <li class="remark-item">Client is interested in 2BHK, corner-facing unit.</li>
+                            <li class="remark-item">Shared pricing PDF via WhatsApp.</li>
+                            <li class="remark-item">Next follow-up scheduled for Thursday, 11 AM.</li>
+                            <li class="remark-item">Next follow-up scheduled for Thursday, 11 AM.</li>
+                        </ul>
+                    </div>
+
+                    <div class="suggestion-box">
+                        <p>Send a follow-up reminder 1 day before the scheduled call on Thursday, 11 AM.</p>
+                        <button class="add-btn">+</button>
+                    </div>
+
+                    <div class="suggestion-box">
+                        <p>Send a follow-up reminder 1 day before the scheduled call on Thursday, 11 AM.</p>
+                        <button class="add-btn">+</button>
+                    </div>
+
+                    <div class="remark-input-container">
+                        <span class="input-icons-left">😊</span>
+                        <input type="text" class="remark-input" placeholder="Add a new remark...">
+                        <div class="input-icons-right">
+                            <span style="cursor: pointer; color: #888; font-size: 20px;">🔗</span>
+                            <span style="cursor: pointer; color: #888; font-size: 20px;">📷</span>
+                            <button class="mic-btn">🎤</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // UX Logic
+        function handleAction(status) {
+            alert("Lead marked as: " + status);
+        }
+
+        // Handle enter key on remark input
+        const remarkInput = document.querySelector('.remark-input');
+        remarkInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && this.value.trim() !== "") {
+                const list = document.querySelector('.remarks-list');
+                const newItem = document.createElement('li');
+                newItem.className = 'remark-item';
+                newItem.textContent = this.value;
+                list.appendChild(newItem);
+                this.value = "";
+                // Auto scroll to bottom of the list if needed
+                list.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+        });
+    </script>
+</body>
+</html>

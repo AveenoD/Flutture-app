@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Detail - Negotiation Exact UI</title>
+    <style>
+        :root {
+            --primary-blue: #0081FF;
+            --bg-light: #F8FAFD;
+            --border-color: #E6EBF1;
+            --text-dark: #333C48;
+            --text-gray: #7A8699;
+            --success: #27AE60;
+            --danger: #EB5757;
+            --hot-bg: #FFEAEA;
+            --card-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: white;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Side & Top Placeholders */
+        .sidebar-space {
+            width: 260px;
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+            background: white;
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+        }
+
+        .topbar-space {
+            height: 64px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        /* Center Content Area */
+        .page-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px 40px;
+            background-color: white;
+        }
+
+        /* Navigation Stepper */
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            position: relative;
+        }
+
+        .stepper::before {
+            content: "";
+            position: absolute;
+            top: 18px;
+            left: 5%;
+            right: 5%;
+            height: 2px;
+            background: #E0E4EC;
+            z-index: 1;
+        }
+
+        .step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            background: white;
+            padding: 0 15px;
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+
+        .step-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-weight: bold;
+        }
+
+        .step.inactive .step-icon {
+            background: #fff;
+            border: 1px solid #E0E4EC;
+            color: #999;
+        }
+
+        .tabs {
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+            display: flex;
+            gap: 40px;
+        }
+
+        .tab {
+            padding-bottom: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-gray);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--primary-blue);
+        }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-blue);
+        }
+
+        /* Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 30px;
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Lead Profile Section */
+        .profile-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #EEE;
+        }
+
+        .hot-badge {
+            background: var(--hot-bg);
+            color: var(--danger);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .profile-details p {
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-top: 4px;
+        }
+
+        .budget-badge {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 11px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-blue { background: var(--primary-blue); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--primary-blue); color: var(--primary-blue); }
+
+        /* Property Cards */
+        .property-grid {
+            display: flex;
+            gap: 15px;
+        }
+
+        .prop-card {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .prop-img {
+            width: 100%;
+            height: 110px;
+            background: #F0F0F0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .prop-name { font-weight: 700; font-size: 14px; color: var(--primary-blue); }
+        .prop-loc { font-size: 11px; color: var(--text-gray); margin: 4px 0; }
+        
+        .tag-row { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px; }
+        .tag { font-size: 10px; padding: 2px 8px; background: #F0F4FF; color: var(--primary-blue); border-radius: 4px; }
+
+        /* Extra Charges Section (Screenshot Jaisa) */
+        .extra-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .a-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 13px;
+            color: var(--text-gray);
+            cursor: pointer;
+        }
+
+        .a-tab.active {
+            color: var(--primary-blue);
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-blue);
+        }
+
+        .charges-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .charge-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid #F1F3F6;
+            border-radius: 8px;
+        }
+
+        .charge-img {
+            width: 44px;
+            height: 44px;
+            background: #F0F0F0;
+            border-radius: 4px;
+        }
+
+        .charge-info {
+            flex-grow: 1;
+        }
+
+        .charge-title { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+        .charge-desc { font-size: 11px; color: var(--text-gray); margin-top: 2px; }
+        .charge-price { font-size: 13px; font-weight: 700; color: var(--primary-blue); }
+
+        .btn-confirm {
+            width: 100%;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Negotiation Chat */
+        .chat-thread {
+            background: #F8FAFD;
+            border-radius: 10px;
+            padding: 20px;
+            height: 380px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .bubble {
+            max-width: 85%;
+            padding: 12px 15px;
+            font-size: 13px;
+            line-height: 1.5;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .sent { background: var(--primary-blue); color: white; align-self: flex-end; border-bottom-right-radius: 0; }
+        .received { background: white; color: var(--text-dark); align-self: flex-start; border: 1px solid var(--border-color); border-bottom-left-radius: 0; }
+        
+        .chat-time { font-size: 10px; margin-top: 5px; display: block; opacity: 0.7; text-align: right; }
+
+        /* Unit Selection Grid */
+        .unit-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .unit {
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .u-avail { background: #E9FBF0; color: #27AE60; border: none; }
+        .u-booked { background: #FFF0F0; color: #EB5757; border: none; }
+        .u-selected { background: #E6F2FF; color: var(--primary-blue); border: 1px solid var(--primary-blue); }
+
+        /* REMARKS SECTION */
+        .remarks-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .remarks-list li {
+            position: relative;
+            padding-left: 20px;
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .remarks-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--primary-blue);
+            font-weight: bold;
+        }
+
+        .remark-input-container {
+            display: flex;
+            align-items: center;
+            background: #F8FAFD;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            padding: 8px 15px;
+            gap: 12px;
+        }
+
+        .remark-input-container input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 13px;
+        }
+
+        /* Price Breakdown Table */
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .final-price {
+            border-top: 1px dashed #CCC;
+            padding-top: 15px;
+            margin-top: 15px;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--success);
+        }
+
+        /* Fixed Footer */
+        .footer-bar {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 40px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            background: white;
+        }
+
+        .btn-large { padding: 12px 45px; border-radius: 6px; font-weight: 600; font-size: 15px; }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .sidebar-space { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-space"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-space">← Lead Detail</div>
+
+        <div class="page-body">
+            <div class="stepper">
+                <div class="step"><div class="step-icon">✓</div>Summary</div>
+                <div class="step"><div class="step-icon">✓</div>Property Visit</div>
+                <div class="step"><div class="step-icon">3</div>Negotiation</div>
+                <div class="step inactive"><div class="step-icon">4</div>Booking</div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active">Overview</div>
+                <div class="tab">Follow Ups</div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="col-left">
+                    <div class="card">
+                        <div class="section-title">Lead Profile</div>
+                        <div class="profile-row">
+                            <div class="avatar"></div>
+                            <div class="profile-details" style="flex:1">
+                                <div style="display:flex; justify-content: space-between;">
+                                    <h3 style="font-size: 16px;">Shaikh Maaz</h3>
+                                    <span class="hot-badge">Very Hot</span>
+                                </div>
+                                <p>📞 (808) 555-0111</p>
+                                <p>📍 Pembroke Pines</p>
+                                <div class="budget-badge">Badge - ₹40L - ₹50L</div>
+                            </div>
+                        </div>
+                        <div class="action-btns">
+                            <button class="btn btn-blue">Call Now</button>
+                            <button class="btn btn-outline">Chat Now</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-title">Selected Property <span style="color:var(--primary-blue); font-size:12px; cursor:pointer">+ Add More</span></div>
+                        <div class="property-grid">
+                            <div class="prop-card">
+                                <div class="prop-img"></div>
+                                <div class="prop-name">Maaz Palace</div>
+                                <div class="prop-loc">Kurla - City Center</div>
+                                <div class="tag-row">
+                                    <span class="tag">Sea Facing</span>
+                                    <span class="tag">Smart Homes</span>
+                                    <span class="tag">Play Ground</span>
+                                </div>
+                            </div>
+                            <div class="prop-card">
+                                <div class="prop-img"></div>
+                                <div class="prop-name">Maaz Palace</div>
+                                <div class="prop-loc">Kurla - City Center</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="extra-tabs">
+                            <div class="a-tab">Base Amenities</div>
+                            <div class="a-tab active">Extra Charges</div>
+                        </div>
+                        <div class="charges-list">
+                            <div class="charge-item">
+                                <input type="checkbox" checked style="accent-color: var(--primary-blue);">
+                                <div class="charge-img"></div>
+                                <div class="charge-info">
+                                    <div class="charge-title">Modular Kitchen</div>
+                                    <div class="charge-desc">Premium modular kitchen with granite countertops</div>
+                                </div>
+                                <div class="charge-price">₹ 70,000</div>
+                            </div>
+                            <div class="charge-item">
+                                <input type="checkbox" style="accent-color: var(--primary-blue);">
+                                <div class="charge-img"></div>
+                                <div class="charge-info">
+                                    <div class="charge-title">Luxury Washroom</div>
+                                    <div class="charge-desc">High-end golden fittings & ambient lighting</div>
+                                </div>
+                                <div class="charge-price">₹ 90,000</div>
+                            </div>
+                            <div class="charge-item">
+                                <input type="checkbox" style="accent-color: var(--primary-blue);">
+                                <div class="charge-img"></div>
+                                <div class="charge-info">
+                                    <div class="charge-title">Glass Shower</div>
+                                    <div class="charge-desc">Frameless glass partition with modern shower panel</div>
+                                </div>
+                                <div class="charge-price">₹ 65,000</div>
+                            </div>
+                            <button class="btn-confirm">+ Confirm Adds On</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-title">Price Breakdown</div>
+                        <div class="price-item"><span>Property Base Price</span><span>+ ₹ 3,00,00,000</span></div>
+                        <div class="price-item"><span>Add-On: Luxury Washroom</span><span>+ ₹ 90,000</span></div>
+                        <div class="price-item"><span>Add-On: Modular Kitchen</span><span>+ ₹ 70,000</span></div>
+                        <div class="price-item"><span>Commission</span><span>+ ₹ 1,00,000</span></div>
+                        <div class="price-item" style="color:var(--danger)"><span>Discount (Diwali Special)</span><span>- ₹ 75,00,000</span></div>
+                        <div class="price-item final-price">
+                            <span>Final Deal Price</span>
+                            <span>₹ 2,27,45,000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-right">
+                    <div class="card" style="padding:0; overflow:hidden">
+                        <div style="padding:20px 20px 10px" class="section-title">Negotiation Thread</div>
+                        <div class="chat-thread" id="chat">
+                            <div class="bubble sent">
+                                Sir, your total deal price is ₹2.26 Cr
+                                <span class="chat-time">4:27 PM</span>
+                            </div>
+                            <div class="bubble received">
+                                That's a bit high. Can you adjust something?
+                                <span class="chat-time">4:28 PM</span>
+                            </div>
+                            <div class="bubble sent">
+                                We've already added a ₹75L discount. The base price is fixed from builder side.
+                                <span class="chat-time">4:29 PM</span>
+                            </div>
+                            <div class="bubble received">
+                                I'm okay with ₹2 Cr — that's my final offer.
+                                <span class="chat-time">4:30 PM</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-title">Unit Selection <span style="color:var(--primary-blue); font-size:12px; cursor:pointer">+ Add Filter</span></div>
+                        <div class="unit-grid">
+                            <div class="unit u-avail">A-101</div>
+                            <div class="unit u-avail">A-102</div>
+                            <div class="unit u-booked">A-103</div>
+                            <div class="unit u-avail">A-104</div>
+                            <div class="unit u-avail">A-105</div>
+                            <div class="unit">A-106</div>
+                            <div class="unit">A-107</div>
+                            <div class="unit u-avail">A-108</div>
+                            <div class="unit u-booked">A-109</div>
+                            <div class="unit u-selected">A-110</div>
+                            <div class="unit u-booked">B-101</div>
+                            <div class="unit u-booked">B-102</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="section-title">Remarks</div>
+                        <ul class="remarks-list">
+                            <li>Client is interested in 2BHK, corner-facing unit.</li>
+                            <li>Shared pricing PDF via WhatsApp.</li>
+                            <li>Next follow-up scheduled for Thursday, 11 AM.</li>
+                        </ul>
+                        <div class="remark-input-container">
+                            <span style="cursor:pointer">📎</span>
+                            <input type="text" placeholder="Add a new remark...">
+                            <span style="cursor:pointer">🎙️</span>
+                            <span style="color:var(--primary-blue); cursor:pointer">➤</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bar">
+            <button class="btn btn-outline btn-large" style="border-color:#CCC; color:#666">✕ Rejected</button>
+            <button class="btn btn-blue btn-large">Approved ≫</button>
+        </div>
+    </div>
+
+    <script>
+        const chat = document.getElementById('chat');
+        chat.scrollTop = chat.scrollHeight;
+
+        document.querySelectorAll('.unit').forEach(unit => {
+            unit.addEventListener('click', function() {
+                if(!this.classList.contains('u-booked')) {
+                    document.querySelectorAll('.unit').forEach(u => u.classList.remove('u-selected'));
+                    this.classList.add('u-selected');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

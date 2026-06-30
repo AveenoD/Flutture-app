@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+:root {
+  /* Base layout tokens */
+  --background: #ffffff;
+  --foreground: #1f1f1f;
+
+  /* Primary palette */
+  --primary-base: #0082E0;
+  --primary-hover: #006fc0;
+  --primary-active: #005a9a;
+  --primary-selected: #e5f3ff;
+
+  /* Secondary palette */
+  --secondary-base: #0055a5;
+  --secondary-hover: #004482;
+  --secondary-active: #003360;
+  --secondary-selected: #e0edff;
+
+  /* Semantic colors */
+  --error: #AF4B4B;
+  --success: #589e67;
+  --warning: #d28e3d;
+  --purple: #954baf;
+  --lime: #b1ab1d;
+
+  /* Disabled */
+  --disabled: #e0e0e0;
+  --disabled-text: #9e9e9e;
+
+  /* Surface colors for badges / subtle backgrounds */
+  --surface-primary: #e5f3ff;
+  --surface-secondary: #e3efff;
+  --surface-error: #fbeaea;
+  --surface-success: #e6f4ea;
+  --surface-warning: #fdf1dd;
+  --surface-purple: #f4e7fb;
+  --surface-lime: #f6f6e2;
+  --surface-neutral: #f5f5f5;
+
+  /* UI Colors */
+  --border-color: #EAECF0;
+  --text-primary: #344054;
+  --text-secondary: #667085;
+  --text-tertiary: #98A2B3;
+  --text-dark: #101828;
+  --hover-bg: #F9FAFB;
+  --active-bg: #F2F4F7;
+  --success-bg: #ECFDF3;
+  --success-text: #027A48;
+
+  /* Chart Colors - Visit (Purple) */
+  --chart-visit-base: #8979FF;
+  --chart-visit-30: rgba(137, 121, 255, 0.3);
+  --chart-visit-5: rgba(137, 121, 255, 0.05);
+  --chart-visit-gradient: linear-gradient(90deg, rgba(137, 121, 255, 0.1) 0%, rgba(137, 121, 255, 0.3) 100%);
+
+  /* Chart Colors - Booking (Pink) */
+  --chart-booking-base: #FF928A;
+  --chart-booking-30: rgba(255, 146, 138, 0.3);
+  --chart-booking-5: rgba(255, 146, 138, 0.05);
+  --chart-booking-gradient: linear-gradient(90deg, rgba(255, 146, 138, 0.1) 0%, rgba(255, 146, 138, 0.3) 100%);
+
+  /* Chart Colors - Lead (Light Blue) */
+  --chart-lead-base: #3CC3DF;
+  --chart-lead-30: rgba(60, 195, 223, 0.3);
+  --chart-lead-5: rgba(60, 195, 223, 0.05);
+  --chart-lead-gradient: linear-gradient(90deg, rgba(60, 195, 223, 0.1) 0%, rgba(60, 195, 223, 0.3) 100%);
+}
+
+@theme inline {
+  /* Map tokens to Tailwind-style theme variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary-base);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-selected: var(--primary-selected);
+
+  --color-secondary: var(--secondary-base);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-active: var(--secondary-active);
+  --color-secondary-selected: var(--secondary-selected);
+
+  --color-error: var(--error);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-purple: var(--purple);
+  --color-lime: var(--lime);
+
+  --color-disabled: var(--disabled);
+  --color-disabled-text: var(--disabled-text);
+
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-error: var(--surface-error);
+  --color-surface-success: var(--surface-success);
+  --color-surface-warning: var(--surface-warning);
+  --color-surface-purple: var(--surface-purple);
+  --color-surface-lime: var(--surface-lime);
+  --color-surface-neutral: var(--surface-neutral);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-[shimmer_2s_infinite] {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    to right,
+    var(--surface-neutral) 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    var(--surface-neutral) 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Hide scrollbar for horizontal scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Detail Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-blue: #007bff;
+            --bg-gray: #f8f9fa;
+            --border-color: #e0e0e0;
+            --text-dark: #333;
+            --text-light: #666;
+            --status-pending: #fff4e5;
+            --status-pending-text: #b76e00;
+            --status-completed: #e6fcf5;
+            --status-completed-text: #08805b;
+            --status-missed: #fff5f5;
+            --status-missed-text: #e03131;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #fff;
+            height: 100vh;
+            display: flex;
+            overflow: hidden; /* Prevent body scroll */
+        }
+
+        /* Layout Structure */
+        .sidebar-placeholder {
+            width: 260px;
+            background-color: transparent; /* Blank space as requested */
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .main-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+        }
+
+        .topbar-placeholder {
+            height: 70px;
+            background-color: transparent; /* Blank space as requested */
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        /* Content Area */
+        .content-container {
+            padding: 30px;
+            flex-grow: 1;
+            overflow-y: auto; /* Scrollable only if needed */
+            background-color: #fff;
+        }
+
+        .header-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .back-btn {
+            background: #f0f0f0;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-section h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Stepper UI */
+        .stepper-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto 50px auto;
+            padding: 0 40px;
+        }
+
+        .stepper-line {
+            position: absolute;
+            top: 25px;
+            left: 100px;
+            right: 100px;
+            height: 2px;
+            background-color: #ddd;
+            z-index: 1;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .step.active .step-icon {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .step-icon {
+            width: 45px;
+            height: 45px;
+            background-color: #fff;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .tab-item {
+            padding: 12px 40px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-light);
+            position: relative;
+        }
+
+        .tab-item.active {
+            color: var(--primary-blue);
+        }
+
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary-blue);
+        }
+
+        /* Create Follow Ups Card */
+        .create-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .create-card h2 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .add-btn {
+            width: 40px;
+            height: 40px;
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Table Section */
+        .table-container {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-toolbar {
+            padding: 15px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            background-color: #fff;
+        }
+
+        .search-box {
+            position: relative;
+            flex-grow: 1;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 35px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .toolbar-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .btn-blue { border-color: var(--primary-blue); color: var(--primary-blue); }
+        .btn-red { background: #e03131; color: white; border: none; }
+
+        /* Data Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 20px;
+            background-color: #fff;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-light);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: #eee;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .badge-pending { background: var(--status-pending); color: var(--status-pending-text); }
+        .badge-pending::before { background: var(--status-pending-text); }
+
+        .badge-completed { background: var(--status-completed); color: var(--status-completed-text); }
+        .badge-completed::before { background: var(--status-completed-text); }
+
+        .badge-missed { background: var(--status-missed); color: var(--status-missed-text); }
+        .badge-missed::before { background: var(--status-missed-text); }
+
+        .action-btn {
+            padding: 6px 15px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: white;
+            transition: 0.2s;
+        }
+
+        .btn-call { background: var(--primary-blue); color: white; border: none; }
+
+        /* Pagination */
+        .pagination {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        .row-select {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .row-select select {
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar-placeholder { width: 0; border: none; }
+            .stepper-container { padding: 0 10px; }
+            .stepper-line { left: 50px; right: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-placeholder"></div>
+
+    <div class="main-wrapper">
+        <div class="topbar-placeholder"></div>
+
+        <div class="content-container">
+            <div class="header-section">
+                <button class="back-btn"><i class="fa-solid fa-arrow-left"></i></button>
+                <h1>Lead Detail</h1>
+            </div>
+
+            <div class="stepper-container">
+                <div class="stepper-line"></div>
+                <div class="step active">
+                    <div class="step-icon"><i class="fa-regular fa-file-lines"></i></div>
+                    <span>Summary</span>
+                </div>
+                <div class="step active">
+                    <div class="step-icon"><i class="fa-solid fa-building"></i></div>
+                    <span>Property Visit</span>
+                </div>
+                <div class="step">
+                    <div class="step-icon"><i class="fa-regular fa-comment-dots"></i></div>
+                    <span>Negotiation</span>
+                </div>
+                <div class="step">
+                    <div class="step-icon"><i class="fa-solid fa-house-chimney"></i></div>
+                    <span>Booking</span>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab-item" onclick="switchTab(this)">Overveiw</div>
+                <div class="tab-item active" onclick="switchTab(this)">Follow Ups</div>
+            </div>
+
+            <div class="create-card">
+                <h2>Create Follow Ups</h2>
+                <button class="add-btn"><i class="fa-solid fa-plus"></i></button>
+            </div>
+
+            <div class="table-container">
+                <div class="table-toolbar">
+                    <button class="btn"><i class="fa-solid fa-bars-staggered"></i> Column</button>
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Search">
+                    </div>
+                    <div class="toolbar-btns">
+                        <button class="btn"><i class="fa-solid fa-upload"></i> Export</button>
+                        <button class="btn btn-blue"><i class="fa-solid fa-rotate"></i> Referesh</button>
+                        <button class="btn btn-red"><i class="fa-solid fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"><input type="checkbox" id="selectAll"></th>
+                            <th>Full Name <i class="fa-solid fa-sort"></i></th>
+                            <th>Date <i class="fa-solid fa-sort"></i></th>
+                            <th>Time <i class="fa-solid fa-sort"></i></th>
+                            <th>Status <i class="fa-solid fa-sort"></i></th>
+                            <th>Action <i class="fa-solid fa-sort"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        </tbody>
+                </table>
+
+                <div class="pagination">
+                    <div class="row-select">
+                        Row Per Page
+                        <select>
+                            <option>10</option>
+                            <option>20</option>
+                        </select>
+                    </div>
+                    <div>
+                        1 - 4 of 4 &nbsp; 
+                        <i class="fa-solid fa-chevron-left" style="cursor:pointer"></i> &nbsp; 
+                        <i class="fa-solid fa-chevron-right" style="cursor:pointer"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tableData = [
+            { name: 'Maaz Khan', date: '24/Aug/2025', time: '2 months ago', status: 'Pending', statusClass: 'badge-pending' },
+            { name: 'Maaz Khan', date: '24/Aug/2025', time: '2 months ago', status: 'Completed', statusClass: 'badge-completed' },
+            { name: 'Maaz Khan', date: '24/Aug/2025', time: '2 months ago', status: 'Completed', statusClass: 'badge-completed' },
+            { name: 'Maaz Khan', date: '24/Aug/2025', time: '2 months ago', status: 'Missed', statusClass: 'badge-missed' },
+            { name: 'Maaz Khan', date: '24/Aug/2025', time: '2 months ago', status: 'Completed', statusClass: 'badge-completed' },
+            { name: 'Maaz Khan', date: '24/Aug/2025', time: '2 months ago', status: 'Completed', statusClass: 'badge-completed' }
+        ];
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = tableData.map((row, index) => `
+                <tr>
+                    <td><input type="checkbox" class="row-checkbox"></td>
+                    <td>
+                        <div class="user-cell">
+                            <img src="https://i.pravatar.cc/150?u=${index}" class="avatar" alt="user">
+                            ${row.name}
+                        </div>
+                    </td>
+                    <td>${row.date}</td>
+                    <td>${row.time}</td>
+                    <td><span class="status-badge ${row.statusClass}">${row.status}</span></td>
+                    <td>
+                        ${row.status === 'Pending' 
+                            ? '<button class="action-btn btn-call">Call Now</button>' 
+                            : '<button class="action-btn">Veiw Detail</button>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function switchTab(el) {
+            document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // Select All Checkbox Logic
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+
+        // Initialize table
+        renderTable();
+    </script>
+</body>
+</html>

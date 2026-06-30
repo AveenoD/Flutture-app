@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Inventory - Crownco</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0061FF;
+            --bg-gray: #F8F9FC;
+            --border-color: #E3E6F0;
+            --text-main: #2D3748;
+            --text-light: #718096;
+            --success: #1CC88A;
+            --danger: #E74A3B;
+            --warning: #F6C23E;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Layout Placeholders */
+        .sidebar-space {
+            width: 260px;
+            flex-shrink: 0;
+            background: white;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar-space {
+            height: 70px;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        /* Scrollable Container */
+        .scroll-container {
+            padding: 24px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        /* Header Area */
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .user-info h2 { font-weight: 700; font-size: 1.5rem; }
+        .user-info p { color: var(--text-light); font-size: 0.9rem; }
+
+        /* Stats Row */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-icon { font-size: 1.2rem; }
+        .trend { font-size: 0.8rem; font-weight: 600; }
+        .trend.up { color: var(--success); }
+        .trend.down { color: var(--danger); }
+
+        .stat-val { font-size: 1.4rem; font-weight: 700; color: var(--text-main); }
+        .stat-label { color: var(--text-light); font-size: 0.85rem; margin-top: 4px; }
+
+        /* Filter Bar */
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .toggle-box { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; margin-right: 10px; }
+        
+        select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .clear-btn { color: var(--primary-blue); text-decoration: none; font-size: 0.85rem; font-weight: 500; }
+
+        .filter-desc {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 24px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 12px 40px;
+            cursor: pointer;
+            color: var(--text-light);
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+
+        .tab.active {
+            color: var(--primary-blue);
+            border-bottom: 2px solid var(--primary-blue);
+        }
+
+        /* Project Cards Grid */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .project-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+
+        .img-container { height: 180px; position: relative; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        .card-body { padding: 20px; }
+        
+        .card-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 12px;
+        }
+
+        .card-title-row h3 { 
+            font-size: 1.3rem; 
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin: 0;
+            flex: 1;
+        }
+
+        .badge-group { display: flex; gap: 6px; }
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .bg-res { background: #E8F5E9; color: #2E7D32; }
+        .bg-mix { background: #FFF9C4; color: #FBC02D; }
+        .bg-com { background: #E8EAF6; color: #3F51B5; }
+        .bg-status { background: #FFE0B2; color: #E65100; }
+        .bg-ready { background: #E8F5E9; color: #2E7D32; }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .tags-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .tag.sea-facing { background: #F3E5F5; color: #7B1FA2; }
+        .tag.smart-homes { background: #FFFDE7; color: #827717; }
+        .tag.playground { background: #E3F2FD; color: #1976D2; }
+
+        /* Pagination Footer */
+        .footer-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        /* Responsive UI adjustments */
+        @media (max-width: 900px) {
+            .sidebar-space { width: 0; display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-space"></div>
+
+    <div class="main-content">
+        <div class="topbar-space"></div>
+
+        <div class="scroll-container">
+            <div class="header-flex">
+                <div class="user-info">
+                    <h2>Welcome Sarah 👋</h2>
+                    <p>23/6/2025</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon">👤</span>
+                        <span class="trend up">+3.2%</span>
+                    </div>
+                    <div class="stat-val">42</div>
+                    <div class="stat-label">Active Projects</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon">📅</span>
+                        <span class="trend up">+2.0%</span>
+                    </div>
+                    <div class="stat-val">2,340</div>
+                    <div class="stat-label">Total Units Available</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon">🏠</span>
+                        <span class="trend up">+1.8%</span>
+                    </div>
+                    <div class="stat-val">18</div>
+                    <div class="stat-label">Ready-To-Move</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon">💳</span>
+                        <span class="trend down">-0.5%</span>
+                    </div>
+                    <div class="stat-val">27</div>
+                    <div class="stat-label">Ongoing</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-icon">📈</span>
+                        <span class="trend up">+0.7%</span>
+                    </div>
+                    <div class="stat-val">9.4%</div>
+                    <div class="stat-label">Upcoming</div>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <div class="toggle-box">
+                    <input type="checkbox" checked> New Leads
+                </div>
+                <select><option>Date Range</option></select>
+                <select><option>Status</option></select>
+                <select><option>Sources</option></select>
+                <select><option>By Budget</option></select>
+                <select><option>By Project</option></select>
+                <a href="#" class="clear-btn">Clear All</a>
+            </div>
+
+            <div class="filter-desc">
+                Showing 18 Leads | Filter: Sources = Assigned By Caller, Budget : 40L-50L, Status : Very Hot
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab(this)">My Projects</div>
+                <div class="tab" onclick="switchTab(this)">All Projects</div>
+            </div>
+
+            <div class="project-grid">
+                <div class="project-card">
+                    <div class="img-container">
+                        <img src="https://images.unsplash.com/photo-1580587771525-78b9bed3bafc?auto=format&fit=crop&w=600&q=80" alt="Maaz Palace">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title-row">
+                            <h3>Maaz Palace</h3>
+                            <div class="badge-group">
+                                <span class="badge bg-res">Residential</span>
+                                <span class="badge bg-status">Ongoing</span>
+                            </div>
+                        </div>
+                        <div class="info-item">📍 Kurla - City Center</div>
+                        <div class="info-item">🏢 2BHK - 1200 Sq meter</div>
+                        <div class="info-item">🏷️ Base Price Range - ₹3Cr - ₹3.5Cr</div>
+                        <div class="tags-row">
+                            <span class="tag sea-facing">Sea Facing</span>
+                            <span class="tag smart-homes">Smart Homes</span>
+                            <span class="tag playground">Play Ground</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="img-container">
+                        <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=600&q=80" alt="Maaz Palace">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title-row">
+                            <h3>Maaz Palace</h3>
+                            <div class="badge-group">
+                                <span class="badge bg-mix">Mixed</span>
+                                <span class="badge bg-status">Upcoming</span>
+                            </div>
+                        </div>
+                        <div class="info-item">📍 Kurla - City Center</div>
+                        <div class="info-item">🏢 2BHK - 1200 Sq meter</div>
+                        <div class="info-item">🏷️ Base Price Range - ₹3Cr - ₹3.5Cr</div>
+                        <div class="tags-row">
+                            <span class="tag sea-facing">Sea Facing</span>
+                            <span class="tag smart-homes">Smart Homes</span>
+                            <span class="tag playground">Play Ground</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="img-container">
+                        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80" alt="Maaz Palace">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title-row">
+                            <h3>Maaz Palace</h3>
+                            <div class="badge-group">
+                                <span class="badge bg-com">Commercial</span>
+                                <span class="badge bg-ready">Ready Move</span>
+                            </div>
+                        </div>
+                        <div class="info-item">📍 Kurla - City Center</div>
+                        <div class="info-item">🏢 2BHK - 1200 Sq meter</div>
+                        <div class="info-item">🏷️ Base Price Range - ₹3Cr - ₹3.5Cr</div>
+                        <div class="tags-row">
+                            <span class="tag sea-facing">Sea Facing</span>
+                            <span class="tag smart-homes">Smart Homes</span>
+                            <span class="tag playground">Play Ground</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="img-container">
+                        <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80" alt="Maaz Palace">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title-row">
+                            <h3>Maaz Palace</h3>
+                            <div class="badge-group">
+                                <span class="badge bg-res">Residential</span>
+                                <span class="badge bg-status">Ongoing</span>
+                            </div>
+                        </div>
+                        <div class="info-item">📍 Kurla - City Center</div>
+                        <div class="info-item">🏢 2BHK - 1200 Sq meter</div>
+                        <div class="info-item">🏷️ Base Price Range - ₹3Cr - ₹3.5Cr</div>
+                        <div class="tags-row">
+                            <span class="tag sea-facing">Sea Facing</span>
+                            <span class="tag smart-homes">Smart Homes</span>
+                            <span class="tag playground">Play Ground</span>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+            <div class="footer-nav">
+                <div>
+                    Row Per Page: 
+                    <select style="padding: 2px 5px; margin-left: 5px;">
+                        <option>10</option>
+                        <option>25</option>
+                    </select>
+                </div>
+                <div>
+                    1 - 4 of 4 &nbsp; 
+                    <button style="border: 1px solid var(--border-color); background: white; padding: 2px 8px; cursor: pointer;">&lt;</button>
+                    <button style="border: 1px solid var(--border-color); background: white; padding: 2px 8px; cursor: pointer;">&gt;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(element) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Add active class to clicked tab
+            element.classList.add('active');
+            
+            // Log for demo purposes
+            console.log("Switched to: " + element.innerText);
+        }
+
+        // Search/Filter interaction logic
+        document.querySelector('.clear-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Resetting all inventory filters.');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+@import "tailwindcss";
+
+:root {
+  /* Base layout tokens */
+  --background: #ffffff;
+  --foreground: #1f1f1f;
+
+  /* Primary palette */
+  --primary-base: #0082E0;
+  --primary-hover: #006fc0;
+  --primary-active: #005a9a;
+  --primary-selected: #e5f3ff;
+
+  /* Secondary palette */
+  --secondary-base: #0055a5;
+  --secondary-hover: #004482;
+  --secondary-active: #003360;
+  --secondary-selected: #e0edff;
+
+  /* Semantic colors */
+  --error: #AF4B4B;
+  --success: #589e67;
+  --warning: #d28e3d;
+  --purple: #954baf;
+  --lime: #b1ab1d;
+
+  /* Disabled */
+  --disabled: #e0e0e0;
+  --disabled-text: #9e9e9e;
+
+  /* Surface colors for badges / subtle backgrounds */
+  --surface-primary: #e5f3ff;
+  --surface-secondary: #e3efff;
+  --surface-error: #fbeaea;
+  --surface-success: #e6f4ea;
+  --surface-warning: #fdf1dd;
+  --surface-purple: #f4e7fb;
+  --surface-lime: #f6f6e2;
+  --surface-neutral: #f5f5f5;
+
+  /* Sidebar specific colors */
+  --sidebar-width: 248px;
+  --sidebar-primary-blue: #2544a8;
+  --sidebar-text-main: #344054;
+  --sidebar-text-sub: #667085;
+  --sidebar-bg-hover: #F9FAFB;
+  --sidebar-bg-active: #F2F4F7;
+  --sidebar-border-color: #EAECF0;
+  --sidebar-text-muted: #98A2B3;
+  --sidebar-avatar-bg: #ECFDF3;
+  --sidebar-avatar-text: #027A48;
+}
+
+@theme inline {
+  /* Map tokens to Tailwind-style theme variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary-base);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-selected: var(--primary-selected);
+
+  --color-secondary: var(--secondary-base);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-active: var(--secondary-active);
+  --color-secondary-selected: var(--secondary-selected);
+
+  --color-error: var(--error);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-purple: var(--purple);
+  --color-lime: var(--lime);
+
+  --color-disabled: var(--disabled);
+  --color-disabled-text: var(--disabled-text);
+
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-error: var(--surface-error);
+  --color-surface-success: var(--surface-success);
+  --color-surface-warning: var(--surface-warning);
+  --color-surface-purple: var(--surface-purple);
+  --color-surface-lime: var(--surface-lime);
+  --color-surface-neutral: var(--surface-neutral);
+
+  --font-sans: var(--font-inter);
+}
+
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+/* Wave animation for emoji */
+@keyframes wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  30% {
+    transform: rotate(14deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.wave-emoji {
+  display: inline-block;
+  animation: wave 2.5s ease-in-out infinite;
+  transform-origin: 70% 70%;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Fade in up animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* Custom scrollbar for chat message area */
+@supports (scrollbar-width: thin) {
+  /* Firefox */
+  .chat-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sidebar-border-color) transparent;
+  }
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+.chat-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--sidebar-border-color);
+  border-radius: 3px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--sidebar-text-muted);
+}
+
+/* Extra small screens (< 375px) */
+@media (max-width: 374px) {
+  .container-responsive {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* Custom breakpoint for xs (between sm and base) */
+@media (min-width: 375px) and (max-width: 639px) {
+  /* Additional mobile-specific styles */
+}

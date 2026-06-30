@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" style=""><head>
+<meta charset="utf-8">
+<meta content="width=1280, height=720, initial-scale=1.0" name="viewport">
+<title>Problem Statement: OS Restrictions</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+        body {
+            background-color: #050508;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        h1, h2, h3, .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-panel {
+            background: rgba(18, 18, 28, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+        }
+
+        .glass-panel-warning {
+            background: rgba(30, 10, 10, 0.6);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.05);
+        }
+
+        /* Neon Glows */
+        .glow-red {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+        }
+        
+        .glow-orange {
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.2);
+        }
+
+        .text-glow-red { text-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
+
+        /* Custom Path Graphics */
+        .path-line {
+            height: 2px;
+            background-color: #333;
+            position: relative;
+        }
+        
+        .path-line.blocked {
+            border-top: 2px dashed #ef4444;
+            background: transparent;
+        }
+
+        .cross-mark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ef4444;
+            font-size: 24px;
+            background: #050508;
+            padding: 0 5px;
+        }
+
+        /* Lock Icon Animation */
+        @keyframes pulse-lock {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        
+        .anim-lock {
+            animation: pulse-lock 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="w-[1280px] h-[720px] flex flex-col p-10 relative" style="">
+<!-- Background decorative elements -->
+<div class="absolute top-0 right-0 w-[600px] h-[600px] bg-red-900/10 rounded-full blur-[100px] -z-10"></div>
+<div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-orange-900/10 rounded-full blur-[80px] -z-10"></div>
+<!-- Header -->
+<header class="mb-8 flex justify-between items-end">
+<div>
+<div class="flex items-center space-x-2 mb-2">
+<span class="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold tracking-wider uppercase">Problem Statement</span>
+<div class="h-px w-10 bg-red-500/20"></div>
+</div>
+<h1 class="text-4xl font-bold text-white font-display">
+                OS Restrictions on Call Recording
+            </h1>
+</div>
+<div class="text-right max-w-md">
+<p class="text-gray-400 text-sm">
+                Software-only solutions are unreliable due to tightening privacy controls on both major mobile platforms.
+            </p>
+</div>
+</header>
+<!-- Main Content Grid -->
+<div class="flex-1 grid grid-cols-12 gap-6">
+<!-- Left Column: OS Limitations -->
+<div class="col-span-5 flex flex-col gap-4">
+<!-- iOS Card -->
+<div class="glass-panel-warning p-5 flex-1 flex flex-col justify-center relative overflow-hidden group">
+<div class="absolute -right-10 -top-10 text-9xl text-white/5 rotate-12 group-hover:text-white/10 transition-colors">
+<i class="fab fa-apple"></i>
+</div>
+<div class="flex items-center space-x-4 mb-4 z-10">
+<div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-2xl text-gray-200">
+<i class="fab fa-apple"></i>
+</div>
+<div>
+<h3 class="text-xl font-bold text-white">iOS Restrictions</h3>
+<p class="text-red-400 text-xs font-mono uppercase tracking-wider">No Public API Access</p>
+</div>
+</div>
+<ul class="space-y-3 z-10">
+<li class="flex items-start space-x-3">
+<i class="fas fa-ban text-red-500 mt-1 text-sm"></i>
+<p class="text-sm text-gray-300">Sandbox prevents background audio access during active calls.</p>
+</li>
+<li class="flex items-start space-x-3">
+<i class="fas fa-ban text-red-500 mt-1 text-sm"></i>
+<p class="text-sm text-gray-300">CallKit does not expose audio streams to third-party apps.</p>
+</li>
+<li class="flex items-start space-x-3">
+<i class="fas fa-ban text-red-500 mt-1 text-sm"></i>
+<p class="text-sm text-gray-300">Merge call workaround (3-way calling) is complex and carrier-dependent.</p>
+</li>
+</ul>
+</div>
+<!-- Android Card -->
+<div class="glass-panel-warning p-5 flex-1 flex flex-col justify-center relative overflow-hidden group">
+<div class="absolute -right-10 -top-10 text-9xl text-white/5 rotate-12 group-hover:text-white/10 transition-colors">
+<i class="fab fa-android"></i>
+</div>
+<div class="flex items-center space-x-4 mb-4 z-10">
+<div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-2xl text-green-400">
+<i class="fab fa-android"></i>
+</div>
+<div>
+<h3 class="text-xl font-bold text-white">Android Limitations</h3>
+<p class="text-orange-400 text-xs font-mono uppercase tracking-wider">API Blocked Since Android 9</p>
+</div>
+</div>
+<ul class="space-y-3 z-10">
+<li class="flex items-start space-x-3">
+<i class="fas fa-exclamation-triangle text-orange-500 mt-1 text-sm"></i>
+<p class="text-sm text-gray-300">Accessibility Service workaround often blocked by Google Play policy.</p>
+</li>
+<li class="flex items-start space-x-3">
+<i class="fas fa-volume-mute text-orange-500 mt-1 text-sm"></i>
+<p class="text-sm text-gray-300">Microphone mute during calls prevents capturing remote audio.</p>
+</li>
+<li class="flex items-start space-x-3">
+<i class="fas fa-microchip text-orange-500 mt-1 text-sm"></i>
+<p class="text-sm text-gray-300">Inconsistent behavior across OEMs (Samsung vs Pixel vs Xiaomi).</p>
+</li>
+</ul>
+</div>
+</div>
+<!-- Right Column: Visual Infographic of Blocked Paths -->
+<div class="col-span-7 glass-panel p-8 relative flex flex-col items-center justify-center">
+<div class="absolute top-4 left-4 text-xs font-mono text-gray-500 uppercase tracking-widest">Architecture Blockage Diagram</div>
+<!-- Diagram Container -->
+<div class="w-full max-w-lg relative">
+<!-- Phone Core -->
+<div class="w-full bg-gray-800/50 rounded-2xl border border-gray-700 p-6 mb-8 relative">
+<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gray-700 px-3 py-1 rounded-full text-xs font-bold text-gray-300">
+                        Smartphone OS Kernel
+                    </div>
+<!-- Internal Audio Path -->
+<div class="flex items-center justify-between mb-8 mt-2">
+<div class="flex flex-col items-center">
+<div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 border border-blue-500/30">
+<i class="fas fa-phone-alt"></i>
+</div>
+<p class="text-xs text-blue-400 mt-2 font-mono">Modem</p>
+</div>
+<!-- Blocked Connection Line -->
+<div class="flex-1 px-4 relative h-10 flex items-center justify-center">
+<div class="w-full h-1 bg-gradient-to-r from-blue-500/30 to-gray-700"></div>
+<div class="absolute w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white shadow-lg glow-red z-10 anim-lock">
+<i class="fas fa-lock"></i>
+</div>
+<div class="absolute top-0 text-[10px] text-red-400 font-mono font-bold tracking-wider">ACCESS DENIED</div>
+</div>
+<div class="flex flex-col items-center opacity-50">
+<div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-gray-400 border border-gray-600">
+<i class="fas fa-save"></i>
+</div>
+<p class="text-xs text-gray-500 mt-2 font-mono">App Recorder</p>
+</div>
+</div>
+<!-- Result Badge -->
+<div class="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-center justify-center">
+<p class="text-red-400 text-sm font-semibold flex items-center">
+<i class="fas fa-times-circle mr-2"></i> Result: Silent or One-Sided Recording
+                        </p>
+</div>
+</div>
+<!-- Comparison: Hardware Path -->
+<div class="w-full bg-blue-900/10 rounded-2xl border border-blue-500/30 p-6 relative">
+<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 px-3 py-1 rounded-full text-xs font-bold text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]">
+                        Proposed Hardware Solution
+                    </div>
+<div class="flex items-center justify-between mt-2">
+<!-- Phone Source -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+<i class="fas fa-mobile-alt"></i>
+</div>
+<p class="text-[10px] text-gray-400 mt-1">Phone</p>
+</div>
+<!-- Bluetooth Path (Success) -->
+<div class="flex-1 px-2 relative flex flex-col items-center">
+<div class="w-full h-0.5 bg-blue-500 mb-1 relative overflow-hidden">
+<div class="absolute top-0 left-0 h-full w-10 bg-white blur-[2px] animate-[flow_1s_infinite_linear]"></div>
+</div>
+<p class="text-[9px] text-blue-300 font-mono">Standard HFP Audio</p>
+<i class="fas fa-check-circle text-green-400 absolute -top-2 bg-[#0d121f] rounded-full"></i>
+</div>
+<!-- Hardware Device -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 border border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.3)]">
+<i class="fas fa-microchip"></i>
+</div>
+<p class="text-[10px] text-purple-300 mt-1 font-bold">Our Device</p>
+</div>
+<!-- App Path -->
+<div class="flex-1 px-2 relative flex flex-col items-center">
+<div class="w-full h-0.5 bg-purple-500 mb-1 relative overflow-hidden">
+<div class="absolute top-0 left-0 h-full w-10 bg-white blur-[2px] animate-[flow_1s_infinite_linear]" style="animation-delay: 0.5s"></div>
+</div>
+<p class="text-[9px] text-purple-300 font-mono">BLE / WiFi</p>
+</div>
+<!-- App Destination -->
+<div class="flex flex-col items-center">
+<div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white border border-gray-600">
+<i class="fas fa-tablet-alt"></i>
+</div>
+<p class="text-[10px] text-gray-400 mt-1">App</p>
+</div>
+</div>
+</div>
+<style>
+                    @keyframes flow {
+                        0% { left: -20%; opacity: 0; }
+                        50% { opacity: 1; }
+                        100% { left: 100%; opacity: 0; }
+                    }
+                </style>
+</div>
+</div>
+</div>
+<!-- Footer Stats -->
+<div class="mt-6 grid grid-cols-3 gap-6">
+<div class="bg-gray-800/30 rounded-lg p-3 border-l-2 border-red-500 flex items-center justify-between">
+<p class="text-gray-400 text-xs uppercase font-semibold">Android 9+ Devices</p>
+<p class="text-red-400 font-mono font-bold">Call Recording Disabled</p>
+</div>
+<div class="bg-gray-800/30 rounded-lg p-3 border-l-2 border-red-500 flex items-center justify-between">
+<p class="text-gray-400 text-xs uppercase font-semibold">iOS Ecosystem</p>
+<p class="text-red-400 font-mono font-bold">No Native API Support</p>
+</div>
+<div class="bg-gray-800/30 rounded-lg p-3 border-l-2 border-green-500 flex items-center justify-between">
+<p class="text-gray-400 text-xs uppercase font-semibold">Our Hardware Sol.</p>
+<p class="text-green-400 font-mono font-bold">100% Compatibility</p>
+</div>
+</div>
+
+</body></html>
